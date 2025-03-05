@@ -1,0 +1,191 @@
+@import "../../root.css";
+
+#user {}
+
+#user .option {
+    display: flex;
+    flex-direction: column;
+}
+
+/* #user .days {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    
+    gap: 8px
+}
+#user .day {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--background-light);
+    padding: 20px;
+    border-radius: 5px;
+}
+
+#user .day .header {
+    border-bottom: 1px solid var(--background-light);
+    margin-bottom: 5px;
+    color: var(--foreground-dark);
+}
+#user .day .day-goals {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+} */
+#user .goal {
+    position: relative;
+}
+
+/* #user .pop .progress-bar {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 5px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+#user .progress-bar p {
+    position: absolute;
+    padding: 5px;
+}
+#user .progress-bar .amount-container {
+    position: relative;
+    border-radius: 5px;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--background-dark);
+}
+#user .progress-bar .amount {
+    height: 100%;
+} */
+#user .graph::-webkit-scrollbar {
+    background-color: var(--background-dark);
+    border-radius: 50px;
+}
+
+#user .graph::-webkit-scrollbar-thumb {
+    background-color: var(--primary);
+    border-radius: 50px;
+}
+
+#user .graph-container {
+    padding: 15px 0px 0px 0px;
+    max-width: 800px;
+}
+
+#user .graph {
+    width: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    overflow-x: scroll;
+
+}
+
+#user .graph-point {
+    background-color: red;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+}
+
+#user .line-connect {
+    stroke-width: 1;
+}
+
+#user .line-vertical {
+    stroke: rgb(168, 168, 168);
+    stroke-width: 1;
+}
+
+#user svg {
+    /* transform: rotateZ(180deg); */
+    background-color: var(--background-medium)
+}
+
+#user text {
+    fill: var(--foreground);
+}
+
+#user .months {
+    position: relative;
+    display: flex;
+    width: 100%;
+    margin-top: 5px;
+    background-color: rgba(255, 0, 0, 0);
+}
+
+#user .month {
+    position: absolute;
+    top: 8px;
+    color: rgb(218, 218, 218);
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+#user canvas {
+    background-color: var(--background-dark);
+    width: 300px;
+    aspect-ratio: 16/9;
+}
+
+
+#user .day {
+    /* border-bottom: 1px solid var(--foreground-dark); */
+    position: relative;
+    border-radius: 0px 0px 0px 0px;
+    border-bottom: 1px solid var(--background-light);
+}
+
+#user .day>.header {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0px 0px 0px 0px;
+}
+
+#user .day>.header .title-box {
+    text-align: center;
+    position: relative;
+
+}
+
+#user .day>.header .title-box .title {
+    font-weight: bold;
+    font-size: large;
+    text-transform: uppercase;
+}
+
+#user .day .subtitle {
+    text-align: center;
+}
+
+#user .day>.header .progress-bar {
+    position: absolute;
+    height: 100%;
+}
+
+#user .day .date {
+    /* text-decoration: underline; */
+}
+
+#user .single-day .progress-added {
+    /* text-decoration: underline; */
+    color: var(--primary);
+}
+
+#user .single-day .progress .header {
+    display: flex;
+    justify-content: space-between;
+}
+
+#user .single-day .progress .footer {
+    display: none;
+}
+
+@media(width <=600px) {
+    #user .days {
+        display: flex;
+        flex-direction: column;
+    }
+}
