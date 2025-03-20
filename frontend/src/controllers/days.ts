@@ -79,4 +79,8 @@ export default dayControllers
 //     getStats,
 //     updateProgress,
 //     deleteProgress
+<<<<<<< HEAD
 // }
+=======
+// }
+>>>>>>> master
