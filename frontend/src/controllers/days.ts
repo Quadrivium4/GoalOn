@@ -53,11 +53,11 @@ const getStats = async(userId?: string):Promise<TGoalDays[]> =>{
     let res = await protectedApi().get(userId? "/stats/" + userId : "/stats");
     return res.data;
 }
-const addProgress = async(goalId: string, progress: number, notes: string): Promise<TDay> =>{
-    let res = await protectedApi().post("/progress", {goalId, progress, date: Date.now(), notes});
+const addProgress = async(goalId: string, progress: number, notes: string, date: number): Promise<TDay> =>{
+    let res = await protectedApi().post("/progress", {goalId, progress, date, notes});
     return res.data;
 }
-const updateProgress = async(progress: TProgressForm): Promise<TDay> =>{
+const updateProgress = async(progress: TProgressForm & {newDate: number}): Promise<TDay> =>{
     let res = await protectedApi().put("/progress", progress);
     return res.data;
 }
@@ -79,8 +79,4 @@ export default dayControllers
 //     getStats,
 //     updateProgress,
 //     deleteProgress
-<<<<<<< HEAD
 // }
-=======
-// }
->>>>>>> master

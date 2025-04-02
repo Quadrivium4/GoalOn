@@ -23,9 +23,17 @@ export const aggregateDays = (date, userId) => [
             userId: userId.toString(),
             $or: [
                 {
-                    date: {
-                        $gte: date,
-                    },
+                    $and: [
+                        {
+                            date: {
+                                $gte: date
+                            }
+                        }, {
+                            date: {
+                                $lte: date + dayInMilliseconds
+                            }
+                        }
+                    ]
                 },
                 {
                     $and: [
@@ -103,7 +111,7 @@ const getStats = async (req, res) => {
     user.goals.map(goal => {
         console.log(goal.id);
         let promise = async () => {
-            let days = await Day.find({ userId, "goal._id": new ObjectId(goal._id) });
+            let days = await Day.find({ userId, "goal._id": new ObjectId(goal._id) }).sort({ date: 1 });
             return { ...goal, days };
         };
         promises.push(promise());
@@ -116,7 +124,7 @@ const postProgress = async (req, res) => {
     const { date, goalId, progress, notes } = req.body;
     let progressDate = new Date(date);
     progressDate.setHours(0, 0, 0, 0);
-    let day = await Day.findOne({ "goal._id": new ObjectId(goalId), date: { $gte: progressDate.getTime() } });
+    let day = await Day.findOne({ $and: [{ "goal._id": new ObjectId(goalId) }, queryDate(progressDate.getTime())] });
     if (!day) {
         console.log("old day");
         let historyEvent = { date, progress, notes, likes: [] };
@@ -134,10 +142,37 @@ const postProgress = async (req, res) => {
     console.log({ day, totalProgress });
     return res.send(day);
 };
+const queryDate = (date) => {
+    let date1 = new Date(date);
+    let date2 = new Date(date1);
+    date2.setDate(date1.getDate() + 1);
+    return {
+        $and: [{ date: { $gte: date1.getTime() } }, { date: { $lt: date2.getTime() } }]
+    };
+};
 const updateProgress = async (req, res) => {
     console.log(req.body);
-    const { date, id, progress, notes } = req.body;
-    const day = await Day.findOneAndUpdate({ _id: new ObjectId(id), "history.date": date }, { $set: { "history.$.progress": progress, "history.$.notes": notes } }, { new: true });
+    const { date, id, progress, notes, newDate } = req.body;
+    let oldDay = await Day.findById(id);
+    let newDateObj = new Date(newDate);
+    let dateObj = new Date(oldDay.date);
+    dateObj.setHours(0, 0, 0, 0);
+    newDateObj.setHours(0, 0, 0, 0);
+    let day;
+    if (newDateObj.getTime() == dateObj.getTime())
+        day = await Day.findOneAndUpdate({ _id: new ObjectId(id), "history.date": date }, { $set: { "history.$.progress": progress, "history.$.notes": notes, "history.$.date": newDate } }, { new: true });
+    else {
+        let historyEvent = { date: newDate, progress, notes, likes: [] };
+        // Remove old progress from day
+        await Day.findOneAndUpdate({ _id: new ObjectId(id), "history.date": date }, { $pull: { history: { date } } }, { new: true });
+        // Add progress to the new day if exists
+        console.log(queryDate(newDateObj.getTime()), oldDay.goal);
+        day = await Day.findOneAndUpdate({ $and: [queryDate(newDateObj.getTime()), { userId: req.user.id, "goal._id": new ObjectId(oldDay.goal._id) }] }, { $push: { history: historyEvent } }, { new: true });
+        console.log("updated day", day);
+        // Create another day if it doesn't 
+        if (!day)
+            day = await Day.create({ goal: oldDay.goal, date: newDateObj.getTime(), progress: 0, userId: req.user.id, history: [historyEvent] });
+    }
     console.log(day);
     res.send(day);
 };

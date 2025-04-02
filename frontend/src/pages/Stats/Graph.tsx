@@ -8,7 +8,7 @@ import {  TDay, TDayGoal, TProgress, TStats } from '../../controllers/days';
 import { TUser, useUser } from '../../context/AuthContext';
 import Pop from '../../components/Pop/Pop';
 import { TGoal } from '../../controllers/goals';
-import { formatDate, sumDayProgress } from '../Goals/Goals';
+import { formatDate, ProgressDays, SingleGoal, sumDayProgress, sumDaysProgress } from '../Goals/Goals';
 import { Day, Goal } from '../Friends/Friends';
 import AddProgress from '../../components/AddProgress';
 import EditProgress from '../../components/EditProgress';
@@ -23,12 +23,15 @@ type TGraphPoint = {
     color: string,
     date: Date,
     gradientId: string,
-    history: TProgress[],
+    history: TDay[],
     goal: TGoal
 } & TPoint;
+type TDayPoint =TDay & {
+
+}
 type TMonthPoint = {
     name: string
-} &TPoint
+} &TPoint;
 // const gap = 25;
 // const padding = 10;
 const gap = 25;
@@ -87,27 +90,26 @@ function createPolygonStringAndMonthPoints (graph: TGraphPoint[]) {
         polygonString: str
     }
 }
-function createGraphPoint(day: TDay, i: number): TGraphPoint{
-    let dayProgress = sumDayProgress(day);
-    let progress = normalizePercentage(getPercentage(day.goal.amount, dayProgress));
+function createGraphPoint(goal: TGoal, history: TDay[], date: number, i: number): TGraphPoint{
+    let goalProgress = sumDaysProgress(history)
+    let progress = normalizePercentage(getPercentage(goal.amount, goalProgress));
     let color = getProgressColor(progress)
-    let date = new Date(day.date);
     //let dayNumber = date.getDate().toString()
     let gradientId = "gradient" + Math.random();
     return {
         progress,
-        date,
+        date: new Date(date),
         color,
         gradientId,
-        history: day.history,
-        goal: day.goal,
+        history,
+        goal: goal,
         x: i * gap + paddingHorizontal,
         y: 150 - progress 
         //Oppure 150 - progress + padding???
     }
 
 }
-function createGraphArray(stats: TDay[]):TGraphPoint[] {
+function createGraphArray(stats: TDay[], goal: TGoal):TGraphPoint[] {
     let graphsArray:TGraphPoint[] = []
     let today = new Date();//new Date("2024, 12, 25")
     let firstDay = stats[0];
@@ -115,46 +117,27 @@ function createGraphArray(stats: TDay[]):TGraphPoint[] {
     let option: "daily" | "weekly" = stats[0].goal.frequency === "daily"? "daily" : "weekly";
     let calendar = getCalendarDates(stats[0].date, today.getTime(),option );
     let j = 0;
-    let goal = firstDay.goal;
     calendar.map((date, i) =>{
         let day = stats[j];
         if(goal.frequency=== "weekly"){
-            //console.log(date.toDateString(), new Date(day.date).toDateString())
-            let dayPoint: TDay;
             if(day) {
-                dayPoint =  {
-                    progress: 0,
-                    date: date.getTime(),
-                    _id: day._id,
-                    history: [],
-                    goal: goal
-                };
+                let history = [];
                 while(day&& date.getTime()  + 7 * 24 *60 * 60 * 1000 > day.date){
-                    dayPoint.progress += day.progress;
-                    dayPoint.history = [...dayPoint.history, ...day.history]
+                    history.push(day)
                     j++;
                     day = stats[j]
                 }
-                let point = createGraphPoint(dayPoint, i);
+                let point = createGraphPoint(goal,history, date.getTime(), i);
                 graphsArray.push(point)
             } else{
                 let point: TGraphPoint = {color: getProgressColor(0), date: date, gradientId: "fake", progress: 0,x: i *gap +paddingHorizontal, y:  150, history: [], goal: goal}
                 graphsArray.push(point)
             }
-            // if(day&& date.getTime()  + 7 * 24 * 60 *60 * 60 * 1000 > day.date){
-            //     let point: TGraphPoint = createGraphPoint(day, i);
-            //     //console.log(day)
-            //     graphsArray.push(point)
-            //     j++;
-            // }else{
-            //     let point: TGraphPoint = {color: getProgressColor(0), date: date, gradientId: "fake", progress: 0,x: i *gap + 2*padding, y:  150, history: [], goal: day.goal}
-            //     graphsArray.push(point)
-            // }
         }else {
             
              if(day&& date.toDateString() == new Date(day.date).toDateString()){
-                console.log(date.toDateString(), day.date, new Date(day.date).toDateString(), day.history);
-                let point: TGraphPoint = createGraphPoint(day, i);
+                //console.log(date.toDateString(), day.date, new Date(day.date).toDateString(), day.history);
+                let point: TGraphPoint = createGraphPoint(goal, [day], date.getTime(), i);
                 //console.log(day)
                 graphsArray.push(point)
                 j++;
@@ -168,32 +151,12 @@ function createGraphArray(stats: TDay[]):TGraphPoint[] {
     return graphsArray
 }
 function PointPop ({point, setPop}: {point: TGraphPoint, setPop: (pop: ReactNode) =>void}){
-   // return (<></>)
-    console.log({point})
     return (
         <>
-        <Day day={{_id: "boh",progress: point.history.reduce<number>((acc: number, value) => acc + value.progress, 0), goal: point.goal, date: point.date.getTime(), history: point.history}}/>
-        <button className='outline' onClick={()=>setPop(<></>)}>add progress</button>
+            <ProgressDays history={point.history} setPop={setPop} />
+            <button className='outline' onClick={() => setPop(<AddProgress goal={point.goal}  closePop={()=>setPop(undefined)}/>)}>add progress</button>
         </>
     )
-        // <>
-        //     <h2>{point.goal.title}</h2>
-        //     <p>{formatDate(point.date)}</p>
-        //     <div className='progress'>
-        //         <div className='amount' style={{width: point.progress + "%", backgroundColor: point.color}}></div>
-        //     </div>
-        //     <div className='history'>
-        //         {
-        //             point.history.map(progress =>{
-        //                 return (
-        //                 <div>
-        //                    <p>{formatDate(progress.date)}</p>
-        //                    <p>{progress.notes}</p>
-        //                 </div>)
-        //             })
-        //         }
-        //     </div>
-        // </>
 
 }
 
@@ -238,7 +201,7 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
                     return (
                         <>
                         <label htmlFor="hello"></label>
-                        <g onClick={() =>{console.log("hello" + i); setPop(<PointPop point={point} setPop={setPop}/>)}} >
+                        <g onClick={() =>{ setPop(<PointPop point={point} setPop={setPop} />)}} >
                         <rect x={point.x - gap/2} width={gap} height={150} fillOpacity={0}></rect>
                         <line x1={point.x} x2={point.x} y1={50} y2={150}  className='line-vertical'></line>
                         <circle r={5} cx={point.x} cy={point.y}z={10} fill={point.color} key={i} ></circle>
@@ -292,9 +255,11 @@ function Graph({user}: {user: TUser}) {
     },[])
     useEffect(() =>{
         let graphsArray: TGraph[]  = stats.map((stat)=>{
+            let {days, ...goal} = stat;
+
             return {
                 title: stat.title,
-                graph: createGraphArray(stat.days)
+                graph: createGraphArray(days,goal )
             }
         })
         setGraphs(graphsArray)

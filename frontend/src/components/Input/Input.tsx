@@ -3,24 +3,16 @@ import React,{useEffect, useState} from 'react';
 const getStringFromMinutes = (minutes: number) =>{
     return Math.floor(minutes/60).toString()+ ":" + (minutes% 60).toString().padStart(2,"0")
 }
-const TimePicker = ({onSelect, initialValue = 0}: {onSelect: (timeInMinutes: number) =>void, initialValue?: number}) =>{
-    const [time, setTime] = useState(initialValue);
-    const [input, setInput] = useState(initialValue? getStringFromMinutes(initialValue) : "")
-    const [error, setError] = useState(false)
-    useEffect(()=>{
-        onSelect(time)
-    },[time, onSelect])
-     useEffect(() =>{
-        handleValidation(input)
-    },[input])
-    const handleValidation = (timeString: string) =>{
-        
+const getTimeFromString = (timeString: string):{err: string | undefined, result: number} =>{
+        let result;
+        let error;
         let time = timeString.split(":")
         if(time.length < 2) {
-            if(time[0] === "") return;
-            let hours = parseInt(time[0]);
-            setTime(hours * 60);
-            //setInput(hours.toString() + ":00")
+            if(time[0] === "") result = 0;
+            else{
+                let hours = parseInt(time[0]);
+                result = hours * 60
+            }
         }else if(time.length < 3){
             if(time[0] === "") time[0] = "0"
             if(time[1] === "") time[1] = "0"
@@ -28,77 +20,66 @@ const TimePicker = ({onSelect, initialValue = 0}: {onSelect: (timeInMinutes: num
             let minutes = parseInt(time[1]);
             console.log({minutes, time})
             let timeInMinutes = hours * 60 + minutes;
-            setTime(timeInMinutes);
-            //setInput(getStringFromMinutes(timeInMinutes))
+            result = timeInMinutes
         }else {
-            setError(true)
+            error = 'Invalid time string'
         }
+        return {err: error, result: result || 0};
     }
-    const validateString = (string: string) =>{
-        for(let i = 0; i< string.length; i++){
-            
+const TimePicker = ({onSelect, initialValue = 0}: {onSelect: (timeInMinutes: number) =>void, initialValue?: number}) =>{
+    const [input, setInput] = useState(initialValue? getStringFromMinutes(initialValue) : "")
+    const [time, setTime] = useState(initialValue);
+    const [error, setError] = useState("")
+    const handleInputChange = (value: string) =>{
+        setInput(value)
+        let {err, result} = getTimeFromString(value);
+        if(err) setError(err)
+        else {
+            if(error) setError("")
+            onSelect(result);
+            setTime(result)
         }
+
     }
     return (
         <input 
             className={error? "error": ""}
             placeholder={"hh:mm"} 
             value={input} 
-            onChange={(e) => setInput(e.target.value)} 
+            onChange={(e) => handleInputChange(e.target.value)} 
             onKeyDown={(e)=>{
                 if(e.key === "Enter") setInput(getStringFromMinutes(time))
             }}
-            onBlur={()=>setInput(getStringFromMinutes(time))}></input>
+            onBlur={()=>setInput(getStringFromMinutes(time))}
+            ></input>
     )
 }
-const getStringFromMeters = (meters: number) =>{
-    let rest = meters% 1000 
-    let restString =  rest? "." + rest : ""
-            
-    return Math.floor(meters/1000) + restString;
-}
+
 const DistancePicker = ({onSelect, initialValue= 0}: {onSelect: (distanceInMeters: number) =>void, initialValue?: number }) =>{
     const [distance, setDistance] = useState(initialValue);
-    const [input, setInput] = useState(initialValue? getStringFromMeters(initialValue): "")
-    const [error, setError] = useState(false)
-    useEffect(()=>{
-        onSelect(distance)
-    },[distance, onSelect])
-    useEffect(() =>{
-        handleValidation(input)
-    },[input])
-    const handleValidation = (distanceString: string) =>{
-        let distance = distanceString.split(".")
-        console.log({distance})
-        if(distance.length < 2) {
-            if(distance[0] === "") return;
-            let kilometers = parseInt(distance[0]);
-            setDistance(kilometers * 1000);
-        }else if(distance.length < 3){
-            let kilometers = parseInt(distance[0]);
-            let meters = parseInt(distance[1].padEnd(3, "0"))
-            let distanceInMeters = kilometers * 1000 + meters;
-            setDistance(distanceInMeters);
-        }else {
-            setError(true)
-        }
+    const [input, setInput] = useState(initialValue? initialValue.toString() : "")
+    const handleInputChange = (value: string) =>{
+        setInput(value)
+        let km = parseFloat(value)
+        
+        if(Number.isNaN(km)) km = 0;
+        let distanceInMeters = Math.round(km * 1000)
+        onSelect(distanceInMeters)
+        setDistance(distanceInMeters)
+        
     }
     return (
         <input 
-            className={error? "error": ""}
+            //className={error? "error": ""}
             placeholder={"km (e.g 6.5)"} 
+            type='number'
             value={input} 
-            onChange={(e) => setInput(e.target.value)} 
+            onChange={(e) => handleInputChange(e.target.value)} 
             onKeyDown={(e)=>{
-                if(e.key === "Enter") {
-                    handleValidation(input);
-                    setInput(getStringFromMeters(distance))
-                } 
+                if(e.key === "Enter") setInput((distance/1000).toString())
             }}
-            onBlur={()=>{
-                handleValidation(input);
-                setInput(getStringFromMeters(distance))
-            }}></input>
+            onBlur={()=>setInput((distance/1000).toString())}
+         ></input>
     )
 }
 const Input = {

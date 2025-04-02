@@ -16,7 +16,7 @@
 #pop-up {
     display: flex;
     flex-direction: column;
-    width: 300px;
+    width: 320px;
     /* margin-top: 20vh; */
     background-color: var(--background-dark);
     box-shadow: 0px 0px 10px 1px rgb(34, 34, 34);

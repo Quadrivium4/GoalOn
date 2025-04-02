@@ -80,6 +80,9 @@ input{
     border-radius: 5px;
     background-color: var(--background-light);
 }
+input.error {
+    box-shadow: inset 0px 0px 10px 1px rgb(223, 61, 61);
+}
 ::-webkit-scrollbar {
     width: 17px;
     padding: 10px;

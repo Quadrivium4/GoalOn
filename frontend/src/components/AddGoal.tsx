@@ -11,7 +11,8 @@ function AddGoal({closePop}: {closePop: () =>void}) {
     const [selectedOption, setSelectedOption] = useState<TGoalAmountType | "">("");
     const [frequency, setFrequency] = useState<"daily" | "weekly" | "monthly" | "">("")
     const [amount, setAmount] = useState<number>();
-    const {addGoal} = useDays()
+    const {addGoal} = useDays();
+    const [i, setI] = useState(0);
     const createGoal = () =>{
         if(!title || !selectedOption || !frequency || !amount) return;
        addGoal({
@@ -25,6 +26,11 @@ function AddGoal({closePop}: {closePop: () =>void}) {
             closePop()
         })
     }
+const hello = (a: number)=>{
+        console.log("a changed", a)
+        setI(v =>v+1)
+
+    }
     return (
     <div className='form'>
         <h2>New Goal</h2>
@@ -35,7 +41,7 @@ function AddGoal({closePop}: {closePop: () =>void}) {
             setAmount(0);
         }
             }/>
-        {selectedOption === "time"? <Input.TimePicker onSelect={setAmount}/> 
+        {selectedOption === "time"? <Input.TimePicker onSelect={hello}/> 
         : selectedOption === "distance"? <Input.DistancePicker onSelect={setAmount} /> 
         : <input placeholder='amount' type='number' onChange={(e)=> setAmount(parseInt(e.target.value))} value={amount || ""}></input>}
         <button onClick={createGoal}>add</button>

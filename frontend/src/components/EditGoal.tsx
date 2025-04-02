@@ -26,6 +26,7 @@ function EditGoal({closePop, goal}: {closePop: () =>void, goal: TGoal}) {
             closePop()
         })
     }
+    
     return (
     <div className='form'>
         <h2>Edit Goal</h2>

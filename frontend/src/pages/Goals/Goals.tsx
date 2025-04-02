@@ -10,11 +10,12 @@ import { TMyGoal, useDays } from '../../context/DaysContext';
 import { MdOutlineModeEditOutline } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import EditGoal from '../../components/EditGoal';
-import { TDay, TGoalAmountType } from '../../controllers/days';
+import { TDay, TGoalAmountType, TGoalDays } from '../../controllers/days';
 import { getTimeAmount } from '../../utils';
 import EditProgress from '../../components/EditProgress';
 import DeleteGoal from '../../components/DeleteGoal';
 import { TGoal } from '../../controllers/goals';
+import { colors } from '../../constants';
 
 export function sameDay(date1: Date | number, date2: Date | number){
     date1 = new Date(date1);
@@ -40,6 +41,7 @@ export function getAmountString(amount: number, type: TGoalAmountType):string{
   return string
 }
 /*
+
 function Goals() {
     const user = useUser();
     const {goals } = user;
@@ -104,6 +106,12 @@ function Goals() {
     </div>
   );
 }*/
+export function sumDaysProgress(days: TDay[]){
+  let sum = 0;
+  for(let i = 0; i< days.length; i++)
+    sum += sumDayProgress(days[i]);
+  return sum;
+}
 export function sumDayProgress(day: TDay){
   let sum = 0;
   //if(!day.history) return 0;
@@ -112,7 +120,39 @@ export function sumDayProgress(day: TDay){
   }
   return sum;
 }
-function SingleGoal({goal, goalInfo, setPop, closePop}: {goal: TMyGoal, goalInfo: TGoal, setPop: (content: ReactNode) =>void, closePop: () => void}){
+export function ProgressDays({history, setPop}:{history: TDay[], setPop: (content: ReactNode)=> void}){
+  return (<div className='sub-progresses'>
+          {history.sort((a, b)=> a.date -b.date).map(day =>{
+        
+              return (
+                <div key={day._id}>
+                  {
+                    day.history.sort((a, b)=> a.date -b.date).map(progress =>{
+                      let date = new Date(progress.date);
+                      return (
+                        <div className='sub-progress' key={progress.date}>
+                          <div className='header'>
+                            <p>{sameDay(date, new Date())? "Today" : isYesterday(date)? "Yesterday": formatDate(date) }</p>
+                            <p style={{color: colors.primary}}>+{getAmountString(progress.progress, day.goal.type)}</p>
+
+                          </div>
+                        <div className='main' style={{display: "flex"}}>
+                          <p>{progress.notes}</p>
+                          <div className='sidebar'>
+                            <MdOutlineModeEditOutline size={24} onClick={() =>setPop(<EditProgress day={day} progress={progress} closePop={()=>setPop(undefined)} />)} className='button-icon' />
+                            {/* <MdDelete size={24} onClick={() =>setPop(<EditGoal goal={goal} closePop={() =>setPop(undefined)} />)} className='button-icon' />  */}
+                          </div>
+                        </div>
+                        </div>
+                      )
+                    })
+                  }
+                </div>
+              )
+            })}
+        </div>)
+}
+export function SingleGoal({goal, setPop, closePop}: {goal: TMyGoal, setPop: (content: ReactNode) =>void, closePop: () => void}){
   console.log(goal)
   let goalDays =  goal.history//days.filter(day => day._id == goal._id)
   let goalProgress = goalDays.reduce((acc, day) => acc + sumDayProgress(day), 0)
@@ -125,45 +165,17 @@ function SingleGoal({goal, goalInfo, setPop, closePop}: {goal: TMyGoal, goalInfo
           <h3>{goal.title}</h3>
           <p>{goalAmountString} {goal.frequency}</p>
         </div>
-        <div className='sub-progresses'>
-          {goalDays.map(day =>{
-        
-              return (
-                <div key={day._id}>
-                  {
-                    day.history.map(progress =>{
-                      let date = new Date(progress.date);
-                      return (
-                        <div className='sub-progress' key={progress.date}>
-                          <div className='header'>
-                            <p>{sameDay(date, Date.now())? "Today" : formatDate(date)}</p>
-                            <p>{getAmountString(progress.progress, goalInfo.type)}</p>
-
-                          </div>
-                        <div className='main' style={{display: "flex"}}>
-                          <p>{progress.notes}</p>
-                          <div className='sidebar'>
-                            <MdOutlineModeEditOutline size={24} onClick={() =>setPop(<EditProgress day={day} progress={progress} closePop={closePop} />)} className='button-icon' />
-                            {/* <MdDelete size={24} onClick={() =>setPop(<EditGoal goal={goal} closePop={() =>setPop(undefined)} />)} className='button-icon' />  */}
-                          </div>
-                        </div>
-                        </div>
-                      )
-                    })
-                  }
-                </div>
-              )
-            })}
-        </div>
+        <ProgressDays history={goalDays} setPop={setPop} />
+       
         <div className='footer'>
           <div style={{display: 'flex', gap: "5px"}}>
-            <button className='outline' onClick={() => setPop(<AddProgress goal={goalInfo} dayId={goalDays.length > 0?goalDays[goalDays.length-1]._id: "fake"}  closePop={closePop}/>)}>add progress</button>
+            <button className='outline' onClick={() => setPop(<AddProgress goal={goal}  closePop={closePop}/>)}>add progress</button>
           </div>
           <div style={{display: 'flex', gap: "5px"}}>
               {/* <MdOutlineModeEditOutline size={24} onClick={() =>setPop(<EditGoal goal={goal} closePop={() =>setPop(undefined)} />)} className='button-icon' /> */}
               {/* <MdDelete size={24} onClick={() =>setPop(<EditGoal goal={goal} closePop={() =>setPop(undefined)} />)} className='button-icon' /> */}
-            <button className='outline gray' onClick={() =>setPop(<EditGoal goal={goalInfo} closePop={closePop} />)} >edit</button>
-            <button className='outline error' onClick={()=> setPop(<DeleteGoal goal={goalInfo} closePop={closePop} />)}>delete</button>
+            <button className='outline gray' onClick={() =>setPop(<EditGoal goal={goal} closePop={closePop} />)} >edit</button>
+            <button className='outline error' onClick={()=> setPop(<DeleteGoal goal={goal} closePop={closePop} />)}>delete</button>
           </div>
         </div>
       </div>
@@ -188,8 +200,8 @@ function Goals() {
         {
           goals.map(goal=>{
             let {history, ...goalInfo} = goal;
-            if(!goal) return <SingleGoal goal={{...goalInfo, history: []}} goalInfo={goalInfo} setPop={setPop} closePop={() => setPop(undefined)} />
-            return <SingleGoal goal={goal} goalInfo={goalInfo} setPop={setPop} closePop={() => setPop(undefined)}/>
+            if(!goal) return <SingleGoal goal={{...goalInfo, history: []}} setPop={setPop} closePop={() => setPop(undefined)} />
+            return <SingleGoal goal={goal}  setPop={setPop} closePop={() => setPop(undefined)}/>
           })
         }
 

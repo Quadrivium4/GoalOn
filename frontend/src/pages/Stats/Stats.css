@@ -168,6 +168,40 @@
 #stats .single-day .progress .footer{
     display: none;
 }
+
+
+#stats  .sub-progresses {
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 12px;
+    gap: 20px;
+}
+
+#stats  .sub-progresses .sub-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    border-bottom: 1px solid var(--background-light);
+    color: var(--foreground-dark);
+
+}
+
+#stats  .sub-progresses .sub-progress .header {
+    display: flex;
+    justify-content: space-between;
+    color: var(--foreground);
+}
+
+#stats  .sub-progresses .sub-progress .main p {
+    width: 100%;
+}
+
+#stats  .sub-progresses .sub-progress .main .sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
 @media(width <= 600px){
     #stats .days {
         display: flex;

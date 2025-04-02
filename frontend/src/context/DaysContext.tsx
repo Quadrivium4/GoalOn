@@ -14,11 +14,11 @@ import { useAuth, useUser } from "./AuthContext";
 type TDaysContext = {
     today: TDay | null,
     goals: TMyGoal[],
-    addProgress: (goalId: string, progress: number, notes: string) => Promise<void>
+    addProgress: (goalId: string, progress: number, notes: string, date:number) => Promise<void>
     addGoal: (goal: TGoalForm) => Promise<void>
     editGoal: (goal: TGoalForm) => Promise<void>,
     deleteGoal: (id: string) => Promise<void>,
-    editProgress: (progress: TProgressForm) => Promise<void>
+    editProgress: (progress: TProgressForm &{newDate: number}) => Promise<void>
     deleteProgress: (progress: TProgressForm) => Promise<void>,
     likeProgress: (progress: TProgressForm) => Promise<void>,
     unlikeProgress: (progress: TProgressForm) => Promise<void>
@@ -44,8 +44,8 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
             console.log("error fetching days: ", err)
         })
     },[])
-    const addProgress = async(goalId: string, progress: number, notes: string)=>{
-        let updatedDay = await dayController.addProgress(goalId, progress, notes);
+    const addProgress = async(goalId: string, progress: number, notes: string, date: number)=>{
+        let updatedDay = await dayController.addProgress(goalId, progress, notes, date);
 
         let updatedDays: any[];
         let updatedGoals = goals.map(goal =>{
@@ -108,7 +108,7 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
         updateUser({...user, goals: goals})
         setLoading(false)
     }
-    const editProgress = async(progress: TProgressForm)=>{
+    const editProgress = async(progress: TProgressForm & {newDate: number})=>{
         let updatedDay = await dayController.updateProgress(progress);
         let updatedDays;
         let updatedGoals = goals.map(goal =>{
