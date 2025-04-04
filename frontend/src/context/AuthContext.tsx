@@ -48,7 +48,8 @@ export type TUserAuthResponse = {
 }
 type ContextProps = TAuthStateProps & {
     login: (form: TLoginForm) =>Promise<void>, 
-    googleLogin: (credentials: CredentialResponse) =>Promise<void>,
+   // googleLogin: (credentials: CredentialResponse) =>Promise<void>,
+    googleLogin: (token: string) =>Promise<void>,
     register: (form: TRegisterForm) => Promise<void>,
     logout: () => Promise<void>, 
     verify: (credentials: TVerifyProps) =>{}, 
@@ -121,8 +122,17 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
             throw err
         }
     }
-    const googleLogin = async(credentials: CredentialResponse) =>{
-        const res  = await api.post("/google-login", credentials);
+    // const googleLogin = async(credentials: CredentialResponse) =>{
+    //     const res  = await api.post("/google-login", credentials);
+    //     console.log(res.data)
+    //     const { user, aToken }: TUserAuthResponse= res.data;
+    //     //console.log({ user, aToken });
+    //     localStorage.setItem("aToken", aToken);
+    //     dispatch({ type: "LOGIN", payload: { aToken, user } });
+    //     //return { user, aToken };
+    // }
+    const googleLogin = async(token: string) =>{
+        const res  = await api.post("/google-login", {token});
         console.log(res.data)
         const { user, aToken }: TUserAuthResponse= res.data;
         //console.log({ user, aToken });

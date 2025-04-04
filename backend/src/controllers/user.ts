@@ -47,10 +47,14 @@ const login = async(req, res) =>{
     res.send({ user, aToken });
 }
 const googleLogin = async(req, res) =>{
-    const {credential, client_id} = req.body;
-    const ticket = await client.verifyIdToken({idToken: credential, audience: client_id})
-    console.log(ticket)
-    const payload = ticket.getPayload()
+    //const {credential, client_id} = req.body;
+    const {token} = req.body;
+    const googleUser = await fetch("https://www.googleapis.com/userinfo/v2/me", { headers: { Authorization: `Bearer ${token}` }}).then(res => res.json());
+    console.log(googleUser)
+    if(googleUser.error) throw new AppError(1, 500, "error google")
+    //const ticket = await client.verifyIdToken({idToken: credential, audience: client_id})
+    //console.log(ticket)
+    const payload = googleUser;//ticket.getPayload()
     let alreadyExistingUser = await User.findOne({email: payload.email});
     if (alreadyExistingUser && !alreadyExistingUser.googleLogin) throw new AppError(1, 401, "A user with that email, not logged with google already exists");
     if (alreadyExistingUser && alreadyExistingUser.googleLogin) {
