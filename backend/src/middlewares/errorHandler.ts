@@ -80,4 +80,4 @@ const errorHandler = async (err, req, res, next) => {
     res.status(500).send("Something went wrong!");
     process.exit(1);
 }
-module.exports = errorHandler
+export default errorHandler

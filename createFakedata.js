@@ -15,7 +15,7 @@ let createUser = (_id, name, email) =>{
 }
 let insertData = () =>{
     let users = [];
-    for(let i = 0; i < 20; i++){
+    for(let i = 0; i < 200; i++){
         users.push(createUser(1, `Aurora`+i, `aurymetta${i}@gmail.com`));
         users.push(createUser(2, `Giacomo`+i, `giacomo${i}@gmail.com`))
         users.push(createUser(3, `Daniele`+i, `daniele${i}@gmail.com`))

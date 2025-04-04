@@ -12,6 +12,7 @@ import { formatDate, ProgressDays, SingleGoal, sumDayProgress, sumDaysProgress }
 import { Day, Goal } from '../Friends/Friends';
 import AddProgress from '../../components/AddProgress';
 import EditProgress from '../../components/EditProgress';
+import { useStats } from './StatsContext';
 type TPoint = {
     x: number,
     y: number
@@ -90,7 +91,7 @@ function createPolygonStringAndMonthPoints (graph: TGraphPoint[]) {
         polygonString: str
     }
 }
-function createGraphPoint(goal: TGoal, history: TDay[], date: number, i: number): TGraphPoint{
+export function createGraphPoint(goal: TGoal, history: TDay[], date: number, i: number): TGraphPoint{
     let goalProgress = sumDaysProgress(history)
     let progress = normalizePercentage(getPercentage(goal.amount, goalProgress));
     let color = getProgressColor(progress)
@@ -109,7 +110,7 @@ function createGraphPoint(goal: TGoal, history: TDay[], date: number, i: number)
     }
 
 }
-function createGraphArray(stats: TDay[], goal: TGoal):TGraphPoint[] {
+export function createGraphArray(stats: TDay[], goal: TGoal):TGraphPoint[] {
     let graphsArray:TGraphPoint[] = []
     let today = new Date();//new Date("2024, 12, 25")
     let firstDay = stats[0];
@@ -151,10 +152,14 @@ function createGraphArray(stats: TDay[], goal: TGoal):TGraphPoint[] {
     return graphsArray
 }
 function PointPop ({point, setPop}: {point: TGraphPoint, setPop: (pop: ReactNode) =>void}){
+    const {updateStats} = useStats()
+    const date = new Date(point.date);
+    const now = new Date()
+    date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
     return (
         <>
-            <ProgressDays history={point.history} setPop={setPop} />
-            <button className='outline' onClick={() => setPop(<AddProgress goal={point.goal}  closePop={()=>setPop(undefined)}/>)}>add progress</button>
+            <ProgressDays history={point.history} setPop={setPop} onChange={updateStats}/>
+            <button className='outline' onClick={() => setPop(<AddProgress goal={point.goal}  closePop={()=>setPop(undefined)} date={date.getTime()} onRes={updateStats}/>)}>add progress</button>
         </>
     )
 
@@ -169,6 +174,7 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
     const svgWidth = (graph.length -1) * gap + paddingHorizontal * 2 < minSvgWidth? minSvgWidth : (graph.length -1) * gap + paddingHorizontal * 2 ;
     console.log({svgWidth, length: graph.length, gap})
     useEffect(() =>{
+        
         let {polygonString, monthPoints} = createPolygonStringAndMonthPoints(graph)
         setMonthNamePoints(monthPoints);
         setPointsString(polygonString)
@@ -235,45 +241,22 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
     )
 }
 
-type TGraph = {
-    title: string, 
-    graph: TGraphPoint[]
+export type TGraph = {
+    goal: TGoal,
+    points: TGraphPoint[]
 }
-function Graph({user}: {user: TUser}) {
-    //const {days} = useDays();
-
-    // DA FARE GOAL RELATIVI ALLO USER PRESO IN CONSIDERAZIONE
-    const {goals} = user;
-    const [stats, setStats] = useState<TGoalDays[]>([]);
-    const [graphs, setGraphs] = useState<TGraph[]>([]);
-
-    useEffect(()=>{
-            dayController.getStats(user._id).then(data =>{
-                setStats(data)
-            });
-       
-    },[])
-    useEffect(() =>{
-        let graphsArray: TGraph[]  = stats.map((stat)=>{
-            let {days, ...goal} = stat;
-
-            return {
-                title: stat.title,
-                graph: createGraphArray(days,goal )
-            }
-        })
-        setGraphs(graphsArray)
-    },[goals, stats])
-    
+function Graph() {
+    const {stats} = useStats()
     return (
         <div className='graphs'>
-            {graphs.map((graph, i)=>{
-                if(graph.graph.length < 1) return <p>no stats</p>
-                let title = graph.title
+            {stats.map((graph, i)=>{
+                //if(i == 0) console.log("RERENDER")
+                let {points, goal} = graph;
+                if(points.length < 1) return <p>no stats</p>
                 return (
-                    <div key={stats[i]._id} className='graph-container'>
-                        <h3>{title}</h3>
-                        <Svg graph={graph.graph} />
+                    <div key={goal._id} className='graph-container'>
+                        <h3>{goal.title}</h3>
+                        <Svg graph={points} />
                     </div>
                 )
             })}

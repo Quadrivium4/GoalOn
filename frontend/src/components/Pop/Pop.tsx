@@ -1,8 +1,17 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import "./Pop.css"
 
 const Pop = ({children, toggle}: {children: ReactNode, toggle: () => void}) =>{
+    useEffect(()=>{
+        document.body.style.overflow = "hidden";
+        // document.documentElement.style.overflow = 'hidden'
+        return () => {
+            document.body.style.overflow = "unset";
+            //document.documentElement.style.overflow = 'unset'
+        }
+    },[])
     const handleClick = () =>{
+
         toggle();
     }
     return (
@@ -13,6 +22,7 @@ const Pop = ({children, toggle}: {children: ReactNode, toggle: () => void}) =>{
                     <span className="n2"></span>
                 </div>
                 <div id="pop-body">
+                    <p>{document.body.style.overflow}</p>
                     {children}
                 </div>
             </div>

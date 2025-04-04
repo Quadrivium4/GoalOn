@@ -32,11 +32,12 @@ const createOrLoginUserFromGoogle = async(accessToken) =>{
     return { user, aToken };
 }
 
-const createUser = async(name:string, email:string, password: string) =>{
+const createUser = async(name:string, email:string, password: string, googleLogin = false) =>{
     let user = await User.create({
         name,
         email,
         password,
+        googleLogin,
         goals: []
     });
     const {aToken} = createTokens(user.id, email);
@@ -56,7 +57,8 @@ const createUnverifiedUser = async (name, email, password) => {
     if (password.length < 6 || password.length > 50) throw new AppError(1, 401, "Password must be more than 6 characters long");
     // There is already a user with that email
     let alreadyExistingUser = await User.findOne({email});
-    if (alreadyExistingUser) throw new AppError(1, 401, "An user with that email already exists");
+    if (alreadyExistingUser && alreadyExistingUser.googleLogin) throw new AppError(1, 401, "An user with that email already registered with google");
+    else if (alreadyExistingUser && !alreadyExistingUser.googleLogin) throw new AppError(1, 401, "An user with that email already exists");
     const hashedPassword = await hashPassword(password);
     
     let user = await UnverifiedUser.create({
@@ -74,7 +76,8 @@ const findUser = async (email, password) => {
     if (!email) throw new AppError(1002, 401, "Invalid Email");
     if (!validateEmail(email)) throw new AppError(1002, 401, "Invalid Email");
     let user = await User.findOne({email});
-    if (!user?.password) throw new AppError(1002, 401, "Invalid Email");
+    if(!user) throw new AppError(1002, 401, "User with Email not found");
+    if(user.googleLogin) throw new AppError(1002, 401, "User logged with google");
     if (!password) throw new AppError(1003, 401, "Invalid Password");
     if(!await comparePassword(password, user.password)) throw new AppError(1003, 401, "Invalid Password");
     

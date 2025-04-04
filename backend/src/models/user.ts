@@ -8,6 +8,7 @@ export interface TUser extends mongoose.Document  {
     profileImg: string,
     goals: TGoal[],
     friends: string[],
+    googleLogin?: boolean,
     outgoingFriendRequests: string[],
     incomingFriendRequests: string[]
 }
@@ -26,7 +27,9 @@ const UserSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-
+    googleLogin: {
+        type: Boolean
+    },
     tokens: [],
     goals: [],
     friends: [],

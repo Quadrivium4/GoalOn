@@ -54,6 +54,9 @@ body{
     font-family: Gummy;
     min-height: 100%;
 }
+body.no-scroll{
+    overflow: hidden;
+}
 form {
     display: flex;
     flex-direction: column;

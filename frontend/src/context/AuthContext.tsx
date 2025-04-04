@@ -4,6 +4,8 @@ import { api, protectedApi } from "../utils";
 import { useMessage } from "./MessageContext";
 import { TGoal } from "../controllers/goals";
 import { redirect } from "react-router-dom";
+import { wait } from "../controllers/days";
+import { CredentialResponse } from "@react-oauth/google";
 const authState: TAuthStateProps = {
     logged: false,
     loading: true,
@@ -46,6 +48,7 @@ export type TUserAuthResponse = {
 }
 type ContextProps = TAuthStateProps & {
     login: (form: TLoginForm) =>Promise<void>, 
+    googleLogin: (credentials: CredentialResponse) =>Promise<void>,
     register: (form: TRegisterForm) => Promise<void>,
     logout: () => Promise<void>, 
     verify: (credentials: TVerifyProps) =>{}, 
@@ -93,7 +96,8 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
         //console.log({aToken})
         if (!aToken) return dispatch({ type: "LOGGED_OUT" });
         try {
-             const res = await protectedApi().get(`${protectedUrl}/user`);
+           // await wait(2000)
+             const res = await protectedApi().get(`/user`);
              let user = res.data;
         //console.log({user})
         if (!user) return dispatch({ type: "LOGGED_OUT" });
@@ -117,13 +121,15 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
             throw err
         }
     }
-    // const loginWithGoogle = async(accessToken: string) =>{
-    //     const {user, aToken} = await signInWithGoogle(accessToken);
-    //     //console.log({ user, aToken });
-    //     localStorage.setItem("aToken", aToken);
-    //     dispatch({ type: "LOGIN", payload: { aToken, user } });
-    //     //return { user, aToken };
-    // }
+    const googleLogin = async(credentials: CredentialResponse) =>{
+        const res  = await api.post("/google-login", credentials);
+        console.log(res.data)
+        const { user, aToken }: TUserAuthResponse= res.data;
+        //console.log({ user, aToken });
+        localStorage.setItem("aToken", aToken);
+        dispatch({ type: "LOGIN", payload: { aToken, user } });
+        //return { user, aToken };
+    }
     const register = async({name, email, password}: TRegisterForm) =>{
         const {user} : {user: TUser} = await api.post(`${baseUrl}/register`, {name, email, password});
         console.log("successfully registered", user);
@@ -160,7 +166,7 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
         dispatch({type: "SET_LOADING", payload: state})
     }
     return (
-        <AuthContext.Provider value={{...state, login, register, logout, verify, deleteAccount,  updateUserProfileImage, updateUser, setLoading}}>
+        <AuthContext.Provider value={{...state, login,googleLogin, register, logout, verify, deleteAccount,  updateUserProfileImage, updateUser, setLoading}}>
                 {children}
         </AuthContext.Provider>
     )

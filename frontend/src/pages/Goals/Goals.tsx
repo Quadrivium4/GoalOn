@@ -113,6 +113,7 @@ export function sumDaysProgress(days: TDay[]){
   return sum;
 }
 export function sumDayProgress(day: TDay){
+ 
   let sum = 0;
   //if(!day.history) return 0;
   for(let i = 0; i < day.history.length; i++){
@@ -120,14 +121,14 @@ export function sumDayProgress(day: TDay){
   }
   return sum;
 }
-export function ProgressDays({history, setPop}:{history: TDay[], setPop: (content: ReactNode)=> void}){
+export function ProgressDays({history, setPop, onChange}:{history: TDay[], setPop: (content: ReactNode)=> void, onChange?: (day: TDay)=>void}){
   return (<div className='sub-progresses'>
-          {history.sort((a, b)=> a.date -b.date).map(day =>{
+          {history.length > 0? history.sort((a, b)=> a.date -b.date).map(day =>{
         
               return (
                 <div key={day._id}>
                   {
-                    day.history.sort((a, b)=> a.date -b.date).map(progress =>{
+                   day.history.sort((a, b)=> a.date -b.date).map(progress =>{
                       let date = new Date(progress.date);
                       return (
                         <div className='sub-progress' key={progress.date}>
@@ -139,7 +140,7 @@ export function ProgressDays({history, setPop}:{history: TDay[], setPop: (conten
                         <div className='main' style={{display: "flex"}}>
                           <p>{progress.notes}</p>
                           <div className='sidebar'>
-                            <MdOutlineModeEditOutline size={24} onClick={() =>setPop(<EditProgress day={day} progress={progress} closePop={()=>setPop(undefined)} />)} className='button-icon' />
+                            <MdOutlineModeEditOutline size={24} onClick={() =>setPop(<EditProgress day={day} progress={progress} closePop={()=>setPop(undefined)} onChange={onChange} />)} className='button-icon' />
                             {/* <MdDelete size={24} onClick={() =>setPop(<EditGoal goal={goal} closePop={() =>setPop(undefined)} />)} className='button-icon' />  */}
                           </div>
                         </div>
@@ -149,7 +150,7 @@ export function ProgressDays({history, setPop}:{history: TDay[], setPop: (conten
                   }
                 </div>
               )
-            })}
+            }): <p>no progress</p>}
         </div>)
 }
 export function SingleGoal({goal, setPop, closePop}: {goal: TMyGoal, setPop: (content: ReactNode) =>void, closePop: () => void}){
@@ -188,9 +189,15 @@ function Goals() {
     const {goals, today, addProgress} = useDays();
     const [pop, setPop] = useState<ReactNode>();
     useEffect(()=>{
+      
+       
       console.log({goals})
       //worker.postMessage("hello")
     },[goals])
+    function error(){
+      throw new Error("brutto")
+    }
+    //throw new Error("brutto")
     //console.log(user)
   return (
     <div className='page' id='goals'>
@@ -209,7 +216,7 @@ function Goals() {
       <button onClick={() =>{
         setPop(<AddGoal closePop={()=>setPop(undefined)} />)
       }}>+</button>
- 
+    <button onClick={error}>error</button>
     </div>
   );
 }

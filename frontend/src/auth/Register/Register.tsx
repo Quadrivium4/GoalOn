@@ -17,9 +17,11 @@ function Register() {
         <input onChange={(e) =>setName(e.target.value)} value={name} type='text' placeholder='username'></input>
         <input onChange={(e) =>setEmail(e.target.value)} value={email} type='email' placeholder='email'></input>
         <input onChange={(e) =>setPassword(e.target.value)} value={password} type='password' placeholder='password'></input>
-        <button type='submit' onClick={async()=>{
-          const response = await register({name, email, password})
-          console.log(response)
+        <button type='submit' onClick={()=>{
+          register({name, email, password}).then(res =>{
+              console.log(res)
+          })
+          //console.log(response)
           //message.success("Email Sent!")
         }}>Submit</button>
         <p>Already have an account? <Link to={"/login"}>Login</Link></p>

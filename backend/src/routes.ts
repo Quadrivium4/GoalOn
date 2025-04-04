@@ -1,6 +1,6 @@
 import express, {Request, Response as ExpressResponse} from "express"
 import { tryCatch } from "./utils.js";
-import { getUser, getUsers, login, logout, profileImgUpload, register, verify } from "./controllers/user.js";
+import { getUser, getUsers, googleLogin, login, logout, profileImgUpload, register, verify } from "./controllers/user.js";
 import verifyToken from "./middlewares/verifyToken.js";
 import { postGoal } from "./controllers/goals.js";
 import { deleteProgress, getDays, getStats, postProgress, updateProgress } from "./controllers/days.js";
@@ -17,6 +17,7 @@ const protectedRouter = express.Router();
 publicRouter.post("/register", tryCatch(register));
 publicRouter.post("/login", tryCatch(login));
 publicRouter.post("/verify", tryCatch(verify));
+publicRouter.post("/google-login", tryCatch(googleLogin))
 
 protectedRouter.use(tryCatch(verifyToken))
 protectedRouter

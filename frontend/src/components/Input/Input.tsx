@@ -57,7 +57,7 @@ const TimePicker = ({onSelect, initialValue = 0}: {onSelect: (timeInMinutes: num
 
 const DistancePicker = ({onSelect, initialValue= 0}: {onSelect: (distanceInMeters: number) =>void, initialValue?: number }) =>{
     const [distance, setDistance] = useState(initialValue);
-    const [input, setInput] = useState(initialValue? initialValue.toString() : "")
+    const [input, setInput] = useState(initialValue? (initialValue/1000).toString() : "")
     const handleInputChange = (value: string) =>{
         setInput(value)
         let km = parseFloat(value)

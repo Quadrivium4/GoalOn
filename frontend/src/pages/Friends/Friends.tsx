@@ -47,7 +47,13 @@ const useUsers = () =>{
         setLoading(true)
         getUsers(query).then(res =>{
             console.log("getting more users", index, offset, searchText)
-            setUsers(users => [...users, ...res])
+            
+                        
+            setUsers(users => {
+                if(users.length > 20){
+                    // console.log("slicing")
+                    // return [...(users.slice(10)), ...res]
+                }return [...users, ...res]})
             setLoading(false)
         }).catch(err =>{
             console.log(err)
@@ -163,7 +169,7 @@ function SearchUser({setPop}: {setPop: (body: any)=>void}){
         <div className='people' onScroll={(e) =>{
             const target = e.target as HTMLDivElement;
             const bottom = Math.abs(target.scrollHeight - target.clientHeight - target.scrollTop) < 1
-            console.log("scrolling...", bottom, target.scrollHeight, target.scrollTop, target.clientHeight)
+            //console.log("scrolling...", bottom, target.scrollHeight, target.scrollTop, target.clientHeight)
             if(bottom) {
                 console.log("BOTTOOM")
                 getMore()
@@ -186,7 +192,6 @@ function SearchUser({setPop}: {setPop: (body: any)=>void}){
         }
         {loading && <p>loading...</p>}
         </div>
-        <button onClick={getMore}>get more</button>
         </>)
 }
 function useLazyFriends (){
@@ -194,7 +199,14 @@ function useLazyFriends (){
     const [index, setIndex] = useState(0)
     useEffect(()=>{
         getLazyFriends(index).then(newFriends =>{
-            setFriends(prev => [...newFriends, ...prev])
+            
+            setFriends(prev => {
+                if(prev.length > 10){
+                    console.log("slicing")
+                    return [...newFriends, ...(prev.slice(5))]
+                }return [...newFriends, ...prev]
+            }
+            )
         })
         
     }, [index])
@@ -322,24 +334,28 @@ function Friends() {
     //const {days, today, addProgress} = useDays();
     const [pop, setPop] = useState<ReactNode>();
     const {friends, getMore, index} = useLazyFriends();
+  
     useEffect(()=>{
         console.log("user changed", user)
     },[user])
     return (
-        <div className='page' id='friends'>
+        <div className='page' id='friends' style={{overflow: "hidden"}}>
             {pop && <Pop toggle={() => setPop(undefined)}>{pop}</Pop>}
             <div className='header'>
                <h1>Friends</h1>
                 <div className='search'>
-                    <RiSearchLine onClick={() => setPop(<SearchUser setPop={setPop}  />)} size={30} color={colors.primary} />
+                    <RiSearchLine onClick={() => {
+                        
+                        setPop(<SearchUser setPop={setPop}  />)
+                    }} size={30} color={colors.primary} />
                 </div>
                 
             </div>
-            <div className='friends-lazy'>
+            <div className='friends-lazy' >
                 {
                     friends.map(friend =>{
                         let goalsString = friend.goalsInfo.map((goal, i) =>  {
-                            console.log("hhhh", goal)
+                            //console.log("hhhh", goal)
                             let title = goal.title;
                             let firstLetter = title[0].toUpperCase();
                             title = firstLetter + title.substring(1);

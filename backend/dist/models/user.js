@@ -14,6 +14,9 @@ const UserSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    googleLogin: {
+        type: Boolean
+    },
     tokens: [],
     goals: [],
     friends: [],

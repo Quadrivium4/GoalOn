@@ -31,10 +31,11 @@ export function timeFromValue(time: string){
     return {hours, minutes}
 
 }
+const emptyProgress: TProgress = {date: Date.now(), notes: "", progress: 0, likes: []};
 
-function InputProgressValues({type, onChange, initial = {date: Date.now(), notes: "", progress: 0, likes: []}}: {type:TGoalAmountType, onChange: (form: TProgress)=>void, initial?: TProgress}){
+function InputProgressValues({type, onChange, initial }: {type:TGoalAmountType, onChange: (form: TProgress)=>void, initial?: Partial<TProgress>}){
     const {message} = useMessage();
-    const [form, setForm] = useState<TProgress>(initial);
+    const [form, setForm] = useState<TProgress>({...emptyProgress, ...initial});
     const updateForm = (form: TProgress) =>{
         setForm(form);
         onChange(form);

@@ -1,7 +1,12 @@
 import sendMail from "../utils/sendMail.js";
+import { createTokens } from "../utils.js";
 import User from "../models/user.js";
 import { createUnverifiedUser, createUser, verifyUser, findUser, deleteUser, logoutUser } from "../functions/user.js";
 import { deleteFile, saveFile } from "../utils/files.js";
+import { OAuth2Client } from "google-auth-library";
+import AppError from "../utils/appError.js";
+export const GOOGLE_LOGIN = "google-login";
+const client = new OAuth2Client();
 const register = async (req, res) => {
     console.log(req.body);
     const { name, email, password } = req.body;
@@ -15,9 +20,6 @@ const register = async (req, res) => {
                 <a href="${link}">verify</a>`
     });
     res.send(user);
-};
-const googleLogin = async (req, res) => {
-    res.render("googleLogin", {});
 };
 // const signInWithGoogle = async (req, res) => {
 //     console.log("logging with google...")
@@ -39,6 +41,25 @@ const verify = async (req, res) => {
 const login = async (req, res) => {
     const { email, password } = req.body;
     const { user, aToken } = await findUser(email, password);
+    res.send({ user, aToken });
+};
+const googleLogin = async (req, res) => {
+    const { credential, client_id } = req.body;
+    const ticket = await client.verifyIdToken({ idToken: credential, audience: client_id });
+    console.log(ticket);
+    const payload = ticket.getPayload();
+    let alreadyExistingUser = await User.findOne({ email: payload.email });
+    if (alreadyExistingUser && !alreadyExistingUser.googleLogin)
+        throw new AppError(1, 401, "A user with that email, not logged with google already exists");
+    if (alreadyExistingUser && alreadyExistingUser.googleLogin) {
+        const { aToken } = createTokens(alreadyExistingUser.id, alreadyExistingUser.email);
+        let user = await User.findByIdAndUpdate(alreadyExistingUser.id, {
+            tokens: [...alreadyExistingUser.tokens, aToken]
+        }, { new: true });
+        return res.send({ user, aToken });
+    }
+    const { user, aToken } = await createUser(payload.name, payload.email, "", true);
+    console.log({ user, aToken });
     res.send({ user, aToken });
 };
 const profileImgUpload = async (req, res) => {
@@ -103,5 +124,5 @@ const logout = async (req, res) => {
     const user = await logoutUser(req.user, req.token);
     res.send({ msg: "Successfully logged out!" });
 };
-export { register, deleteAccount, deleteUser, getUser, getUsers, login, logout, logoutUser, verify, profileImgUpload };
+export { register, deleteAccount, deleteUser, getUser, getUsers, login, logout, logoutUser, verify, profileImgUpload, googleLogin };
 //# sourceMappingURL=user.js.map

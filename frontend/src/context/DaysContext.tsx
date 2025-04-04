@@ -9,17 +9,18 @@ import goalController, { TGoalForm, TGoal} from "../controllers/goals";
 import dayController, { TDay, TProgress, TProgressForm } from "../controllers/days";
 import * as likeController from "../controllers/likes"
 import { dayInMilliseconds, todayDate } from "../constants";
-import { getToday } from "../utils";
+import { getLastMonday, getToday, isToday } from "../utils";
 import { useAuth, useUser } from "./AuthContext";
+import { nextDayTime } from "../pages/Stats/StatsContext";
 type TDaysContext = {
     today: TDay | null,
     goals: TMyGoal[],
-    addProgress: (goalId: string, progress: number, notes: string, date:number) => Promise<void>
+    addProgress: (goalId: string, progress: number, notes: string, date:number) => Promise<TDay>
     addGoal: (goal: TGoalForm) => Promise<void>
     editGoal: (goal: TGoalForm) => Promise<void>,
     deleteGoal: (id: string) => Promise<void>,
-    editProgress: (progress: TProgressForm &{newDate: number}) => Promise<void>
-    deleteProgress: (progress: TProgressForm) => Promise<void>,
+    editProgress: (progress: TProgressForm &{newDate: number}) => Promise<TDay>
+    deleteProgress: (progress: TProgressForm) => Promise<TDay>,
     likeProgress: (progress: TProgressForm) => Promise<void>,
     unlikeProgress: (progress: TProgressForm) => Promise<void>
 } | undefined;
@@ -49,28 +50,33 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
 
         let updatedDays: any[];
         let updatedGoals = goals.map(goal =>{
-            if(goal._id == updatedDay.goal._id){
-                let updated = false;
-                updatedDays = goal.history.map(day =>{
-                    if(day._id === updatedDay._id){
-                        console.log("updated day",updatedDay)
-                        updated = true;
-                        return updatedDay
+            let newGoal: TMyGoal = goal;
+            if(goal._id === updatedDay.goal._id){
+                if(goal.frequency === "daily"){
+                    if(isToday(updatedDay.date)) {
+                        newGoal = {...goal, history: [updatedDay]}
                     }
-                    return day
-                })
-                if(!updated) {
-                        updatedDays.push(updatedDay);
+                }else if(goal.frequency === "weekly"){
+                    let lastMonday = getLastMonday(Date.now()).getTime();
+                    if(updatedDay.date > lastMonday && updatedDay.date < nextDayTime(lastMonday)){
+                        let updated = false;
+                        updatedDays = goal.history.map(day =>{
+                            if(day._id === updatedDay._id){
+                                updated = true;
+                                return updatedDay
+                            }
+                            return day
+                        })
+                        if(!updated) updatedDays.push(updatedDay);
+                        newGoal =  {...goal, history: updatedDays}
+                    }
                 }
-                return {...goal, history: updatedDays}
-            }else{
-                return goal
             }
-            
-            
+            return newGoal
+
         })
         setGoals(updatedGoals)
-        
+        return updatedDay
     }
     const addGoal = async(goalForm: TGoalForm) =>{
         setLoading(true)
@@ -100,6 +106,7 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
         })
         setGoals(updatedGoals)
         setLoading(false)
+        
     }
     const deleteGoal = async(id: string) =>{
         setLoading(true)
@@ -107,6 +114,7 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
 
         updateUser({...user, goals: goals})
         setLoading(false)
+        
     }
     const editProgress = async(progress: TProgressForm & {newDate: number})=>{
         let updatedDay = await dayController.updateProgress(progress);
@@ -122,6 +130,7 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
             return {...goal, history: updatedDays}
         })
         setGoals(updatedGoals)
+        return updatedDay
     }
     const deleteProgress = async(progress: TProgressForm)=>{
         let updatedDay = await dayController.deleteProgress(progress)
@@ -137,6 +146,7 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
             return {...goal, history: updatedDays}
         })
         setGoals(updatedGoals)
+        return updatedDay
     }
     const likeProgress = async(progress: TProgressForm) =>{
         let updatedDay = await likeController.postLike(progress)

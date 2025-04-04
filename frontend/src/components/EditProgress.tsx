@@ -3,19 +3,21 @@ import  {TProgress, TDay} from '../controllers/days';
 import { useDays } from '../context/DaysContext';
 import InputGoalValue from './Input/InputGoalValue';
 
-function EditProgress({day, progress,  closePop} : {day: TDay, progress: TProgress,  closePop: ()=>void}) {
+function EditProgress({day, progress,  closePop, onChange} : {day: TDay, progress: TProgress,  closePop: ()=>void, onChange?: (day: TDay)=>void}) {
     const {editProgress, deleteProgress} = useDays()
     const {goal} = day;
     const [form, setForm] = useState<TProgress>(progress);
-    const updateGoalProgress = async() =>{
-        editProgress({id: day._id, date: progress.date,progress: form.progress, notes: form.notes, newDate: form.date}).then(() =>{
+    const updateGoalProgress = () =>{
+        editProgress({id: day._id, date: progress.date,progress: form.progress, notes: form.notes, newDate: form.date}).then((res) =>{
+            if(onChange) onChange(res)
              closePop();
         }).catch(err =>{
             console.log("hello error:", err)
         })
     }
-    const deleteGoalProgress = async() =>{
-        deleteProgress({...progress, id: day._id}).then(() =>{
+    const deleteGoalProgress = () =>{
+        deleteProgress({...progress, id: day._id}).then((res) =>{
+            if(onChange) onChange(res)
             closePop();
         }).catch(err =>{
             console.log("hello error:", err)

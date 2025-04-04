@@ -2,9 +2,12 @@
 
 import { TUser } from "../context/AuthContext"
 import { protectedApi } from "../utils"
+import { wait } from "./days";
 
 // }
 const getUser = async(userId: string): Promise<TUser> =>{
+    //await wait(5000)
+
     const res = await protectedApi().get("/user", {params: {id: userId}});
     return res.data;
 }

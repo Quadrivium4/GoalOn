@@ -8,6 +8,7 @@ import Day from "./models/day.js";
 import mongoose from "mongoose";
 import User from "./models/user.js";
 import fileUpload from "express-fileupload";
+import errorHandler from "./middlewares/errorHandler.js";
 const app = express();
 const port = 5000;
 app.use(express.json());
@@ -43,4 +44,5 @@ const updateUsersDb = async () => {
     });
     await Promise.all(promises);
 };
+app.use(errorHandler);
 //# sourceMappingURL=server.js.map
