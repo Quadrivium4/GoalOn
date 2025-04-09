@@ -185,8 +185,9 @@ export function SingleGoal({goal, setPop, closePop}: {goal: TMyGoal, setPop: (co
 //* VERSION 2 */
 function Goals() {
     const user = useUser();
+    const {loading} = useAuth()
     //const {goals } = user;
-    const {goals, today, addProgress} = useDays();
+    const {goals, today, addProgress, daysLoading} = useDays();
     const [pop, setPop] = useState<ReactNode>();
     useEffect(()=>{
       
@@ -205,11 +206,12 @@ function Goals() {
       {/* <h1>Hello {user.name}</h1> */}
       <div className='goals'>
         {
-          goals.map(goal=>{
+          user.goals.length > 0 && daysLoading? <p>skeleton loading</p>:
+          goals.length > 0? goals.map(goal=>{
             let {history, ...goalInfo} = goal;
             if(!goal) return <SingleGoal goal={{...goalInfo, history: []}} setPop={setPop} closePop={() => setPop(undefined)} />
             return <SingleGoal goal={goal}  setPop={setPop} closePop={() => setPop(undefined)}/>
-          })
+          }): <p>no goals</p>
         }
 
       </div>

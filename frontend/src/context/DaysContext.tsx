@@ -13,6 +13,7 @@ import { getLastMonday, getToday, isToday } from "../utils";
 import { useAuth, useUser } from "./AuthContext";
 import { nextDayTime } from "../pages/Stats/StatsContext";
 type TDaysContext = {
+    daysLoading: boolean,
     today: TDay | null,
     goals: TMyGoal[],
     addProgress: (goalId: string, progress: number, notes: string, date:number) => Promise<TDay>
@@ -37,11 +38,16 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
     //const [goals, setGoals] = useState<TGoal[]>([]);
     const  {updateUser, setLoading} = useAuth()
     const user = useUser();
+    const [daysLoading, setDaysLoading] = useState(true);
     const [goals, setGoals] = useState<TMyGoal[]>([]);
     const [today, setToday] = useState<TDay | null>(null)
     //const [loading, setLoading] = useState(true);
     useEffect(() =>{
-        dayController.getDays().then(setGoals).catch(err =>{
+        if(!user.goals) return setDaysLoading(false);
+        dayController.getDays().then((goals) =>{
+            setGoals(goals);
+            setDaysLoading(false)
+        }).catch(err =>{
             console.log("error fetching days: ", err)
         })
     },[])
@@ -179,7 +185,7 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
         setGoals(updatedGoals)
     }
     return (
-        <DaysContext.Provider value={{goals,today, addProgress, addGoal, editGoal, deleteGoal, editProgress, deleteProgress, likeProgress, unlikeProgress}}>
+        <DaysContext.Provider value={{goals,today, addProgress,daysLoading, addGoal, editGoal, deleteGoal, editProgress, deleteProgress, likeProgress, unlikeProgress}}>
             {children}
         </DaysContext.Provider>
     )
