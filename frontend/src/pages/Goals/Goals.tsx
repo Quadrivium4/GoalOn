@@ -16,6 +16,7 @@ import EditProgress from '../../components/EditProgress';
 import DeleteGoal from '../../components/DeleteGoal';
 import { TGoal } from '../../controllers/goals';
 import { colors } from '../../constants';
+import GoalSkeleton from '../../components/GoalSkeleton';
 
 export function sameDay(date1: Date | number, date2: Date | number){
     date1 = new Date(date1);
@@ -206,7 +207,7 @@ function Goals() {
       {/* <h1>Hello {user.name}</h1> */}
       <div className='goals'>
         {
-          user.goals.length > 0 && daysLoading? <p>skeleton loading</p>:
+          user.goals.length > 0 && daysLoading? <GoalSkeleton goals={user.goals} />:
           goals.length > 0? goals.map(goal=>{
             let {history, ...goalInfo} = goal;
             if(!goal) return <SingleGoal goal={{...goalInfo, history: []}} setPop={setPop} closePop={() => setPop(undefined)} />
@@ -219,6 +220,7 @@ function Goals() {
         setPop(<AddGoal closePop={()=>setPop(undefined)} />)
       }}>+</button>
     <button onClick={error}>error</button>
+    
     </div>
   );
 }

@@ -9,7 +9,7 @@ import goalController, { TGoalForm, TGoal} from "../controllers/goals";
 import dayController, { TDay, TProgress, TProgressForm } from "../controllers/days";
 import * as likeController from "../controllers/likes"
 import { dayInMilliseconds, todayDate } from "../constants";
-import { getLastMonday, getToday, isToday } from "../utils";
+import { getLastMonday, getToday, isToday, nextWeekTime } from "../utils";
 import { useAuth, useUser } from "./AuthContext";
 import { nextDayTime } from "../pages/Stats/StatsContext";
 type TDaysContext = {
@@ -32,7 +32,37 @@ const daysState = {
 }
 export type TMyGoal = {
     history: TDay[]
-} & TGoal
+} & TGoal;
+/*
+const getUpdatedGoalDays = (updatedDay: TDay, goals: TMyGoal[]) =>{
+    let updatedGoals = goals.map(goal =>{
+            let newGoal: TMyGoal = goal;
+            if(goal._id === updatedDay.goal._id){
+                if(goal.frequency === "daily"){
+                    if(isToday(updatedDay.date)) {
+                        newGoal = {...goal, history: [updatedDay]}
+                    }
+                }else if(goal.frequency === "weekly"){
+                    let lastMonday = getLastMonday(Date.now()).getTime();
+                    if(updatedDay.date > lastMonday && updatedDay.date < nextDayTime(lastMonday)){
+                        let updated = false;
+                        updatedDays = goal.history.map(day =>{
+                            if(day._id === updatedDay._id){
+                                updated = true;
+                                return updatedDay
+                            }
+                            return day
+                        })
+                        if(!updated) updatedDays.push(updatedDay);
+                        newGoal =  {...goal, history: updatedDays}
+                    }
+                }
+            }
+            return newGoal
+
+        })
+}
+        */
 const DaysContext = createContext<TDaysContext>(undefined)
 const DaysProvider = ({children}: {children: ReactNode}) =>{
     //const [goals, setGoals] = useState<TGoal[]>([]);
@@ -54,7 +84,7 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
     const addProgress = async(goalId: string, progress: number, notes: string, date: number)=>{
         let updatedDay = await dayController.addProgress(goalId, progress, notes, date);
 
-        let updatedDays: any[];
+        let updatedDays: TDay[];
         let updatedGoals = goals.map(goal =>{
             let newGoal: TMyGoal = goal;
             if(goal._id === updatedDay.goal._id){
@@ -64,7 +94,9 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
                     }
                 }else if(goal.frequency === "weekly"){
                     let lastMonday = getLastMonday(Date.now()).getTime();
-                    if(updatedDay.date > lastMonday && updatedDay.date < nextDayTime(lastMonday)){
+                    console.log({lastMonday: new Date(lastMonday)})
+                    
+                    if(updatedDay.date > lastMonday && updatedDay.date < nextWeekTime(lastMonday).getTime()){
                         let updated = false;
                         updatedDays = goal.history.map(day =>{
                             if(day._id === updatedDay._id){
