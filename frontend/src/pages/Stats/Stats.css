@@ -169,6 +169,22 @@
     display: none;
 }
 
+#stats .point-pop{
+    position: relative;
+}
+#stats .point-pop>.header {
+    height: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#stats .point-pop .header .progress {
+    /* border-top-left-radius: 10px;
+    border-top-right-radius: 10px; */
+    transition: 1s;
+    height: 100%;
+    background-color: var(--primary);
+}
 
 #stats  .sub-progresses {
     display: flex;

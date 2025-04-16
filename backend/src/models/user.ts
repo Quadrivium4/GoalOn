@@ -1,5 +1,12 @@
-import mongoose from "mongoose";
-import { TGoal } from "./goal.js";
+import mongoose,  { Types }  from "mongoose";
+export interface TGoal  {
+    _id: Types.ObjectId,
+    title: string,
+    type: "time" | "distance" | "number",
+    frequency: "daily" | "weekly" | "monthly",
+    description: string,
+    amount: number
+}
 export interface TUser extends mongoose.Document  {
     name: string,
     email: string,

@@ -2,7 +2,9 @@ import dotenv from "dotenv";
 dotenv.config();
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
-import { TDay } from "./models/day.js";
+import Day, { TDay } from "./models/day.js";
+import { ObjectId } from "mongodb";
+import { queryDayDate } from "./controllers/goals.js";
 export const dayInMilliseconds = 1000 * 60 * 60 * 24;
 
 const validateEmail = (email: string) => {
@@ -57,7 +59,15 @@ function isOldDay(dayDate: number, date: number){
     console.log("false")
     return false
 }
-
+function eqOid(id1: string | ObjectId, id2: string | ObjectId){
+    id1 =  new ObjectId(id1);
+    id2 = new ObjectId(id2);
+    return id1.toString() === id2.toString();
+}
+async function deleteAllDaysInDate(date: number | Date) {
+    const deleted = await Day.deleteMany(queryDayDate(date));
+    console.log({deleted})
+}
 export {
     validateEmail,
     tryCatch,
@@ -65,5 +75,7 @@ export {
     comparePassword,
     createTokens,
     extractBearerToken,
-    isOldDay
+    isOldDay,
+    eqOid,
+    deleteAllDaysInDate
 }

@@ -14,7 +14,11 @@ function User() {
     const [user, setUser] = useState<TUser>();
     console.log({userId})
     useEffect(() =>{
-        if(userId) getUser(userId).then(res => setUser(res))
+        if(userId) getUser(userId).then(res => setUser(res)).catch(err =>{
+            console.log("cannot load user")
+        })
+        return () =>{
+        }
     },[])
     return (
         <div id='user' className='page'>

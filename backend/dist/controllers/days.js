@@ -2,6 +2,7 @@ import Day from "../models/day.js";
 import { dayInMilliseconds } from "../utils.js";
 import User from "../models/user.js";
 import { ObjectId } from "mongodb";
+import { queryDate } from "../functions/days.js";
 let week = dayInMilliseconds * 7;
 export const getLastSunday = (date) => {
     date = new Date(date);
@@ -53,6 +54,11 @@ export const aggregateDays = (date, userId) => [
         },
     },
     {
+        $sort: {
+            "date": -1
+        }
+    },
+    {
         $group: 
         /**
          * _id: The id of the group.
@@ -60,10 +66,10 @@ export const aggregateDays = (date, userId) => [
          */
         {
             _id: "$goal._id",
-            title: { $first: "$goal.title" },
-            amount: { $first: "$goal.amount" },
-            frequency: { $first: "$goal.frequency" },
-            type: { $first: "$goal.type" },
+            title: { $last: "$goal.title" },
+            amount: { $last: "$goal.amount" },
+            frequency: { $last: "$goal.frequency" },
+            type: { $last: "$goal.type" },
             history: {
                 $push: {
                     _id: "$_id",
@@ -109,7 +115,6 @@ const getStats = async (req, res) => {
     }
     const promises = [];
     user.goals.map(goal => {
-        console.log(goal.id);
         let promise = async () => {
             let days = await Day.find({ userId, "goal._id": new ObjectId(goal._id) }).sort({ date: 1 });
             return { ...goal, days };
@@ -141,14 +146,6 @@ const postProgress = async (req, res) => {
     }, { new: true });
     console.log({ day, totalProgress });
     return res.send(day);
-};
-const queryDate = (date) => {
-    let date1 = new Date(date);
-    let date2 = new Date(date1);
-    date2.setDate(date1.getDate() + 1);
-    return {
-        $and: [{ date: { $gte: date1.getTime() } }, { date: { $lt: date2.getTime() } }]
-    };
 };
 const updateProgress = async (req, res) => {
     console.log(req.body);

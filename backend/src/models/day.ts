@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { TGoal } from "./goal.js";
+import { TGoal } from "./user.js";
+
 export type THistoryEvent = {
     progress: number,
     date: number,

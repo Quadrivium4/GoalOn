@@ -29,7 +29,7 @@ export type TLazyFriendsResponse = {
     }[]
 const getUsers= async({index, offset, search, signal}: {index: number, search?: string, offset?: number, signal?: GenericAbortSignal}): Promise<TUser[]> =>{
     
-    const res =  await protectedApi().get("/users", {params:{
+    const res =  await protectedApi.get("/users", {params:{
         index, 
         offset,
         search
@@ -40,30 +40,30 @@ const getUsers= async({index, offset, search, signal}: {index: number, search?: 
 }
 const getFriends = async(search?: string): Promise<TFriendsResponse> =>{
     if(search) {
-        const res =  await protectedApi().get("/friend?search=" + search);
+        const res =  await protectedApi.get("/friend?search=" + search);
         return res.data
     }
-    const res =  await protectedApi().get("/friend")
+    const res =  await protectedApi.get("/friend")
     return res.data
 }
 const getLazyFriends = async(index: number): Promise<TLazyFriendsResponse>=>{
-    const res = await protectedApi().get("/lazy-friends?index=" +index + "&timestamp=" + Date.now());
+    const res = await protectedApi.get("/lazy-friends", {params: { index, timestamp: Date.now()}});
     return res.data;
 } 
 const sendFriendRequest = async(id: string): Promise<TUser> =>{
-    let res = await protectedApi().post("/send-friend-request/" + id);
+    let res = await protectedApi.post("/send-friend-request/" + id);
     return res.data;
 }
 const acceptFriendRequest = async(id: string): Promise<TUser> =>{
-    let res = await protectedApi().post("/accept-friend-request/" + id)
+    let res = await protectedApi.post("/accept-friend-request/" + id)
     return res.data;
 }
 const cancelFriendRequest = async(id: string): Promise<TUser> =>{
-    let res = await protectedApi().delete("/cancel-friend-request/" + id);
+    let res = await protectedApi.delete("/cancel-friend-request/" + id);
     return res.data;
 }
 const deleteFriend = async(id: string): Promise<TUser> =>{
-    let res = await protectedApi().delete("/delete-friend/" + id);
+    let res = await protectedApi.delete("/delete-friend/" + id);
     return res.data;
 }
 

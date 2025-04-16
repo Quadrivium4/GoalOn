@@ -10,6 +10,7 @@ import dayController, { TDay, TGoalDays, TStat } from '../../controllers/days';
 import { TUser, useUser } from "../../context/AuthContext";
 import { nextWeekTime } from "../../utils";
 import { sumDaysProgress } from "../Goals/Goals";
+import axios, { Axios } from "axios";
 type TStatsStateProps = {
     stats: TGraph[]
 }
@@ -40,57 +41,73 @@ const StatsProvider = ({ children, user}: {children: ReactNode, user: TUser}) =>
         dayController.getStats(_id).then(data =>{
             let result: TGraph[] = createGraphArray(data)
             setState({stats:result})
-        });
+         }).catch(err =>{
+            if(axios.isCancel(err)){
+                console.log("cancel err")
+            }else {
+                console.log("unexpected error")
+            }
+        })
     },[goals,_id])
     //const delay = 5000;
     const updateStats = (day: TDay) =>{
-        console.log("updating stats")
-        let dayDate = new Date(day.date);
-        dayDate.setHours(0,0,0,0);
-        let newStats = stats.map(graph =>{
-            if(graph.goal._id === day.goal._id){
-                let newPoints = graph.points.map((point, i) =>{
-                    if(day.goal.frequency === "weekly"){
-                        let nextWeek = new Date(day.date);
-                        nextWeek.setDate(nextWeek.getDate() + 7)
-                        if(day.date > point.date.getTime() && day.date < nextWeekTime(point.date).getTime()){
-                            let updated = false;
-                            let newPoint;
-                            let newHistory: TDay[] = point.history.map((d, j) =>{ 
-                                if(d._id === day._id){
-                                    updated = true;
-                                    return  day
-                                }
-                                return d
-                            })
-                            if(!updated) {
-                                newHistory.push(day);
-                            }
-                            newPoint = createGraphPoint(day.goal, newHistory, point.date.getTime(), i )
-                            return  newPoint
-                        }
+        dayController.getStats(_id).then(data =>{
+            let result: TGraph[] = createGraphArray(data)
+            setState({stats:result})
+        });
+        // Manually update stats, not recommended
+        // console.log("updating stats")
+        // let dayDate = new Date(day.date);
+        // dayDate.setHours(0,0,0,0);
+        // let newStats = stats.map(graph =>{
+        //     if(graph.goal._id === day.goal._id){
+        //         let newPoints = graph.points.map((point, i) =>{
+        //             if(day.goal.frequency === "weekly"){
+        //                 let nextWeek = new Date(day.date);
+        //                 nextWeek.setDate(nextWeek.getDate() + 7)
+        //                 if(day.date > point.date.getTime() && day.date < nextWeekTime(point.date).getTime()){
+        //                     let updated = false;
+        //                     let newPoint;
+        //                     let newHistory: TDay[] = point.history.map((d, j) =>{ 
+        //                         if(d._id === day._id){
+        //                             updated = true;
+        //                             return  day
+        //                         }
+        //                         return d
+        //                     })
+        //                     if(!updated) {
+        //                         newHistory.push(day);
+        //                     }
+                            
+        //                     let maxAmount = (100 *sumDaysProgress(point.history))/ point.progress;
+        //                     newPoint = createGraphPoint(day.goal, newHistory, point.date, i, maxAmount)
+        //                     //console.log({newPoint, maxAmount, amountHeight: point.amountHeight, sumDaysProgress: sumDaysProgress(newHistory), pointProgress: point.progress})
+        //                     return  newPoint
+        //                 }
 
-                        console.log({point})
-                        return point
-                    }else {
-                        if(point.date.getTime() === dayDate.getTime()){
-                            let newPoint = createGraphPoint(day.goal, [day], point.date.getTime(), i);
-                            return newPoint;
-                        }
-                        return point
-                    }
+        //                 console.log({point})
+        //                 return point
+        //             }else {
+        //                 if(point.date.getTime() === dayDate.getTime()){
+        //                     let maxAmount = (100 *sumDaysProgress(point.history))/ point.progress;
+        //                     let newPoint = createGraphPoint(day.goal, [day], point.date, i, maxAmount);
+        //                     //console.log({newPoint, maxAmount})
+        //                     return newPoint;
+        //                 }
+        //                 return point
+        //             }
                     
-                })
-                graph.points = newPoints;
+        //         })
+        //         graph.points = newPoints;
 
-            }
-            return graph
-        })
-        console.log({newStats})
-        newStats.map(graph => graph.points.map(point => point.history.map(day => day.history.map((progress, i) =>{
-            if(progress.notes === "cic") console.log(progress)
-        }))))
-        setState({stats: newStats})
+        //     }
+        //     return graph
+        // })
+        // console.log({newStats})
+        // newStats.map(graph => graph.points.map(point => point.history.map(day => day.history.map((progress, i) =>{
+        //     if(progress.notes === "cic") console.log(progress)
+        // }))))
+        // setState({stats: newStats})
     }
     return (
         <StatsContext.Provider value={{ ...state, updateStats}}>

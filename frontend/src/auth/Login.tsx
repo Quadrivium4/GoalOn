@@ -4,20 +4,27 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin, useGoogleLogin, useGoogleOneTapLogin } from '@react-oauth/google';
 import { useMessage } from '../context/MessageContext';
 import { AxiosError } from 'axios';
-
+const errors = {
+  INVALID_EMAIL: 1002,
+  INVALID_PASSWORD: 1003,
+}
 function Login() {
   const {login, googleLogin} = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const {message} = useMessage();
+  const [error, setError] = useState(null)
   const handleLogin = () =>{
+      setError(null)
       login({email, password}).then((res)=>{
               navigate("/");
               console.log(res)
           }).catch(err => {
+
             let msg =  err.message
-            console.log("login error", err)
+            console.log("login error", {err})
+            setError(err.errorCode);
             message.error(msg)
           })
   }
@@ -54,7 +61,7 @@ function Login() {
         <button type='submit' onClick={handleLogin}>Submit</button>
         <p>Don't have an account yet? <Link to={"/"}>Register</Link></p>
         <button onClick={()=>glog()}>google</button>
-       
+       {error === errors.INVALID_PASSWORD && <><p>Have you lost your password?</p><Link to={"/reset-password"}>reset password</Link></>}
         {/* <GoogleLogin onSuccess={handleGoogleLogin} onError={()=> console.log("Error google login")}/> */}
       </div>
     </div>

@@ -1,5 +1,6 @@
 // const addDay = async(day: TDayForm): Promise<TDay> =>{
 
+import { TUser } from "../context/AuthContext"
 import { protectedApi } from "../utils"
 import { TDay, TGoalAmountType } from "./days"
 export type TGoalForm = {
@@ -15,15 +16,15 @@ export type TGoal =  TGoalForm & {
 } 
 // }
 const addGoal = async(goalForm: TGoalForm): Promise<TDay> =>{
-    const res =  await protectedApi().post("/goals", {goalForm, date: Date.now()})
+    const res =  await protectedApi.post("/goals", {goalForm, date: Date.now()})
     return res.data
 }
-const editGoal = async(goalForm: TGoalForm): Promise<TDay> =>{
-    const res =  await protectedApi().put("/goals", {goalForm, date: Date.now()})
+const editGoal = async(goal: TGoal): Promise<TDay> =>{
+    const res =  await protectedApi.put("/goals", {...goal, date: Date.now()})
     return res.data
 }
-const deleteGoal = async(id: string): Promise<TGoal[]> =>{
-    const res =  await protectedApi().delete("/goals", {params: {id}});
+const deleteGoal = async(id: string): Promise<TUser> =>{
+    const res =  await protectedApi.delete("/goals", {params: {id}});
     return res.data
 }
 export default {

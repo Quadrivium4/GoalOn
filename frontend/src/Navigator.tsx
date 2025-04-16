@@ -24,13 +24,15 @@ const Navigator = () =>{
         else if(!loading) removeLoader()
 
     },[loading])
+    if(loading) return null;
+
     return (
         <>
-        {!loading &&logged && user? 
+        {logged && user? 
             <DaysProvider>
                 <AppNavigator />
             </DaysProvider>
-        :!loading? <AuthNavigator/>: null}</>
+        : <AuthNavigator/>}</>
 
     )
 }

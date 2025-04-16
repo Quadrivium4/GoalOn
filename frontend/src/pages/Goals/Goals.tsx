@@ -17,6 +17,8 @@ import DeleteGoal from '../../components/DeleteGoal';
 import { TGoal } from '../../controllers/goals';
 import { colors } from '../../constants';
 import GoalSkeleton from '../../components/GoalSkeleton';
+import Admin from '../Admin/Admin';
+import { getPercentage, getProgressColor } from '../Stats/Graph';
 
 export function sameDay(date1: Date | number, date2: Date | number){
     date1 = new Date(date1);
@@ -154,15 +156,18 @@ export function ProgressDays({history, setPop, onChange}:{history: TDay[], setPo
             }): <p>no progress</p>}
         </div>)
 }
+export function getGoalAmountString(goal: TGoal, goalProgress: number){
+  return  goal.type === "time"? getTimeAmount(goalProgress) + "/" +getTimeAmount(goal.amount) + " hours": goal.type === "distance"? goalProgress/1000 + "/" + goal.amount/1000 + "km": goal.amount;
+}
 export function SingleGoal({goal, setPop, closePop}: {goal: TMyGoal, setPop: (content: ReactNode) =>void, closePop: () => void}){
-  console.log(goal)
-  let goalDays =  goal.history//days.filter(day => day._id == goal._id)
-  let goalProgress = goalDays.reduce((acc, day) => acc + sumDayProgress(day), 0)
-  let progressWidth = 100 /goal.amount* goalProgress;
-  let goalAmountString = goal.type === "time"? getTimeAmount(goalProgress) + "/" +getTimeAmount(goal.amount) + " hours": goal.type === "distance"? goalProgress/1000 + "/" + goal.amount/1000 + "km": goal.amount;
+  console.log({goal})
+  let goalDays =  goal.history;
+  let goalProgress = sumDaysProgress(goalDays);
+  let progressWidth = getPercentage(goal.amount, goalProgress);
+  let goalAmountString = getGoalAmountString(goal, goalProgress)
   return (
       <div className='goal' key={goal._id}>
-        <div className='header'><div className='progress' style={{width: progressWidth + "%"}}></div></div>
+        <div className='header'><div className='progress' style={{width: progressWidth + "%", backgroundColor: getProgressColor(progressWidth)}}></div></div>
         <div className='info'>
           <h3>{goal.title}</h3>
           <p>{goalAmountString} {goal.frequency}</p>
@@ -188,11 +193,11 @@ function Goals() {
     const user = useUser();
     const {loading} = useAuth()
     //const {goals } = user;
-    const {goals, today, addProgress, daysLoading} = useDays();
+    const {goals, addProgress, daysLoading} = useDays();
     const [pop, setPop] = useState<ReactNode>();
     useEffect(()=>{
       
-       
+      
       console.log({goals})
       //worker.postMessage("hello")
     },[goals])
@@ -219,8 +224,8 @@ function Goals() {
       <button onClick={() =>{
         setPop(<AddGoal closePop={()=>setPop(undefined)} />)
       }}>+</button>
-    <button onClick={error}>error</button>
-    
+    {/* <button onClick={()=> window.open('tel:+393478619432', '_system')}>error</button> */}
+    {/* <Admin /> */}
     </div>
   );
 }

@@ -48,24 +48,24 @@ export function wait(duration: number){
 }
 const getDays = async():Promise<TMyGoal[]> =>{
     await wait(2000)
-    let res = await protectedApi().get("/days", {params: {timestamp: Date.now()}});
+    let res = await protectedApi.get("/days", {params: {timestamp: Date.now()}});
     return res.data;
 }
 const getStats = async(userId?: string):Promise<TGoalDays[]> =>{
-    console.log("mine", {userId})
-    let res = await protectedApi().get(userId? "/stats/" + userId : "/stats");
+    //console.log("mine", {userId})
+    let res = await protectedApi.get(userId? "/stats/" + userId : "/stats");
     return res.data;
 }
 const addProgress = async(goalId: string, progress: number, notes: string, date: number): Promise<TDay> =>{
-    let res = await protectedApi().post("/progress", {goalId, progress, date, notes});
+    let res = await protectedApi.post("/progress", {goalId, progress, date, notes});
     return res.data;
 }
 const updateProgress = async(progress: TProgressForm & {newDate: number}): Promise<TDay> =>{
-    let res = await protectedApi().put("/progress", progress);
+    let res = await protectedApi.put("/progress", progress);
     return res.data;
 }
 const deleteProgress = async(progress: TProgressForm): Promise<TDay> =>{
-    let res = await protectedApi().delete("/progress", {params: progress});
+    let res = await protectedApi.delete("/progress", {params: progress});
     return res.data;
 }
 let dayControllers = {

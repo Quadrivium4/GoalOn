@@ -1,10 +1,12 @@
 import sendMail from "../utils/sendMail.js"
 import { createTokens, extractBearerToken } from "../utils.js";
 import User from "../models/user.js";
-import { createUnverifiedUser, createUser, verifyUser, findUser, deleteUser, logoutUser } from "../functions/user.js";
+import { createUnverifiedUser, createUser, verifyUser, findUser, deleteUser, logoutUser, createResetPasswordUser } from "../functions/user.js";
 import { deleteFile, saveFile } from "../utils/files.js";
 import { OAuth2Client } from "google-auth-library";
 import AppError from "../utils/appError.js";
+import crypto from "crypto";
+
 export const GOOGLE_LOGIN = "google-login"
 const client = new OAuth2Client();
 const register = async(req, res) =>{
@@ -45,6 +47,42 @@ const login = async(req, res) =>{
     const {user, aToken} = await findUser(email, password);
     
     res.send({ user, aToken });
+}
+const verifyResetPassword = async(req, res)=>{
+    console.log("verifying reset password", req.body)
+    const {id,  token } = req.body;
+    const {name, email, password}= await verifyUser(id, token);
+    console.log({name, email, password})
+    let user = await User.findOneAndUpdate({email}, {password }, {new: true});
+        
+    const { aToken } = createTokens(user.id, email);
+    user = await User.findByIdAndUpdate(user.id,
+        {
+            tokens: [...user.tokens, aToken]
+        }, { new: true });
+
+    console.log({user, aToken})
+    res.send({ user, aToken });
+}
+const resetPassword = async(req, res) =>{
+    console.log("resetting password", req.body);
+    const {email, password} = req.body;
+    const user = await User.findOne({email});
+    if(!user) throw new AppError(1002,404, "User with that email not found");
+    const unverifiedUser = await createResetPasswordUser(user.name, user.email, password);
+    
+
+    //const token = crypto.randomBytes(32).toString("hex");
+    const link = `${process.env.CLIENT_URL}/verify-password/${unverifiedUser.id}/${unverifiedUser.token}`;
+    console.log({link})
+    let result = await sendMail({
+        to: user.email,
+        subject: "Confirm your email",
+        body:  `<h1>Confirmation email: </h1>
+                <a href="${link}">verify</a>`
+    })
+    console.log(result);
+    res.send({user, result});
 }
 const googleLogin = async(req, res) =>{
     //const {credential, client_id} = req.body;
@@ -133,6 +171,8 @@ const logout = async(req, res) =>{
 }
 export {
     register,
+    resetPassword,
+    verifyResetPassword,
     deleteAccount,
     deleteUser,
     getUser,

@@ -22,7 +22,7 @@ const Pop = ({children, toggle}: {children: ReactNode, toggle: () => void}) =>{
                     <span className="n2"></span>
                 </div>
                 <div id="pop-body">
-                    <p>{document.body.style.overflow}</p>
+                    {/* <p>{document.body.style.overflow}</p> */}
                     {children}
                 </div>
             </div>

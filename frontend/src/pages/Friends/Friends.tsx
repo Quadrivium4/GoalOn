@@ -207,8 +207,13 @@ function useLazyFriends (){
                 }return [...newFriends, ...prev]
             }
             )
+        }).catch(err =>{
+            console.log("hello error", err)
+            //setFriends([])
         })
-        
+        return () =>{
+
+        }
     }, [index])
     useEffect(() =>{
         return () => {
@@ -273,7 +278,7 @@ export function Day({day}: {day: TDay}){
             
     }
     return (
-            <div className='single-day'>
+            <div className='single-day' key={day._id} id={day._id}>
             {
                 day.history.length> 0? day.history.map(progress =>{
                     let {date} = progress;
@@ -308,7 +313,7 @@ export function Goal({ goal }: {goal: TMyGoal}){
     let dayProgress = sumDoubleDayProgress(goal)
     let normalizedPercentage = normalizePercentage(getPercentage(goal.amount, dayProgress));
     return (
-        <div className='day'>
+        <div className='day' >
             <div className='header'>
                 <div className='progress-bar' style={{width: normalizedPercentage+ "%", backgroundColor: getProgressColor(normalizedPercentage)}}></div>
                 <div className='title-box'>
@@ -336,7 +341,7 @@ function Friends() {
     const {friends, getMore, index} = useLazyFriends();
   
     useEffect(()=>{
-        console.log("user changed", user)
+        //console.log("user changed", user)
     },[user])
     return (
         <div className='page' id='friends' style={{overflow: "hidden"}}>
@@ -362,7 +367,7 @@ function Friends() {
                             return i < friend.goals.length -1? title+= ", " : title+= "."
                         });
                         return (
-                            <div className='friend'>
+                            <div className='friend' key={friend._id} id={friend._id}>
                                 <div className='header'>
                                     <Link to={"/user/" + friend._id}>
                                         <ProfileIcon name={friend.name} profileImg={friend.profileImg} _id={friend._id}/>
@@ -376,9 +381,9 @@ function Friends() {
                                 <div className="days">
                                     {
                                         friend.goalsInfo.map(gl =>{
-                                            let goal = friend.goals.find(goal => goal._id == gl._id);
-                                            if(!goal) return <Goal goal={{...gl, history: []}} />
-                                            return (<Goal goal={goal} />)
+                                            let goal = friend.goals.find(goal => goal._id === gl._id);
+                                            if(!goal) return <Goal goal={{...gl, history: []}} key={gl._id}/>
+                                            return (<Goal goal={goal} key={goal._id} />)
                                         })
                                     }
                                 </div>

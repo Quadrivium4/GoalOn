@@ -2,13 +2,13 @@
 import React,{useEffect, useState, useRef, ReactNode} from 'react';
 import { useDays } from '../../context/DaysContext';
 import "./Stats.css"
-import { getNormalizedPercentage } from '../../utils';
+import { getLastMonday, getNormalizedPercentage } from '../../utils';
 import dayController, { TGoalDays, TStat } from '../../controllers/days';
 import {  TDay, TDayGoal, TProgress, TStats } from '../../controllers/days';
 import { TUser, useUser } from '../../context/AuthContext';
 import Pop from '../../components/Pop/Pop';
-import { TGoal } from '../../controllers/goals';
-import { formatDate, ProgressDays, SingleGoal, sumDayProgress, sumDaysProgress } from '../Goals/Goals';
+import { TGoal, TGoalForm } from '../../controllers/goals';
+import { formatDate, getAmountString, getGoalAmountString, ProgressDays, SingleGoal, sumDayProgress, sumDaysProgress } from '../Goals/Goals';
 import { Day, Goal } from '../Friends/Friends';
 import AddProgress from '../../components/AddProgress';
 import EditProgress from '../../components/EditProgress';
@@ -19,7 +19,8 @@ type TPoint = {
 }
 
 type TGraphPoint = {
-
+    id: string,
+    amountHeight: number,
     progress: number,
     color: string,
     date: Date,
@@ -31,6 +32,7 @@ type TDayPoint =TDay & {
 
 }
 type TMonthPoint = {
+    id: string,
     name: string
 } &TPoint;
 // const gap = 25;
@@ -43,7 +45,7 @@ const minSvgWidth = 0;
 
 export const getPercentage = (amount: number, progress: number) =>{
     let percentage = Math.round(100/(amount)* progress);
-    percentage = percentage > 100 ? 100 : percentage;
+    //percentage = percentage > 100 ? 100 : percentage;
     return percentage;
 }
 export const normalizePercentage = (percentage: number) =>{
@@ -54,17 +56,18 @@ export const getProgressColor = (percentage: number) =>{
     return `rgb(${185-percentage}, ${Math.round(200/100 * percentage)}, ${ Math.round(82/100 * percentage)})`;
 }
 function getCalendarDates(from: number, to: number, option?: "daily" | "weekly"){
-    const startDate = new Date(from);
+    let startDate = new Date(from);
     const endDate = new Date(to);
     startDate.setHours(0,0,0,0);
     endDate.setHours(0,0,0,0);
     const dateArrays = [];
-    if(!option || option == "daily"){
+    if(!option || option === "daily"){
         for(; startDate <= endDate; startDate.setDate(startDate.getDate() + 1)){
             dateArrays.push(new Date(startDate));
         }
-    }else{
-        for(; startDate < endDate; startDate.setDate(startDate.getDate() + 7)){
+    }else if(option === "weekly"){
+        startDate = getLastMonday(startDate);
+        for(; startDate <= endDate; startDate.setDate(startDate.getDate() + 7)){
             dateArrays.push(new Date(startDate));
         }
     }
@@ -82,7 +85,7 @@ function createPolygonStringAndMonthPoints (graph: TGraphPoint[]) {
         let day = new Date(graph[i].date);
         let previousDay = new Date(graph[i-1]?.date);
         if(day.getMonth() != previousDay.getMonth() ){
-            monthPointsArray.push({...point, name: point.date.toLocaleString('en-us', { month: 'long' })});
+            monthPointsArray.push({...point, name: point.date.toLocaleString('en-us', { month: 'long' }), id: "month" + point.date.getTime()});
         }
     }
     str+=`${graph[graph.length-1].x},150 ${graph[0].x},150`;
@@ -91,64 +94,119 @@ function createPolygonStringAndMonthPoints (graph: TGraphPoint[]) {
         polygonString: str
     }
 }
-export function createGraphPoint(goal: TGoal, history: TDay[], date: number, i: number): TGraphPoint{
+export function createGraphPoint(goal: TGoal, history: TDay[], date: Date, i: number, maxAmount?: number): TGraphPoint{
+    if(!maxAmount)  maxAmount  = 0;
+
     let goalProgress = sumDaysProgress(history)
-    let progress = normalizePercentage(getPercentage(goal.amount, goalProgress));
-    let color = getProgressColor(progress)
+
+    let progressHeight = getPercentage(maxAmount, goalProgress);
+    
+    //let maxAmount = (100 *sumDaysProgress(newHistory))/  (150 - point.amountHeight);
+    let progressPercentage = normalizePercentage(getPercentage(goal.amount, goalProgress));
+    let amountHeight = getPercentage(maxAmount, goal.amount);
+    let color = getProgressColor(progressPercentage)
     //let dayNumber = date.getDate().toString()
-    let gradientId = "gradient" + Math.random();
+    let id = goal._id + date.getTime();
+    let gradientId = "gradient" +  id;
+    
     return {
-        progress,
-        date: new Date(date),
+        id,
+        progress: progressHeight,
+        date: date,
         color,
         gradientId,
         history,
         goal: goal,
         x: i * gap + paddingHorizontal,
-        y: 150 - progress 
+        y: 150 - progressHeight,
+        amountHeight: 150 - amountHeight
         //Oppure 150 - progress + padding???
     }
 
 }
-export function createGraphArray(stats: TDay[], goal: TGoal):TGraphPoint[] {
-    let graphsArray:TGraphPoint[] = []
-    let today = new Date();//new Date("2024, 12, 25")
-    let firstDay = stats[0];
-    if(!firstDay) return [];
-    let option: "daily" | "weekly" = stats[0].goal.frequency === "daily"? "daily" : "weekly";
-    let calendar = getCalendarDates(stats[0].date, today.getTime(),option );
+type TDateDays = {
+    date: Date, 
+    days: TDay[]
+}
+export function getDaysArray(frequency: TGoal["frequency"], calendar: Date[], stats: TDay[]):TDateDays[]{
+    let daysArray: TDateDays[] = [];
     let j = 0;
     calendar.map((date, i) =>{
         let day = stats[j];
-        if(goal.frequency=== "weekly"){
+        //if(!day) return daysArray.push({date, days: []});
+        if(frequency=== "weekly"){
             if(day) {
                 let history = [];
-                while(day&& date.getTime()  + 7 * 24 *60 * 60 * 1000 > day.date){
+                while(stats[j ]&& date.getTime()  + 7 * 24 *60 * 60 * 1000 > stats[j].date){
+                    day = stats[j]
                     history.push(day)
                     j++;
-                    day = stats[j]
+                    
                 }
-                let point = createGraphPoint(goal,history, date.getTime(), i);
-                graphsArray.push(point)
-            } else{
-                let point: TGraphPoint = {color: getProgressColor(0), date: date, gradientId: "fake", progress: 0,x: i *gap +paddingHorizontal, y:  150, history: [], goal: goal}
-                graphsArray.push(point)
-            }
-        }else {
-            
-             if(day&& date.toDateString() == new Date(day.date).toDateString()){
-                //console.log(date.toDateString(), day.date, new Date(day.date).toDateString(), day.history);
-                let point: TGraphPoint = createGraphPoint(goal, [day], date.getTime(), i);
-                //console.log(day)
-                graphsArray.push(point)
+                daysArray.push({date, days: history})
+            } else daysArray.push({date, days: []})
+        }else if(frequency === "daily"){
+            if(day&& date.toDateString() === new Date(day.date).toDateString()){
+                daysArray.push({date, days: [day]})
                 j++;
-            }else{
-                let point: TGraphPoint = {color: getProgressColor(0), date: date, gradientId: "fake", progress: 0,x: i *gap + paddingHorizontal, y:  150, history: [], goal: goal}
-                graphsArray.push(point)
-            }
+            }else daysArray.push({date, days: []})
         }
-       
     })
+    return daysArray;
+}
+export function getMaxProgress(stats: TDateDays[], frequency: TGoalForm["frequency"]){
+    let maxAmount = sumDaysProgress(stats[0].days);
+        for(const {days, date} of stats){
+            const curAmount = sumDaysProgress(days);
+            const latestDay = days[days.length-1];
+            if(latestDay && latestDay.goal.amount > maxAmount) maxAmount = latestDay.goal.amount;
+            if(curAmount > maxAmount) maxAmount = curAmount;
+        }
+    
+    return maxAmount;
+}
+export function createEmptyPoint(goal: TGoal, date: Date, i: number, maxAmount: number ) {
+    let id = goal._id + date.getTime();
+    let point: TGraphPoint =  {
+        id,
+        color: getProgressColor(0), 
+        date: date, 
+        gradientId: "gradient" + id, 
+        progress: 0,
+        x: i *gap +paddingHorizontal,
+        y:  150, 
+        history: [], 
+        goal: goal, 
+        amountHeight: 150- getPercentage(maxAmount, goal.amount)
+        };
+    return point;
+}
+export function createGraphArray(stats: TDay[], goal: TGoal):TGraphPoint[] {
+    if(stats.length < 1) return [];
+
+    let firstDay = stats[0];
+    let graphsArray:TGraphPoint[] = [];
+    
+    let today = new Date();//new Date("2024, 12, 25")
+    
+    let option: "daily" | "weekly" = goal.frequency === "daily"? "daily" : "weekly";
+    let calendar = getCalendarDates(firstDay.date, today.getTime(),option );
+    let daysArray: TDateDays[] = getDaysArray(goal.frequency, calendar, stats);
+    let maxProgress = getMaxProgress(daysArray, goal.frequency);
+    // empty days use latest goal amount
+    let dayLatestGoal = daysArray[0].days[daysArray[0].days.length-1].goal;
+    //console.log(goal.title, {maxProgress})
+    daysArray.map(({date, days}, i) =>{
+        let point: TGraphPoint;
+        if(days.length > 0){
+            dayLatestGoal = days[days.length-1].goal;
+            point = createGraphPoint(dayLatestGoal, days, date, i, maxProgress);
+            
+        }else point = createEmptyPoint(dayLatestGoal, date, i, maxProgress)
+        
+        graphsArray.push(point)
+    })
+
     return graphsArray
 }
 function PointPop ({point, setPop}: {point: TGraphPoint, setPop: (pop: ReactNode) =>void}){
@@ -156,11 +214,22 @@ function PointPop ({point, setPop}: {point: TGraphPoint, setPop: (pop: ReactNode
     const date = new Date(point.date);
     const now = new Date()
     date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+    let goalDays =  point.history;
+    let {goal } = point;
+    let goalProgress = sumDaysProgress(goalDays);
+    let progressWidth = getPercentage(goal.amount, goalProgress);
+    let goalAmountString = getGoalAmountString(goal, goalProgress)
     return (
-        <>
+        <div className='point-pop'> 
+            <div className='info'>
+                <p>{goalAmountString} {goal.frequency}</p>
+            </div>
+            <div className='header'><div className='progress' style={{width: progressWidth + "%",backgroundColor: getProgressColor(progressWidth)}}></div></div>
+            
+            
             <ProgressDays history={point.history} setPop={setPop} onChange={updateStats}/>
             <button className='outline' onClick={() => setPop(<AddProgress goal={point.goal}  closePop={()=>setPop(undefined)} date={date.getTime()} onRes={updateStats}/>)}>add progress</button>
-        </>
+        </div>
     )
 
 }
@@ -172,14 +241,14 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
     const [pop, setPop] = useState<ReactNode>();
     const ref = useRef<HTMLDivElement>(null);
     const svgWidth = (graph.length -1) * gap + paddingHorizontal * 2 < minSvgWidth? minSvgWidth : (graph.length -1) * gap + paddingHorizontal * 2 ;
-    console.log({svgWidth, length: graph.length, gap})
+   // console.log({svgWidth, length: graph.length, gap})
     useEffect(() =>{
         
         let {polygonString, monthPoints} = createPolygonStringAndMonthPoints(graph)
         setMonthNamePoints(monthPoints);
         setPointsString(polygonString)
         if(ref.current) {
-            console.log({div: ref.current})
+            //console.log({div: ref.current})
             ref.current.scrollLeft = ref.current.scrollWidth
         }
     },[graph])
@@ -191,7 +260,7 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
                 monthNamePoints.map((month, i) =>{
                     let nextMonthPosition = monthNamePoints[i+1]?  monthNamePoints[i+1].x : svgWidth//graph.length *gap+ padding;
                     let visible = monthDayScroll > month.x - (paddingHorizontal + 0.1);
-                    return <p className='month' style={{opacity: (nextMonthPosition - monthDayScroll - paddingHorizontal)/130, display: visible? "block" : "none", paddingLeft: paddingHorizontal}} >{month.name}</p>
+                    return <p key={month.id}className='month' style={{opacity: (nextMonthPosition - monthDayScroll - paddingHorizontal)/130, display: visible? "block" : "none", paddingLeft: paddingHorizontal}} >{month.name}</p>
                 })
             }
         </div>
@@ -205,16 +274,19 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
                     let nextPoint = graph[i+1];
                     //console.log({point})
                     return (
-                        <>
-                        <label htmlFor="hello"></label>
-                        <g onClick={() =>{ setPop(<PointPop point={point} setPop={setPop} />)}} >
+
+                        <g onClick={() =>{ setPop(<PointPop point={point} setPop={setPop} />)}} key={point.id}>
                         <rect x={point.x - gap/2} width={gap} height={150} fillOpacity={0}></rect>
+
+                        <circle r={3} cx={point.x} cy={point.amountHeight}z={10} fill={"white"} ></circle>
+                        {nextPoint && <line x1={point.x} x2={ nextPoint.x} y1={point.amountHeight} y2={nextPoint.amountHeight} style={{stroke:  "rgba(230, 230, 230, 0.5)"}}  ></line>}
+
                         <line x1={point.x} x2={point.x} y1={50} y2={150}  className='line-vertical'></line>
                         <circle r={5} cx={point.x} cy={point.y}z={10} fill={point.color} key={i} ></circle>
-                        <text x={point.x - (4.5 * point.date.getDate().toString().length)} y={40} style={{color: "red"}}>{point.date.getDate().toString() }</text>
+
                         
-                        </g>
-                        {nextPoint? 
+                        <text x={point.x - (4.5 * point.date.getDate().toString().length)} y={40} style={{color: "red"}}>{point.date.getDate().toString() }</text>
+                            {nextPoint? 
                             <>
                             <linearGradient id={point.gradientId} >
                                 <stop offset="0%" stopColor={point.color}></stop>
@@ -223,14 +295,12 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
                             <line x1={point.x} y1={point.y} x2={nextPoint.x}y2={nextPoint.y} className='line-connect' stroke={point.color == nextPoint.color? nextPoint.color : `url(#${point.gradientId})` }></line>
                             </>
                         : null}
-                       
-
-                        </>
+                        </g>
                     )
                 })}
             {
                 monthNamePoints.map(
-                    (month) =>(monthDayScroll < month.x - paddingHorizontal && <text className='month'  x={month.x } y={20}>{month.name}</text>)
+                    (month) =>(monthDayScroll < month.x - paddingHorizontal && <text key={month.id}className='month'  x={month.x } y={20}>{month.name}</text>)
                 )
             }
             </svg>

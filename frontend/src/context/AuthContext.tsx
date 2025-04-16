@@ -6,6 +6,8 @@ import { TGoal } from "../controllers/goals";
 import { redirect } from "react-router-dom";
 import { wait } from "../controllers/days";
 import { CredentialResponse } from "@react-oauth/google";
+import { CanceledError } from "axios";
+import { stat } from "fs";
 const authState: TAuthStateProps = {
     logged: false,
     loading: true,
@@ -53,6 +55,7 @@ type ContextProps = TAuthStateProps & {
     register: (form: TRegisterForm) => Promise<void>,
     logout: () => Promise<void>, 
     verify: (credentials: TVerifyProps) =>{}, 
+    verifyPassword: (credentials: TVerifyProps) =>Promise<void>, 
     deleteAccount: () =>{}, 
     updateUserProfileImage: (id: string) => void,
     updateUser: (user: TUser) => void,
@@ -95,20 +98,30 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
     const isLogged = async () => {
         const aToken =  localStorage.getItem("aToken");
         //console.log({aToken})
+        //console.log(aToken)
         if (!aToken) return dispatch({ type: "LOGGED_OUT" });
         try {
            // await wait(2000)
-             const res = await protectedApi().get(`/user`);
+             const res = await protectedApi.get(`/user`);
              let user = res.data;
         //console.log({user})
-        if (!user) return dispatch({ type: "LOGGED_OUT" });
-        //dispatch({type: "LOGGED_OUT"})
-        localStorage.setItem("user", JSON.stringify(user));
-        dispatch({ type: "LOGIN", payload: { aToken, user } });
+            if (!user) return dispatch({ type: "LOGGED_OUT" });
+            //dispatch({type: "LOGGED_OUT"})
+            localStorage.setItem("user", JSON.stringify(user));
+            dispatch({ type: "LOGIN", payload: { aToken, user } });
         } catch (error) {
-        
-            return dispatch({ type: "LOGGED_OUT" });
+           
+            //console.log({loading:state.loading})
+            //console.log("authError", error)
+            // if(error instanceof CanceledError && {config: {signal: AbortSignal}}){
+
+            //     return 0;
+            // }
+            //     return dispatch({ type: "LOGGED_OUT" });
+            // }
+            dispatch({type: "SET_LOADING", payload: false})
         }
+
         
     };
     const login = async({email, password}: TLoginForm) =>{
@@ -147,7 +160,7 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
     }
     const logout = async() =>{
         console.log({state})
-        await protectedApi().get(`${protectedUrl}/logout`);
+        await protectedApi.get(`${protectedUrl}/logout`);
         console.log("log out")
         localStorage.removeItem("aToken");
         dispatch({type: "LOGGED_OUT"})
@@ -155,6 +168,14 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
     }
     const verify = async({id, token}: TVerifyProps) =>{
         const res =  await api.post(`${baseUrl}/verify`, {token, id});
+        const {user, aToken}: TUserAuthResponse = res.data;
+        console.log({user, aToken})
+        localStorage.setItem("aToken", aToken);
+        dispatch({type: "LOGIN", payload: {aToken, user}})
+    }
+    const verifyPassword = async({id, token}: TVerifyProps) =>{
+        // TODO secure verify endpoint
+        const res =  await api.post(`/verify-reset-password`, {token, id});
         const {user, aToken}: TUserAuthResponse = res.data;
         console.log({user, aToken})
         localStorage.setItem("aToken", aToken);
@@ -175,8 +196,9 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
     const setLoading = (state: boolean) =>{
         dispatch({type: "SET_LOADING", payload: state})
     }
+
     return (
-        <AuthContext.Provider value={{...state, login,googleLogin, register, logout, verify, deleteAccount,  updateUserProfileImage, updateUser, setLoading}}>
+        <AuthContext.Provider value={{...state, login,googleLogin, register, logout, verify, verifyPassword, deleteAccount,  updateUserProfileImage, updateUser, setLoading}}>
                 {children}
         </AuthContext.Provider>
     )

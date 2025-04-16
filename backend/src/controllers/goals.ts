@@ -1,7 +1,11 @@
+import { queryDate } from "../functions/days.js";
 import Day from "../models/day.js";
-import Goal, { TGoal } from "../models/goal.js"
-import User from "../models/user.js";
+import User, { TGoal, TUser } from "../models/user.js";
 import { ObjectId } from "mongodb";
+import { ProtectedReq } from "../routes.js";
+import { Response } from "express";
+import { eqOid } from "../utils.js";
+import AppError from "../utils/appError.js";
 
 const postGoal = async(req, res) =>{
     let {goalForm, date} = req.body;
@@ -26,9 +30,53 @@ const postGoal = async(req, res) =>{
     let day = await Day.create({goal: goal, date: date, userId: user.id});
     return res.send(day)
 }
-const putGoal = async(req, res) =>{
+export const queryDayDate = (date: number | Date) =>{
+    date = new Date(date);
+    date.setHours(0,0,0,0);
+    return queryDate(date.getTime());
+}
+const putGoal = async(req: ProtectedReq, res: Response) =>{
+    
+    const {title, amount, frequency, _id, date} = req.body;
+    console.log(req.body, queryDate(date))
+    let newGoal: TGoal;
+    const newGoals = req.user.goals.map(goal =>{
+        if(eqOid(goal._id, _id)){
+            newGoal = {...goal, title, amount, frequency}
+            return newGoal
+        }
+        return goal
+    })
+    const newUser = await User.findByIdAndUpdate(req.user.id, {goals: newGoals}, {new: true});
+    if(!newGoal) throw new AppError(1, 401, "invalid id");
+    // Change Today with new Goal
+    let day = await Day.findOneAndUpdate({$and: [{userId: req.user.id}, queryDayDate(date)]}, {goal: newGoal}, {new: true});
+    console.log("day updated", day)
+    if(!day) {
+        console.log("creating new day")
+        day = await Day.create({goal: newGoal, date: date, userId: req.user.id })
+    }
+    res.send(day)
+
+}
+const completeGoal = async(req, res) =>{
     
 }
+interface IQuery {
+    id: string
+}
+
+const deleteGoal = async(req: ProtectedReq<{},{},{}, IQuery>, res: Response) =>{
+    const {id}= req.query;
+
+    await Day.deleteMany({"goal._id": new ObjectId(id)});
+    let newGoals = req.user.goals.filter(goal => !eqOid(goal._id, id));
+
+    let user = await User.findByIdAndUpdate(req.user.id, {goals: newGoals}, {new: true})
+    res.send(user)
+}
 export {
-    postGoal
+    postGoal,
+    putGoal,
+    deleteGoal
 }

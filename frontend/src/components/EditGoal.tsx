@@ -21,7 +21,8 @@ function EditGoal({closePop, goal}: {closePop: () =>void, goal: TGoal}) {
             frequency,
             amount,
             progress: 0,
-            type: selectedOption
+            type: selectedOption,
+            _id: goal._id
         }).then(() =>{
             closePop()
         })
@@ -41,7 +42,7 @@ function EditGoal({closePop, goal}: {closePop: () =>void, goal: TGoal}) {
         {selectedOption === "time"? <Input.TimePicker onSelect={setAmount} initialValue={goal.amount}/> 
         : selectedOption === "distance"? <Input.DistancePicker onSelect={setAmount} initialValue={goal.amount}/> 
         : <input placeholder='amount' type='number' onChange={(e)=> setAmount(parseInt(e.target.value))} value={amount || ""}></input>}
-        <button onClick={createGoal}>add</button>
+        <button onClick={createGoal}>save</button>
     </div>
 );
 }

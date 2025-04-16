@@ -48,6 +48,20 @@ const createUser = async(name:string, email:string, password: string, googleLogi
 
     return {user, aToken };
 }
+const createResetPasswordUser = async (name, email, password) => {
+    password = password.trim();
+    if (password.length < 6 || password.length > 50) throw new AppError(1, 401, "Password must be more than 6 characters long");
+    const hashedPassword = await hashPassword(password);
+    
+    let user = await UnverifiedUser.create({
+        name,
+        email,
+        password: hashedPassword,
+        token: crypto.randomBytes(32).toString("hex")
+    });
+    
+    return user
+}
 const createUnverifiedUser = async (name, email, password) => {
     name = name.trim();
     email = email.trim();
@@ -110,6 +124,7 @@ const logoutUser = async(user, token) =>{
 export {
     createUser,
     createUnverifiedUser,
+    createResetPasswordUser,
     findUser,
     logoutUser,
     verifyUser,

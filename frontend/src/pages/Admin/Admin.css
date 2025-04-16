@@ -1,0 +1,9 @@
+#admin textarea {
+    all: unset;
+    width: 100%;
+    color: white;
+    height: 120px;
+    background-color: var(--background-dark);
+    caret-color: white;
+
+}
