@@ -30,30 +30,9 @@ function Login() {
             message.error(msg)
           })
   }
-  // const handleGoogleLogin = (res: CredentialResponse) =>{
-  //     googleLogin(res).then((res)=>{
-  //             navigate("/");
-  //             console.log(res)
-  //         }).catch((err) => {
-      
-  //           let msg =  err.message;
-  //           console.log("login error", err)
-  //           message.error(msg)
-  //         })
-  // }
-  const handleGoogleLogin = (token: string) =>{
-      googleLogin(token).then((res)=>{
-              navigate("/");
-              console.log(res)
-          }).catch((err) => {
-      
-            let msg =  err.message;
-            console.log("login error", err)
-            message.error(msg)
-          })
+  const onGoogleLogin = () =>{
+      navigate("/");
   }
-  const glog = useGoogleLogin({onSuccess: (res) =>handleGoogleLogin(res.access_token)})//useGoogleOneTapLogin({onSuccess: (token) =>handleGoogleLogin(token)});
-  //{credential: token, clientId: process.env.REACT_APP_CLIENT_ID}
   return (
     <>
       <h1>Login</h1>
@@ -62,7 +41,7 @@ function Login() {
         <input onChange={(e) =>setPassword(e.target.value)} value={password} type='password' placeholder='password'></input>
         <button type='submit' onClick={handleLogin}>Submit</button>
         <p>- or - </p>
-        <GoogleButton>Sign in with google</GoogleButton>
+        <GoogleButton onSuccess={onGoogleLogin} onError={message.error}>Sign in with google</GoogleButton>
         <p>Don't have an account yet? <Link to={"/"}>Register</Link></p>
         <p>forgot password? <Link to={"/reset-password"} state={{email}} >Reset</Link></p>
         

@@ -19,6 +19,7 @@ function GoogleButton({onSuccess = ()=>{}, onError= ()=>{}, children}: {onSucces
             let msg =  err.message;
             // console.log("login error", err)
             // message.error(msg)
+            console.log(err)
             onError(msg)
           })
   }
@@ -26,7 +27,10 @@ function GoogleButton({onSuccess = ()=>{}, onError= ()=>{}, children}: {onSucces
   return (
     <>
 
-        <button onClick={()=>glog()} className='google-button outline'>
+        <button onClick={()=>{
+            console.log("google clicked");
+            glog();
+            }} className='google-button outline'>
             <FcGoogle />
             {children}
         </button>

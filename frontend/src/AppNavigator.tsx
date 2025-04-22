@@ -10,7 +10,7 @@ import User from './pages/User/User';
 
 
 const appRouter = createBrowserRouter([{
-    path: "/",
+    path: "/*",
     element: <Goals />
 },{
     path: "/stats",
@@ -33,7 +33,7 @@ const AppNavigator = () =>{
         <BrowserRouter>
         {window.screen.width >= 500?<Header></Header> : null}
         <Routes>
-        <Route path='/' element={<Goals />}></Route>
+        <Route path='/*' element={<Goals />}></Route>
         <Route path='/stats' element={<Stats />}></Route>
         <Route path='/settings' element={<Settings/>}></Route>
         <Route path='/friends' element={<Friends />}></Route>
