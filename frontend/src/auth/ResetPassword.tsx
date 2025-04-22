@@ -22,7 +22,8 @@ function ResetPassword() {
         })
     }
   return (
-    <div>
+    <>
+      <Link to={"/login"} style={{position: "absolute", top: 10, left: 10}}>{"<"} Back</Link>
       <h1>Reset Password</h1>
       <div className='form'>
         <input onChange={(e) =>setEmail(e.target.value)} value={email} type='email' placeholder='email'></input>
@@ -32,7 +33,7 @@ function ResetPassword() {
        
         {/* <GoogleLogin onSuccess={handleGoogleLogin} onError={()=> console.log("Error google login")}/> */}
       </div>
-    </div>
+    </>
   );
 }
 

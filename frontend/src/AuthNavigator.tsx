@@ -23,7 +23,7 @@ const authRouter = createBrowserRouter([{
 }])
 const AuthNavigator = () =>{
     return (
-        <div className='page'>
+        <div id='auth-page'>
         <RouterProvider router={authRouter}></RouterProvider>
         </div>
     )

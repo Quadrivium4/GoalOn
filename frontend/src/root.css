@@ -38,12 +38,16 @@
 h1,h2,h3,h4,h5,h6{
     color: var(--foreground-light);
     font-family: sans-serif;
-    font-weight: 600;
+    font-weight: 100;
+}
+h1{
+    font-size: 30px;
 }
 a{
     all: unset;
     cursor: pointer;
-
+    font-weight: 600;
+    letter-spacing: 0.8px;
 }
 html{
     height: 100%;
@@ -123,7 +127,7 @@ input:-webkit-autofill:active {
 button {
     background-color: var(--primary);
     color: white;
-    padding: 10px 20px;
+    padding: 8px 20px;
     cursor: pointer;
     text-transform: uppercase;
     border-radius: 4px;
@@ -133,6 +137,7 @@ button {
     align-items: center;
     justify-content: center;
     font-family: Gummy;
+    font-size: 16px;
     /*box-shadow: 0 0 5px rgba(255, 255, 255, 0.267);*/
 }
 button:hover {
@@ -170,5 +175,6 @@ footer{
 @media(max-width: 600px){
     button{
         padding: 5px 10px;
+        font-size: 14px;
     }
 }

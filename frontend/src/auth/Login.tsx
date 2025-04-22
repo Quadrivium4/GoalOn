@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin, useGoogleLogin, useGoogleOneTapLogin } from '@react-oauth/google';
 import { useMessage } from '../context/MessageContext';
 import { AxiosError } from 'axios';
+import classes from "./Form.module.css"
+import GoogleButton from '../components/GoogleButton';
 const errors = {
   INVALID_EMAIL: 1002,
   INVALID_PASSWORD: 1003,
@@ -53,18 +55,20 @@ function Login() {
   const glog = useGoogleLogin({onSuccess: (res) =>handleGoogleLogin(res.access_token)})//useGoogleOneTapLogin({onSuccess: (token) =>handleGoogleLogin(token)});
   //{credential: token, clientId: process.env.REACT_APP_CLIENT_ID}
   return (
-    <div>
+    <>
       <h1>Login</h1>
-      <div className='form'>
+      <div className={'form'}>
         <input onChange={(e) =>setEmail(e.target.value)} value={email} type='email' placeholder='email'></input>
         <input onChange={(e) =>setPassword(e.target.value)} value={password} type='password' placeholder='password'></input>
         <button type='submit' onClick={handleLogin}>Submit</button>
+        <p>- or - </p>
+        <GoogleButton>Sign in with google</GoogleButton>
         <p>Don't have an account yet? <Link to={"/"}>Register</Link></p>
-        <button onClick={()=>glog()}>google</button>
-       {error === errors.INVALID_PASSWORD && <><p>Have you lost your password?</p><Link to={"/reset-password"} state={{email}} >reset password</Link></>}
+        <p>forgot password? <Link to={"/reset-password"} state={{email}} >Reset</Link></p>
+        
         {/* <GoogleLogin onSuccess={handleGoogleLogin} onError={()=> console.log("Error google login")}/> */}
       </div>
-    </div>
+    </>
   );
 }
 

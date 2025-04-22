@@ -1,19 +1,38 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useMessage } from '../../context/MessageContext';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
+import styles from "../Form.module.css"
+import { CredentialResponse, GoogleLogin, useGoogleLogin, useGoogleOneTapLogin } from '@react-oauth/google';
+import Login from '../Login';
+import GoogleButton from '../../components/GoogleButton';
+console.log(styles)
 
 function Register() {
-  const {register} = useAuth()
+  const {register, googleLogin} = useAuth()
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const {message} = useMessage()
+  const {message} = useMessage();
+  const navigate = useNavigate();
+
+  const handleGoogleLogin = (token: string) =>{
+      googleLogin(token).then((res)=>{
+              navigate("/");
+              console.log(res)
+          }).catch((err) => {
+      
+            let msg =  err.message;
+            console.log("login error", err)
+            message.error(msg)
+          })
+  }
+  const glog = useGoogleLogin({onSuccess: (res) =>handleGoogleLogin(res.access_token)});
+
   return (
     <>
       <h1>Register</h1>
-      <div className='form'>
+      <div className={'form'} >
         <input onChange={(e) =>setName(e.target.value)} value={name} type='text' placeholder='username'></input>
         <input onChange={(e) =>setEmail(e.target.value)} value={email} type='email' placeholder='email'></input>
         <input onChange={(e) =>setPassword(e.target.value)} value={password} type='password' placeholder='password'></input>
@@ -24,9 +43,11 @@ function Register() {
           //console.log(response)
           //message.success("Email Sent!")
         }}>Submit</button>
-        <p>Already have an account? <Link to={"/login"}>Login</Link></p>
+        <p>- or -</p>
+        <GoogleButton >Sign up With google</GoogleButton>
+         <p>Already have an account? <Link to={"/login"}>Login</Link></p>
       </div>
-      
+      {/* <Login /> */}
     </>
   );
 }
