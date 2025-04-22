@@ -16,18 +16,10 @@ function Register() {
   const {message} = useMessage();
   const navigate = useNavigate();
 
-  const handleGoogleLogin = (token: string) =>{
-      googleLogin(token).then((res)=>{
-              navigate("/");
-              console.log(res)
-          }).catch((err) => {
-      
-            let msg =  err.message;
-            console.log("login error", err)
-            message.error(msg)
-          })
+  const handleGoogleLogin = () =>{
+    navigate("/")
   }
-  const glog = useGoogleLogin({onSuccess: (res) =>handleGoogleLogin(res.access_token)});
+
 
   return (
     <>
@@ -44,7 +36,7 @@ function Register() {
           //message.success("Email Sent!")
         }}>Submit</button>
         <p>- or -</p>
-        <GoogleButton >Sign up With google</GoogleButton>
+        <GoogleButton onSuccess={handleGoogleLogin} onError={message.error} >Sign up With google</GoogleButton>
          <p>Already have an account? <Link to={"/login"}>Login</Link></p>
       </div>
       {/* <Login /> */}
