@@ -1,6 +1,6 @@
 import React,{useState} from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CredentialResponse, GoogleLogin, useGoogleLogin, useGoogleOneTapLogin } from '@react-oauth/google';
 import { useMessage } from '../context/MessageContext';
 import { AxiosError } from 'axios';
@@ -9,11 +9,14 @@ import { api } from '../utils';
 function ResetPassword() {
   const {login, googleLogin} = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState<string>("");
+  const location = useLocation()
+  const [email, setEmail] = useState<string>(location.state?.email || "");
   const [password, setPassword] = useState<string>("");
+  const {message} = useMessage()
     const handleResetPass = () =>{
         api.post("/reset-password", {email, password}).then(res =>{
             console.log(res)
+            message.success("We have sent you a confirmatin email");
         }).catch(err =>{
             console.log(err)
         })

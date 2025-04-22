@@ -61,7 +61,7 @@ function Login() {
         <button type='submit' onClick={handleLogin}>Submit</button>
         <p>Don't have an account yet? <Link to={"/"}>Register</Link></p>
         <button onClick={()=>glog()}>google</button>
-       {error === errors.INVALID_PASSWORD && <><p>Have you lost your password?</p><Link to={"/reset-password"}>reset password</Link></>}
+       {error === errors.INVALID_PASSWORD && <><p>Have you lost your password?</p><Link to={"/reset-password"} state={{email}} >reset password</Link></>}
         {/* <GoogleLogin onSuccess={handleGoogleLogin} onError={()=> console.log("Error google login")}/> */}
       </div>
     </div>

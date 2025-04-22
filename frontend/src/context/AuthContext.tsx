@@ -95,6 +95,7 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
                 isLogged()
         //}
     },[])
+
     const isLogged = async () => {
         const aToken =  localStorage.getItem("aToken");
         //console.log({aToken})
@@ -175,6 +176,7 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
     }
     const verifyPassword = async({id, token}: TVerifyProps) =>{
         // TODO secure verify endpoint
+        await wait(5000);
         const res =  await api.post(`/verify-reset-password`, {token, id});
         const {user, aToken}: TUserAuthResponse = res.data;
         console.log({user, aToken})

@@ -86,12 +86,14 @@ export const protectedApi = axios.create({
         "Authorization":  "Bearer " + localStorage.getItem("aToken"),
     }
 })
-
 type TOverrideRequestError = {
     url: string
-}
+};
 let cancelTokens: TCancelTokens ={};
 protectedApi.interceptors.request.use((config)=>{
+    let aToken = localStorage.getItem("aToken");
+    if(aToken) config.headers.Authorization =  "Bearer " + aToken;
+
     if(!config.url) config.url = "";
     if(!config.baseURL) config.baseURL = "";
     let fullUrl = config.baseURL + config.url;

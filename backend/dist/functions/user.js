@@ -5,6 +5,7 @@ import crypto from "crypto";
 import { validateEmail, hashPassword, comparePassword, createTokens } from "../utils.js";
 import User from "../models/user.js";
 import UnverifiedUser from "../models/unverifiedUser.js";
+import { isValidObjectId } from "mongoose";
 const createOrLoginUserFromGoogle = async (accessToken) => {
     const googleUser = await fetch("https://www.googleapis.com/userinfo/v2/me", {
         headers: { Authorization: `Bearer ${accessToken}` }
@@ -104,6 +105,8 @@ const findUser = async (email, password) => {
 };
 const verifyUser = async (id, token) => {
     console.log(id, token);
+    if (!isValidObjectId(id))
+        throw new AppError(1, 401, "Invalid Id");
     const unverifiedUser = await UnverifiedUser.findOneAndDelete({ _id: id, token });
     console.log({ unverifiedUser });
     if (!unverifiedUser)
