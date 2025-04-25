@@ -6,6 +6,7 @@ import Day, { TDay } from "./models/day.js";
 import { ObjectId } from "mongodb";
 import { queryDayDate } from "./controllers/goals.js";
 export const dayInMilliseconds = 1000 * 60 * 60 * 24;
+import crypto from "crypto";
 
 const validateEmail = (email: string) => {
     const expression = /([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])/i;
@@ -68,6 +69,9 @@ async function deleteAllDaysInDate(date: number | Date) {
     const deleted = await Day.deleteMany(queryDayDate(date));
     console.log({deleted})
 }
+function createRandomToken(){
+    return crypto.randomBytes(32).toString("hex")
+}
 export {
     validateEmail,
     tryCatch,
@@ -77,5 +81,6 @@ export {
     extractBearerToken,
     isOldDay,
     eqOid,
-    deleteAllDaysInDate
+    deleteAllDaysInDate,
+    createRandomToken
 }

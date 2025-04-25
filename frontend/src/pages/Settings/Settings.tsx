@@ -1,14 +1,13 @@
 import React from 'react';
 import { useAuth, useUser } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useNavigation } from 'react-router-dom';
 import ImageUpload from '../../components/ImageUpload';
 import { baseUrl } from '../../constants';
 import "./Settings.css"
 import ProfileIcon from '../../components/ProfileIcon';
 
 function Settings() {
-  const {logout} = useAuth();
-  const navigate = useNavigate()
+  const {logout, deleteAccountRequest} = useAuth();
   const user = useUser();
   const {updateUserProfileImage} = useAuth()
   return (
@@ -22,8 +21,16 @@ function Settings() {
       </ImageUpload>
       <button onClick={async() =>{
         let res  = await logout();
-        navigate("/")
+        console.log("navigating")
+   
+        window.location.replace("/")
         }}>logout</button>
+        <button className="outline error" onClick={async() =>{
+        let res  = await deleteAccountRequest();
+        console.log("navigating")
+   
+        window.location.replace("/")
+        }}>Delete Account</button>
     </div>
   );
 }

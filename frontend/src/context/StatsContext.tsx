@@ -5,17 +5,18 @@ import {
     ReactNode,
     useEffect
 } from "react";
-import { createGraphArray as createPointsArray, createGraphPoint, TGraph } from "./Graph";
-import dayController, { TDay, TGoalDays, TStat } from '../../controllers/days';
-import { TUser, useUser } from "../../context/AuthContext";
-import { nextWeekTime } from "../../utils";
-import { sumDaysProgress } from "../Goals/Goals";
+import { createGraphArray as createPointsArray, createGraphPoint, TGraph } from "../pages/Stats/Graph";
+import dayController, { TDay, TGoalDays, TStat } from '../controllers/days';
+import { TUser, useUser } from "./AuthContext";
+import { nextWeekTime } from "../utils";
+import { sumDaysProgress } from "../pages/Goals/Goals";
 import axios, { Axios } from "axios";
 type TStatsStateProps = {
     stats: TGraph[]
 }
 type TStatsContextProps = TStatsStateProps & {
-    updateStats: (day: TDay) => void
+    updateStats: (stats: TGoalDays[]) => void,
+    reloadStats: ()=>void
 } | null
 const StatsContext = createContext<TStatsContextProps>(null);
 export const nextDayTime = (date: number | Date) =>{
@@ -35,23 +36,29 @@ const createGraphArray = (data: TGoalDays[]) => data.map((stat)=>{
 
 const StatsProvider = ({ children, user}: {children: ReactNode, user: TUser}) => {
     const [state, setState] = useState<TStatsStateProps>({stats: []});
-    const {goals, _id} = user;
+    const {goals, _id} = user ;
     const {stats} = state;
     useEffect(()=>{
+       // console.log("reloading stats")
         dayController.getStats(_id).then(data =>{
             let result: TGraph[] = createGraphArray(data)
             setState({stats:result})
          }).catch(err =>{
             if(axios.isCancel(err)){
-                console.log("cancel err")
+                //console.log("cancel err")
             }else {
-                console.log("unexpected error")
+                //console.log("unexpected error")
             }
         })
     },[goals,_id])
     //const delay = 5000;
-    const updateStats = (day: TDay) =>{
+    const updateStats = (stats: TGoalDays[]) =>{
+            let result: TGraph[] = createGraphArray(stats)
+            setState({stats:result})
+    }
+    const reloadStats = () =>{
         dayController.getStats(_id).then(data =>{
+            // Goal in stats is updated!!
             let result: TGraph[] = createGraphArray(data)
             setState({stats:result})
         });
@@ -110,7 +117,7 @@ const StatsProvider = ({ children, user}: {children: ReactNode, user: TUser}) =>
         // setState({stats: newStats})
     }
     return (
-        <StatsContext.Provider value={{ ...state, updateStats}}>
+        <StatsContext.Provider value={{ ...state, updateStats, reloadStats}}>
             {children}
         </StatsContext.Provider>
     );

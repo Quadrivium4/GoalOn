@@ -5,9 +5,11 @@ import AppError from "../utils/appError.js"
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import {validateEmail, hashPassword, comparePassword, createTokens} from "../utils.js"
-import User from "../models/user.js";
+import User, { TUser } from "../models/user.js";
 import UnverifiedUser from "../models/unverifiedUser.js";
 import { isValidObjectId } from "mongoose";
+import Day from "../models/day.js";
+import { ObjectId } from "mongodb";
 
 const createOrLoginUserFromGoogle = async(accessToken) =>{
     const googleUser = await fetch("https://www.googleapis.com/userinfo/v2/me", {
@@ -111,8 +113,13 @@ const verifyUser = async(id, token) =>{
     if (!unverifiedUser) throw new AppError(1, 401, "Cannot Verify User");
     return unverifiedUser;
 }
-const deleteUser = async(id) =>{
-    const deletedUser = await User.findByIdAndDelete(id);
+const deleteUser = async(id: string) =>{
+    const deletedUser: TUser = await User.findByIdAndDelete(id);
+    const deletedDays = await Day.deleteMany({userId: id});
+    const friendOids = deletedUser.friends.map(friendId => new ObjectId(friendId));
+    const deletedFriends = await User.updateMany({_id: {$in: friendOids}}, { $pull: {
+            friends: deletedUser.id
+        }})
     return deletedUser
 }
 const logoutUser = async(user, token) =>{

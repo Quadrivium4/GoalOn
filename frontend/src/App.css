@@ -17,13 +17,15 @@
     justify-content: space-between;
     padding: 10px 40px;
     background-color: var(--background-dark);
+    width: 100%;
 }
 #header .nav-links {
     display: flex;
     gap: 30px;
 }
 .logo {
-    font-family:cursive
+    font-family: Gummy;
+    font-weight: 500;
 }
 .logo span{
     color: var(--primary);

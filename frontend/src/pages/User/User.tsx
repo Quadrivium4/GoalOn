@@ -8,7 +8,7 @@ import Graph from '../Stats/Graph';
 import { useLocation, useParams } from 'react-router-dom';
 import { getUser } from '../../controllers/user';
 import { TUser } from '../../context/AuthContext';
-import { StatsProvider } from '../Stats/StatsContext';
+import { StatsProvider } from '../../context/StatsContext';
 function User() {
     const {userId} = useParams();
     const [user, setUser] = useState<TUser>();
@@ -23,6 +23,7 @@ function User() {
     return (
         <div id='user' className='page'>
         <h1>{user?.name}</h1>
+        <p>{user?.bio}</p>
         {user && 
         <StatsProvider user={user}>
             <Graph/>

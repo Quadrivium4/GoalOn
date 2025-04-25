@@ -18,7 +18,7 @@ const getTimeFromString = (timeString: string):{err: string | undefined, result:
             if(time[1] === "") time[1] = "0"
             let hours = parseInt(time[0]);
             let minutes = parseInt(time[1]);
-            console.log({minutes, time})
+            //console.log({minutes, time})
             let timeInMinutes = hours * 60 + minutes;
             result = timeInMinutes
         }else {

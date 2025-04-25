@@ -1,10 +1,11 @@
 import sendMail from "../utils/sendMail.js";
-import { createTokens } from "../utils.js";
+import { comparePassword, createRandomToken, createTokens, validateEmail } from "../utils.js";
 import User from "../models/user.js";
 import { createUnverifiedUser, createUser, verifyUser, findUser, deleteUser, logoutUser, createResetPasswordUser } from "../functions/user.js";
 import { deleteFile, saveFile } from "../utils/files.js";
 import { OAuth2Client } from "google-auth-library";
 import AppError from "../utils/appError.js";
+import { isValidObjectId } from "mongoose";
 export const GOOGLE_LOGIN = "google-login";
 const client = new OAuth2Client();
 const register = async (req, res) => {
@@ -121,8 +122,26 @@ const getUser = async (req, res) => {
         name: user.name,
         email: user.email,
         profileImg: user.profileImg,
+        bio: user.bio,
         goals: user.goals
     });
+};
+const changeEmail = async (req, res) => {
+    const { email, password } = req.body;
+    if (!validateEmail(email))
+        throw new AppError(1, 401, "Invalid Email");
+    if (req.user.googleLogin)
+        throw new AppError(1, 401, "cannot change email of google account");
+    const passwordsCheck = await comparePassword(password, req.user.password);
+    if (!passwordsCheck)
+        throw new AppError(1003, 401, "Invalid Password");
+    const newUser = await User.findByIdAndUpdate(req.user.id, { email }, { new: true });
+    return res.send(newUser);
+};
+const editUser = async (req, res) => {
+    const { name, bio } = req.body;
+    const newUser = await User.findByIdAndUpdate(req.user.id, { name, bio }, { new: true });
+    return res.send(newUser);
 };
 const getUsers = async (req, res) => {
     let { search, index, offset } = req.query;
@@ -152,14 +171,35 @@ const updateUser = async (req, res) => {
 //     console.log("profile image updated",{ user})
 //     res.send(fileId)
 // }
+const deleteAccountRequest = async (req, res) => {
+    const token = createRandomToken();
+    const user = await User.findByIdAndUpdate(req.user.id, { deletionToken: token });
+    const link = `${process.env.CLIENT_URL}/delete-account/${req.user.id}/${token}`;
+    await sendMail({
+        to: req.user.email,
+        subject: "Confirm Account Deletion",
+        body: `
+            Do you want to delete permanently your account?\n 
+            the action is irreversible: <a href="${link}">confirm</>`
+    });
+    res.send({ message: "we sent you a confirmation email" });
+};
 const deleteAccount = async (req, res) => {
-    const deletedUser = await deleteUser(req.user.id);
-    console.log("Deleted User", deletedUser.name);
+    const { id, token } = req.body;
+    if (!isValidObjectId(id))
+        throw new AppError(1, 401, "invalid id");
+    const user = await User.findById(id);
+    if (!user)
+        throw new AppError(1, 401, "invalid id");
+    if (user.deletionToken !== token)
+        throw new AppError(1, 401, "invalid token");
+    const deletedUser = await deleteUser(id);
+    res.send(deletedUser);
 };
 const logout = async (req, res) => {
     console.log("logging out");
     const user = await logoutUser(req.user, req.token);
     res.send({ msg: "Successfully logged out!" });
 };
-export { register, resetPassword, verifyResetPassword, deleteAccount, deleteUser, getUser, getUsers, login, logout, logoutUser, verify, profileImgUpload, googleLogin };
+export { register, resetPassword, verifyResetPassword, deleteAccount, deleteAccountRequest, deleteUser, getUser, getUsers, login, logout, logoutUser, verify, profileImgUpload, googleLogin, changeEmail, editUser };
 //# sourceMappingURL=user.js.map

@@ -115,7 +115,7 @@ protectedApi.interceptors.request.use((config)=>{
     console.log({error})
 })
 
-protectedApi.interceptors.response.use(function(response){
+protectedApi.interceptors.response.use((response)=>{
 
     //console.log({response});
     return response
@@ -130,6 +130,7 @@ protectedApi.interceptors.response.use(function(response){
     }
     //console.log({error});
     return error
+    return [null, error]
 }
 )
 

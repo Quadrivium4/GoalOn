@@ -47,7 +47,7 @@ export function wait(duration: number){
     return new Promise((resolve, reject) => setTimeout(resolve, duration))
 }
 const getDays = async():Promise<TMyGoal[]> =>{
-    await wait(2000)
+    //await wait(2000)
     let res = await protectedApi.get("/days", {params: {timestamp: Date.now()}});
     return res.data;
 }

@@ -46,8 +46,11 @@ const getFriends = async(search?: string): Promise<TFriendsResponse> =>{
     const res =  await protectedApi.get("/friend")
     return res.data
 }
-const getLazyFriends = async(index: number): Promise<TLazyFriendsResponse>=>{
-    const res = await protectedApi.get("/lazy-friends", {params: { index, timestamp: Date.now()}});
+const getLazyFriends = async(index: number, controller?: GenericAbortSignal): Promise<TLazyFriendsResponse>=>{
+    let date = new Date();
+    date.setHours(0,0,0,0);
+    
+    const res = await protectedApi.get("/lazy-friends", {params: { index, timestamp: date.getTime()}, signal: controller});
     return res.data;
 } 
 const sendFriendRequest = async(id: string): Promise<TUser> =>{

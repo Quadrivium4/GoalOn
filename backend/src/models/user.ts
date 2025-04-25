@@ -15,9 +15,11 @@ export interface TUser extends mongoose.Document  {
     profileImg: string,
     goals: TGoal[],
     friends: string[],
+    bio: string,
     googleLogin?: boolean,
     outgoingFriendRequests: string[],
-    incomingFriendRequests: string[]
+    incomingFriendRequests: string[],
+    deletionToken?: string
 }
 const UserSchema = new mongoose.Schema({
     name: {
@@ -40,9 +42,16 @@ const UserSchema = new mongoose.Schema({
     tokens: [],
     goals: [],
     friends: [],
+    bio: {
+        type: String,
+        trim: true
+    },
     incomingFriendRequests: [],
     outgoingFriendRequests: [],
     profileImg: {
+        type: String
+    },
+    deletionToken: {
         type: String
     }
 });

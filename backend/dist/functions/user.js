@@ -6,6 +6,8 @@ import { validateEmail, hashPassword, comparePassword, createTokens } from "../u
 import User from "../models/user.js";
 import UnverifiedUser from "../models/unverifiedUser.js";
 import { isValidObjectId } from "mongoose";
+import Day from "../models/day.js";
+import { ObjectId } from "mongodb";
 const createOrLoginUserFromGoogle = async (accessToken) => {
     const googleUser = await fetch("https://www.googleapis.com/userinfo/v2/me", {
         headers: { Authorization: `Bearer ${accessToken}` }
@@ -115,6 +117,11 @@ const verifyUser = async (id, token) => {
 };
 const deleteUser = async (id) => {
     const deletedUser = await User.findByIdAndDelete(id);
+    const deletedDays = await Day.deleteMany({ userId: id });
+    const friendOids = deletedUser.friends.map(friendId => new ObjectId(friendId));
+    const deletedFriends = await User.updateMany({ _id: { $in: friendOids } }, { $pull: {
+            friends: deletedUser.id
+        } });
     return deletedUser;
 };
 const logoutUser = async (user, token) => {

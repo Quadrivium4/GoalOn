@@ -160,13 +160,13 @@ export function getGoalAmountString(goal: TGoal, goalProgress: number){
   return  goal.type === "time"? getTimeAmount(goalProgress) + "/" +getTimeAmount(goal.amount) + " hours": goal.type === "distance"? goalProgress/1000 + "/" + goal.amount/1000 + "km": goal.amount;
 }
 export function SingleGoal({goal, setPop, closePop}: {goal: TMyGoal, setPop: (content: ReactNode) =>void, closePop: () => void}){
-  console.log({goal})
+  //console.log({goal})
   let goalDays =  goal.history;
   let goalProgress = sumDaysProgress(goalDays);
   let progressWidth = getPercentage(goal.amount, goalProgress);
   let goalAmountString = getGoalAmountString(goal, goalProgress)
   return (
-      <div className='goal' key={goal._id}>
+      <div className='goal'>
         <div className='header'><div className='progress' style={{width: progressWidth + "%", backgroundColor: getProgressColor(progressWidth)}}></div></div>
         <div className='info'>
           <h3>{goal.title}</h3>
@@ -197,15 +197,10 @@ function Goals() {
     const [pop, setPop] = useState<ReactNode>();
     useEffect(()=>{
       
-      
-      console.log({goals})
+      // console.log(user)
+      // console.log({goals})
       //worker.postMessage("hello")
     },[goals])
-    function error(){
-      throw new Error("brutto")
-    }
-    //throw new Error("brutto")
-    //console.log(user)
   return (
     <div className='page' id='goals'>
       {pop && <Pop toggle={() => setPop(undefined)}>{pop}</Pop>}
@@ -213,10 +208,10 @@ function Goals() {
       <div className='goals'>
         {
           user.goals.length > 0 && daysLoading? <GoalSkeleton goals={user.goals} />:
-          goals.length > 0? goals.map(goal=>{
+          goals?.length > 0? goals.map(goal=>{
             let {history, ...goalInfo} = goal;
-            if(!goal) return <SingleGoal goal={{...goalInfo, history: []}} setPop={setPop} closePop={() => setPop(undefined)} />
-            return <SingleGoal goal={goal}  setPop={setPop} closePop={() => setPop(undefined)}/>
+            if(!goal) return <SingleGoal goal={{...goalInfo, history: []}} setPop={setPop} closePop={() => setPop(undefined)} key={goalInfo._id}/>
+            return <SingleGoal goal={goal}  setPop={setPop} closePop={() => setPop(undefined)}  key={goalInfo._id}/>
           }): <p>no goals</p>
         }
 

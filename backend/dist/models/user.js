@@ -20,9 +20,16 @@ const UserSchema = new mongoose.Schema({
     tokens: [],
     goals: [],
     friends: [],
+    bio: {
+        type: String,
+        trim: true
+    },
     incomingFriendRequests: [],
     outgoingFriendRequests: [],
     profileImg: {
+        type: String
+    },
+    deletionToken: {
         type: String
     }
 });

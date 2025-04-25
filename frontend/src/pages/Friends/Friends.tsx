@@ -198,8 +198,9 @@ function useLazyFriends (){
     const [friends, setFriends] = useState<TLazyFriendsResponse>([]);
     const [index, setIndex] = useState(0)
     useEffect(()=>{
-        getLazyFriends(index).then(newFriends =>{
-            
+        const controller = new AbortController();
+        getLazyFriends(index,controller.signal).then(newFriends =>{
+            console.log(newFriends)
             setFriends(prev => {
                 if(prev.length > 10){
                     console.log("slicing")
@@ -212,7 +213,7 @@ function useLazyFriends (){
             //setFriends([])
         })
         return () =>{
-
+            controller.abort();
         }
     }, [index])
     useEffect(() =>{

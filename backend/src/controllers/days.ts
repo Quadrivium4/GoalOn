@@ -7,7 +7,7 @@ import mongoose, { isValidObjectId } from "mongoose";
 import { ObjectId } from "mongodb";
 import { queryDate } from "../functions/days.js";
 import { ProtectedReq } from "../routes.js";
-let week = dayInMilliseconds *7;
+import { queryDayDate } from "./goals.js";
 export const getLastSunday = (date: number | Date) =>{
   date = new Date(date);
   date.setDate(date.getDate() - date.getDay());
@@ -15,6 +15,7 @@ export const getLastSunday = (date: number | Date) =>{
 }
 export const getLastMonday = (date: number | Date) =>{
   date = new Date(date);
+  date.setHours(0,0,0,0);
   date.setDate(date.getDate() - date.getDay() + 1);
   return date;
 }
@@ -107,19 +108,13 @@ const getStats = async(req: ProtectedReq, res: Response) =>{
     let {userId} = req.params;
     console.log(req.params)
     let user: TUser;
-    if(userId) {
-      console.log({userId})
-      user = await User.findById(userId);
-      console.log("hello", {user})
-    } else {
-      userId = req.user.id;
-      user = req.user;
-    }
+    if(userId) user = await User.findById(userId);
+    else user = req.user;
 
     const promises = [];
     user.goals.map(goal =>{
         let promise = async() => {
-          let days = await Day.find({userId, "goal._id": new ObjectId(goal._id)}).sort({date: 1})
+          let days = await Day.find({userId: user.id, "goal._id": new ObjectId(goal._id)}).sort({date: 1})
           return {...goal, days}
         }
         promises.push(promise());
@@ -132,10 +127,9 @@ const postProgress = async(req: ProtectedReq, res: Response) =>{
     const {date, goalId, progress, notes} = req.body;
     let progressDate = new Date(date);
     progressDate.setHours(0,0,0,0)
-    
-    let day = await Day.findOne({$and: [{"goal._id":  new ObjectId(goalId)}, queryDate(progressDate.getTime())] });
+    let day = await Day.findOne({$and: [{"goal._id":  new ObjectId(goalId)}, queryDayDate(progressDate.getTime())] });
     if(!day ){
-        console.log("old day");
+        console.log("old day post progress");
         let historyEvent: THistoryEvent = {date, progress,notes, likes: []};
         let goal = req.user.goals.find(goal => goalId === goal._id.toString())
         console.log({goal})
@@ -151,7 +145,11 @@ const postProgress = async(req: ProtectedReq, res: Response) =>{
     console.log({day, totalProgress})
     return res.send(day)
 }
-
+const getLastDayGoal = async(date, goalId) =>{
+    const lastDay = await Day.findOne({$and: [{date: {$lte: date}}, {"goal._id": new ObjectId(goalId)}]},{},{$sort: {date: -1}})
+    console.log("last day", lastDay)
+    return lastDay.goal;
+}
 const updateProgress = async(req: ProtectedReq, res: Response) =>{
     console.log(req.body)
     const {date, id, progress, notes, newDate} = req.body;
@@ -161,19 +159,23 @@ const updateProgress = async(req: ProtectedReq, res: Response) =>{
     dateObj.setHours(0,0,0,0);
     newDateObj.setHours(0,0,0,0);
     let day: TDay;
-    if(newDateObj.getTime() == dateObj.getTime())
+    if(newDateObj.getTime() == dateObj.getTime()){
       day = await Day.findOneAndUpdate({_id: new ObjectId(id), "history.date": date}, {$set: {"history.$.progress": progress, "history.$.notes": notes, "history.$.date": newDate}},{new: true});
-    else{
+    }else{
       let historyEvent: THistoryEvent = {date: newDate, progress,notes, likes: []};
       // Remove old progress from day
       await Day.findOneAndUpdate({_id: new ObjectId(id), "history.date": date}, {$pull: {history: {date}}},{new: true});
 
       // Add progress to the new day if exists
       console.log(queryDate(newDateObj.getTime()), oldDay.goal)
-      day= await Day.findOneAndUpdate({$and: [queryDate(newDateObj.getTime()), {userId: req.user.id, "goal._id": new ObjectId(oldDay.goal._id)}]}, {$push: {history: historyEvent}},{new: true} )
+      day= await Day.findOneAndUpdate({$and: [queryDayDate(newDateObj.getTime()), {userId: req.user.id, "goal._id": new ObjectId(oldDay.goal._id)}]}, {$push: {history: historyEvent}},{new: true} )
       console.log("updated day", day)
+      let goal = await getLastDayGoal(date, oldDay.goal._id)
       // Create another day if it doesn't 
-      if(!day) day = await Day.create({goal: oldDay.goal, date: newDateObj.getTime(), progress: 0, userId: req.user.id, history: [historyEvent]})
+      if(!day){
+        console.log("update progress creating new day");
+        day = await Day.create({goal: goal, date: newDateObj.getTime(), progress: 0, userId: req.user.id, history: [historyEvent]})
+      } 
     }
     console.log(day)
     res.send(day)

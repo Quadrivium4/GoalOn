@@ -7,12 +7,14 @@ import dayController, { TGoalDays, TStat } from '../../controllers/days';
 import {  TDay, TDayGoal, TProgress, TStats } from '../../controllers/days';
 import { TUser, useUser } from '../../context/AuthContext';
 import Pop from '../../components/Pop/Pop';
-import { TGoal, TGoalForm } from '../../controllers/goals';
+import { editGoalAmount, TGoal, TGoalForm } from '../../controllers/goals';
 import { formatDate, getAmountString, getGoalAmountString, ProgressDays, SingleGoal, sumDayProgress, sumDaysProgress } from '../Goals/Goals';
 import { Day, Goal } from '../Friends/Friends';
 import AddProgress from '../../components/AddProgress';
 import EditProgress from '../../components/EditProgress';
-import { useStats } from './StatsContext';
+import { useStats } from '../../context/StatsContext';
+import EditGoal from '../../components/EditGoal';
+import Input from '../../components/Input/Input';
 type TPoint = {
     x: number,
     y: number
@@ -94,7 +96,7 @@ function createPolygonStringAndMonthPoints (graph: TGraphPoint[]) {
         polygonString: str
     }
 }
-export function createGraphPoint(goal: TGoal, history: TDay[], date: Date, i: number, maxAmount?: number): TGraphPoint{
+export function createGraphPoint(goal: TGoal, history: TDay[], date: Date, i: number, frequency: TGoal["frequency"], maxAmount?: number, ): TGraphPoint{
     if(!maxAmount)  maxAmount  = 0;
 
     let goalProgress = sumDaysProgress(history)
@@ -116,7 +118,10 @@ export function createGraphPoint(goal: TGoal, history: TDay[], date: Date, i: nu
         color,
         gradientId,
         history,
-        goal: goal,
+        goal: {
+            ...goal,
+            frequency
+        },
         x: i * gap + paddingHorizontal,
         y: 150 - progressHeight,
         amountHeight: 150 - amountHeight
@@ -146,10 +151,13 @@ export function getDaysArray(frequency: TGoal["frequency"], calendar: Date[], st
                 daysArray.push({date, days: history})
             } else daysArray.push({date, days: []})
         }else if(frequency === "daily"){
+            //console.log()
+           //console.log(day, date.toDateString(), new Date(day.date).toDateString(), j)
             if(day&& date.toDateString() === new Date(day.date).toDateString()){
                 daysArray.push({date, days: [day]})
                 j++;
             }else daysArray.push({date, days: []})
+            //console.log( j)
         }
     })
     return daysArray;
@@ -165,7 +173,7 @@ export function getMaxProgress(stats: TDateDays[], frequency: TGoalForm["frequen
     
     return maxAmount;
 }
-export function createEmptyPoint(goal: TGoal, date: Date, i: number, maxAmount: number ) {
+export function createEmptyPoint(goal: TGoal, date: Date, i: number, frequency: TGoal["frequency"],  maxAmount: number ) {
     let id = goal._id + date.getTime();
     let point: TGraphPoint =  {
         id,
@@ -176,7 +184,10 @@ export function createEmptyPoint(goal: TGoal, date: Date, i: number, maxAmount: 
         x: i *gap +paddingHorizontal,
         y:  150, 
         history: [], 
-        goal: goal, 
+        goal: {
+            ...goal,
+            frequency
+        }, 
         amountHeight: 150- getPercentage(maxAmount, goal.amount)
         };
     return point;
@@ -191,7 +202,10 @@ export function createGraphArray(stats: TDay[], goal: TGoal):TGraphPoint[] {
     
     let option: "daily" | "weekly" = goal.frequency === "daily"? "daily" : "weekly";
     let calendar = getCalendarDates(firstDay.date, today.getTime(),option );
+    //console.log({calendar})
+    
     let daysArray: TDateDays[] = getDaysArray(goal.frequency, calendar, stats);
+     //console.log({daysArray})
     let maxProgress = getMaxProgress(daysArray, goal.frequency);
     // empty days use latest goal amount
     let dayLatestGoal = daysArray[0].days[daysArray[0].days.length-1].goal;
@@ -200,24 +214,71 @@ export function createGraphArray(stats: TDay[], goal: TGoal):TGraphPoint[] {
         let point: TGraphPoint;
         if(days.length > 0){
             dayLatestGoal = days[days.length-1].goal;
-            point = createGraphPoint(dayLatestGoal, days, date, i, maxProgress);
+            point = createGraphPoint(dayLatestGoal, days, date, i,goal.frequency, maxProgress);
             
-        }else point = createEmptyPoint(dayLatestGoal, date, i, maxProgress)
+        }else point = createEmptyPoint(dayLatestGoal, date, i, goal.frequency, maxProgress)
         
         graphsArray.push(point)
     })
 
     return graphsArray
 }
+function EditGoalAmount({goal, closePop, date}: {goal: TGoal, closePop: ()=>void, date: number}){
+    const user = useUser();
+    const {updateStats} = useStats();
+    const [amount, setAmount] = useState<number>(goal.amount);
+        // const editGoalAmount =  async(goalForm: Omit<TGoal, "type">, date: number) =>{
+    //     setLoading(true)
+    //     if(goalForm.frequency === "daily"){
+    //         let newDay = await goalController.editGoalAmount<TDay>(goalForm, date);
+    //         let updatedGoals = getUpdatedGoals(goals, newDay, true)
+    //         setGoals(updatedGoals)
+    //     }else if(goalForm.frequency === "weekly"){
+    //         let newDays = await goalController.editGoalAmount<TDay[]>(goalForm, date);
+    //         let updatedGoals = getUpdatedGoalDays(goals, newDays, goalForm._id)
+    //         setGoals(updatedGoals)
+    //     }
+    
+       
+    //     setLoading(false)
+        
+    // }
+    const createGoal = () =>{
+        if(!amount) return;
+       editGoalAmount({
+            title: goal.title,
+            userId: user._id,
+            frequency: goal.frequency,
+            amount,
+            progress: 0,
+            _id: goal._id
+        },date ).then((res) =>{
+            closePop();
+            updateStats(res)
+        }).catch(err=>{
+            console.log("error edit amount stats")
+        })
+    }
+    
+    return (
+    <div className='form'>
+        <h2>Edit Goal Amount</h2>
+        {goal.type === "time"? <Input.TimePicker onSelect={setAmount} initialValue={goal.amount}/> 
+        : goal.type=== "distance"? <Input.DistancePicker onSelect={setAmount} initialValue={goal.amount}/> 
+        : <input placeholder='amount' type='number' onChange={(e)=> setAmount(parseInt(e.target.value))} value={amount || ""}></input>}
+        <button onClick={createGoal}>save</button>
+    </div>)
+}
+
 function PointPop ({point, setPop}: {point: TGraphPoint, setPop: (pop: ReactNode) =>void}){
-    const {updateStats} = useStats()
+    const {updateStats, reloadStats} = useStats()
     const date = new Date(point.date);
     const now = new Date()
     date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
     let goalDays =  point.history;
     let {goal } = point;
     let goalProgress = sumDaysProgress(goalDays);
-    let progressWidth = getPercentage(goal.amount, goalProgress);
+    let progressWidth = normalizePercentage(getPercentage(goal.amount, goalProgress));
     let goalAmountString = getGoalAmountString(goal, goalProgress)
     return (
         <div className='point-pop'> 
@@ -227,8 +288,9 @@ function PointPop ({point, setPop}: {point: TGraphPoint, setPop: (pop: ReactNode
             <div className='header'><div className='progress' style={{width: progressWidth + "%",backgroundColor: getProgressColor(progressWidth)}}></div></div>
             
             
-            <ProgressDays history={point.history} setPop={setPop} onChange={updateStats}/>
-            <button className='outline' onClick={() => setPop(<AddProgress goal={point.goal}  closePop={()=>setPop(undefined)} date={date.getTime()} onRes={updateStats}/>)}>add progress</button>
+            <ProgressDays history={point.history} setPop={setPop} onChange={reloadStats}/>
+            <button className='outline' onClick={() => setPop(<AddProgress goal={point.goal}  closePop={()=>setPop(undefined)} date={date.getTime()} onRes={reloadStats}/>)}>add progress</button>
+            <button className='outline gray' onClick={() => setPop(<EditGoalAmount goal={point.goal}  date={point.date.getTime()} closePop={() => setPop(undefined)}/>)}>Edit goal</button>
         </div>
     )
 

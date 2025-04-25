@@ -6,19 +6,19 @@ import {
     useEffect
 } from "react";
 import goalController, { TGoalForm, TGoal} from "../controllers/goals";
-import dayController, { TDay, TProgress, TProgressForm } from "../controllers/days";
+import dayController, { TDay, TGoalDays, TProgress, TProgressForm } from "../controllers/days";
 import * as likeController from "../controllers/likes"
 import { dayInMilliseconds, todayDate } from "../constants";
 import { getLastMonday, getToday, isToday, nextWeekTime } from "../utils";
 import { useAuth, useUser } from "./AuthContext";
-import { nextDayTime } from "../pages/Stats/StatsContext";
+import { nextDayTime } from "./StatsContext";
 type TDaysContext = {
     daysLoading: boolean,
     //today: TDay | null,
     goals: TMyGoal[],
     addProgress: (goalId: string, progress: number, notes: string, date:number) => Promise<TDay>
     addGoal: (goal: TGoalForm) => Promise<void>
-    editGoal: (goal: TGoal) => Promise<void>,
+    editGoal: (goal: Omit<TGoal, "type">) => Promise<void>,
     deleteGoal: (id: string) => Promise<void>,
     editProgress: (progress: TProgressForm &{newDate: number}) => Promise<TDay>
     deleteProgress: (progress: TProgressForm) => Promise<TDay>,
@@ -63,31 +63,14 @@ const getUpdatedGoalDays = (updatedDay: TDay, goals: TMyGoal[]) =>{
         })
 }
         */
-const DaysContext = createContext<TDaysContext>(undefined)
-const DaysProvider = ({children}: {children: ReactNode}) =>{
-    //const [goals, setGoals] = useState<TGoal[]>([]);
-    const  {updateUser, setLoading} = useAuth()
-    const user = useUser();
-    const [daysLoading, setDaysLoading] = useState(true);
-    const [goals, setGoals] = useState<TMyGoal[]>([]);
-    //const [today, setToday] = useState<TDay | null>(null)
-    //const [loading, setLoading] = useState(true);
-    useEffect(() =>{
-        if(!user.goals) return setDaysLoading(false);
-        dayController.getDays().then((goals) =>{
-            setGoals(goals);
-            setDaysLoading(false)
-        }).catch(err =>{
-            console.log("error fetching days: ", err)
-        })
-    },[])
-    const addProgress = async(goalId: string, progress: number, notes: string, date: number)=>{
-        let updatedDay = await dayController.addProgress(goalId, progress, notes, date);
 
-        let updatedDays: TDay[];
-        let updatedGoals = goals.map(goal =>{
+const getUpdatedGoals = (goals: TMyGoal[], updatedDay: TDay, updateGoal?: boolean) =>{
+    console.log("get",{updatedDay})
+    let updatedDays: TDay[];
+    let result = goals.map(goal =>{
             let newGoal: TMyGoal = goal;
             if(goal._id === updatedDay.goal._id){
+                if(updateGoal) newGoal.amount = updatedDay.goal.amount;
                 if(goal.frequency === "daily"){
                     if(isToday(updatedDay.date)) {
                         newGoal = {...goal, history: [updatedDay]}
@@ -113,6 +96,62 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
             return newGoal
 
         })
+        return result;
+}
+// const getUpdatedGoalDays = (goals: TMyGoal[], updatedDays: TDay[], goalId: string) =>{
+//     //let updatedDays: TDay[];
+//     let result = goals.map(goal =>{
+//             let newGoal: TMyGoal = goal;
+//             if(goal._id === goalId){
+//                 if(updateGoal) newGoal.amount = updatedDay.goal.amount;
+//                 if(goal.frequency === "daily"){
+//                     if(isToday(updatedDay.date)) {
+//                         newGoal = {...goal, history: [updatedDay]}
+//                     }
+//                 }else if(goal.frequency === "weekly"){
+//                     let lastMonday = getLastMonday(Date.now()).getTime();
+//                     console.log({lastMonday: new Date(lastMonday)})
+                    
+//                     if(updatedDay.date > lastMonday && updatedDay.date < nextWeekTime(lastMonday).getTime()){
+//                         let updated = false;
+//                         updatedDays = goal.history.map(day =>{
+//                             if(day._id === updatedDay._id){
+//                                 updated = true;
+//                                 return updatedDay
+//                             }
+//                             return day
+//                         })
+//                         if(!updated) updatedDays.push(updatedDay);
+//                         newGoal =  {...goal, history: updatedDays}
+//                     }
+//                 }
+//             }
+//             return newGoal
+
+//         })
+//         return result;
+// }
+const DaysContext = createContext<TDaysContext>(undefined)
+const DaysProvider = ({children}: {children: ReactNode}) =>{
+    //const [goals, setGoals] = useState<TGoal[]>([]);
+    const  {updateUser, setLoading} = useAuth()
+    const user = useUser();
+    const [daysLoading, setDaysLoading] = useState(true);
+    const [goals, setGoals] = useState<TMyGoal[]>([]);
+    //const [today, setToday] = useState<TDay | null>(null)
+    //const [loading, setLoading] = useState(true);
+    useEffect(() =>{
+        if(!user.goals) return setDaysLoading(false);
+        dayController.getDays().then((goals) =>{
+            setGoals(goals);
+            setDaysLoading(false)
+        }).catch(err =>{
+            console.log("error fetching days: ", err)
+        })
+    },[])
+    const addProgress = async(goalId: string, progress: number, notes: string, date: number)=>{
+        let updatedDay = await dayController.addProgress(goalId, progress, notes, date);
+        let updatedGoals = getUpdatedGoals(goals, updatedDay);
         setGoals(updatedGoals)
         return updatedDay
     }
@@ -131,24 +170,36 @@ const DaysProvider = ({children}: {children: ReactNode}) =>{
 
         setLoading(false)
     }
-     const editGoal = async(goalForm: TGoal) =>{
+     const editGoal = async(goalForm: Omit<TGoal, "type">) =>{
         setLoading(true)
         let newDay = await goalController.editGoal(goalForm);
         let newGoals = user.goals.map(goal =>{
             if(goal._id === newDay.goal._id) return newDay.goal;
             return goal
         })
-        updateUser({...user, goals: newGoals})
-        let updatedGoals = goals.map(goal =>{
-            if(newDay.goal._id == goal._id){
-                return {...newDay.goal, history: [...goal.history, newDay]}
-            }
-            return goal
-        })
+        updateUser({...user, goals: newGoals});
+        let updatedGoals = getUpdatedGoals(goals, newDay, true)
         setGoals(updatedGoals)
         setLoading(false)
         
     }
+
+    // const editGoalAmount =  async(goalForm: Omit<TGoal, "type">, date: number) =>{
+    //     setLoading(true)
+    //     if(goalForm.frequency === "daily"){
+    //         let newDay = await goalController.editGoalAmount<TDay>(goalForm, date);
+    //         let updatedGoals = getUpdatedGoals(goals, newDay, true)
+    //         setGoals(updatedGoals)
+    //     }else if(goalForm.frequency === "weekly"){
+    //         let newDays = await goalController.editGoalAmount<TDay[]>(goalForm, date);
+    //         let updatedGoals = getUpdatedGoalDays(goals, newDays, goalForm._id)
+    //         setGoals(updatedGoals)
+    //     }
+    
+       
+    //     setLoading(false)
+        
+    // }
     const deleteGoal = async(id: string) =>{
         setLoading(true)
         let user= await goalController.deleteGoal(id);

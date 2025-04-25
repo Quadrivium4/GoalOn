@@ -6,7 +6,7 @@ import styles from "../Form.module.css"
 import { CredentialResponse, GoogleLogin, useGoogleLogin, useGoogleOneTapLogin } from '@react-oauth/google';
 import Login from '../Login';
 import GoogleButton from '../../components/GoogleButton';
-console.log(styles)
+//console.log(styles)
 
 function Register() {
   const {register, googleLogin} = useAuth()

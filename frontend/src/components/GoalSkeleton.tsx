@@ -8,7 +8,7 @@ function GoalSkeleton({goals}:{goals: TGoal[]}) {
     return (
         <>
         {goals.map(goal =>{
-            console.log("hello")
+            //console.log("hello")
             return (<div className="goal-skeleton" key={goal._id}>
                 <div className='circle'></div>
             </div>)

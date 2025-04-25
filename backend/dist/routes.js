@@ -1,8 +1,8 @@
 import express from "express";
 import { tryCatch } from "./utils.js";
-import { getUser, getUsers, googleLogin, login, logout, profileImgUpload, register, resetPassword, verify, verifyResetPassword } from "./controllers/user.js";
+import { changeEmail, deleteAccount, deleteAccountRequest, editUser, getUser, getUsers, googleLogin, login, logout, profileImgUpload, register, resetPassword, verify, verifyResetPassword } from "./controllers/user.js";
 import verifyToken from "./middlewares/verifyToken.js";
-import { deleteGoal, postGoal, putGoal } from "./controllers/goals.js";
+import { deleteGoal, postGoal, putGoal, putGoalAmount } from "./controllers/goals.js";
 import { deleteProgress, getDays, getStats, postProgress, updateProgress } from "./controllers/days.js";
 import { acceptFriendRequest, cancelFriendRequest, deleteFriend, getFriends, getLazyFriends, sendFriendRequest } from "./controllers/friends.js";
 import { deleteProgressLikes, updateProgressLikes } from "./controllers/likes.js";
@@ -55,15 +55,20 @@ publicRouter.post("/verify", tryCatch(verify));
 publicRouter.post("/reset-password", tryCatch(resetPassword));
 publicRouter.post("/verify-reset-password", tryCatch(verifyResetPassword));
 publicRouter.post("/google-login", tryCatch(googleLogin));
+publicRouter.post("/delete-account", tryCatch(deleteAccount));
 protectedRouter.use(tryCatch(verifyToken));
 protectedRouter
     .get("/user", tryCatch(getUser))
+    .put("/user", tryCatch(editUser))
+    .delete("/user", tryCatch(deleteAccountRequest))
     .get("/users", tryCatch(getUsers))
-    .get("/logout", tryCatch(logout));
+    .get("/logout", tryCatch(logout))
+    .post("/change-email", tryCatch(changeEmail));
 protectedRouter
     .post("/goals", tryCatch(postGoal))
     .put("/goals", tryCatch(putGoal))
-    .delete("/goals", tryCatch(deleteGoal));
+    .delete("/goals", tryCatch(deleteGoal))
+    .put("/goal-amount", tryCatch(putGoalAmount));
 protectedRouter
     .post("/progress", tryCatch(postProgress))
     .put("/progress", tryCatch(updateProgress))

@@ -21,6 +21,7 @@ export type TUser = {
     profileImg: string,
     goals: TGoal[],
     friends: string[],
+    bio: string,
     outgoingFriendRequests: string[],
     incomingFriendRequests: string[]
 
@@ -59,7 +60,8 @@ type ContextProps = TAuthStateProps & {
     deleteAccount: () =>{}, 
     updateUserProfileImage: (id: string) => void,
     updateUser: (user: TUser) => void,
-    setLoading: (state: boolean) =>void
+    setLoading: (state: boolean) =>void,
+    deleteAccountRequest: () =>void
 } | null;
 const AuthContext = createContext<ContextProps>(null);
 type TActionProps = {
@@ -126,15 +128,20 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
         
     };
     const login = async({email, password}: TLoginForm) =>{
+         setLoading(true);
         try {
+           
+           // await wait(5000)
             const res = await api.post(`${baseUrl}/login`,{ email, password });
             const { user, aToken }: TUserAuthResponse= res.data;
             console.log({ user, aToken });
             localStorage.setItem("aToken", aToken);
             dispatch({ type: "LOGIN", payload: { aToken, user } });
-        } catch (err) {
-            throw err
+            
+        }finally{
+            setLoading(false);
         }
+        
     }
     // const googleLogin = async(credentials: CredentialResponse) =>{
     //     const res  = await api.post("/google-login", credentials);
@@ -146,17 +153,27 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
     //     //return { user, aToken };
     // }
     const googleLogin = async(token: string) =>{
-        const res  = await api.post("/google-login", {token});
-        console.log(res.data)
-        const { user, aToken }: TUserAuthResponse= res.data;
-        //console.log({ user, aToken });
-        localStorage.setItem("aToken", aToken);
-        dispatch({ type: "LOGIN", payload: { aToken, user } });
+         try {
+            setLoading(true);
+            //await wait(5000)
+            const res  = await api.post("/google-login", {token});
+            console.log(res.data)
+            const { user, aToken }: TUserAuthResponse= res.data;
+            //console.log({ user, aToken });
+            localStorage.setItem("aToken", aToken);
+            dispatch({ type: "LOGIN", payload: { aToken, user } });
+         }finally{
+            setLoading(false)
+         }
+        
         //return { user, aToken };
     }
     const register = async({name, email, password}: TRegisterForm) =>{
+        setLoading(true)
+        //await wait(5000)
         const {user} : {user: TUser} = await api.post(`${baseUrl}/register`, {name, email, password});
         console.log("successfully registered", user);
+        setLoading(true)
         //SecureStore.setItemAsync("aToken", aToken);
     }
     const logout = async() =>{
@@ -165,7 +182,7 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
         console.log("log out")
         localStorage.removeItem("aToken");
         dispatch({type: "LOGGED_OUT"})
-        redirect("/login")
+        //redirect("/login")
     }
     const verify = async({id, token}: TVerifyProps) =>{
         const res =  await api.post(`${baseUrl}/verify`, {token, id});
@@ -176,7 +193,7 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
     }
     const verifyPassword = async({id, token}: TVerifyProps) =>{
         // TODO secure verify endpoint
-        await wait(5000);
+        //await wait(5000);
         const res =  await api.post(`/verify-reset-password`, {token, id});
         const {user, aToken}: TUserAuthResponse = res.data;
         console.log({user, aToken})
@@ -185,6 +202,12 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
     }
     const deleteAccount = async() =>{
         await api.delete(`${protectedUrl}/user`);
+        console.log("User delted succesfully");
+        localStorage.removeItem("aToken");
+        dispatch({type: "LOGGED_OUT"});
+    }
+     const deleteAccountRequest = async() =>{
+        await protectedApi.delete(`${protectedUrl}/user`);
         console.log("User delted succesfully");
         localStorage.removeItem("aToken");
         dispatch({type: "LOGGED_OUT"});
@@ -200,7 +223,7 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
     }
 
     return (
-        <AuthContext.Provider value={{...state, login,googleLogin, register, logout, verify, verifyPassword, deleteAccount,  updateUserProfileImage, updateUser, setLoading}}>
+        <AuthContext.Provider value={{...state, login,googleLogin, register, logout, verify, verifyPassword, deleteAccount,  updateUserProfileImage, updateUser, setLoading, deleteAccountRequest}}>
                 {children}
         </AuthContext.Provider>
     )
