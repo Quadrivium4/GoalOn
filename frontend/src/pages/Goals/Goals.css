@@ -42,9 +42,16 @@
 #goals .goals .goal .sub-progresses {
     display: flex;
     flex-direction: column;
+
+
+    gap: 12px;
+}
+#goals .goals .goal .sub-progresses .day{
+    display: flex;
+    flex-direction: column;
     background-color: rgba(0, 0, 0, 0.2);
     padding: 12px;
-    gap: 20px;
+    gap: 12px;
 }
 #goals .goals .goal .sub-progresses .sub-progress {
     display: flex;

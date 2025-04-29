@@ -274,6 +274,7 @@ function PointPop ({point, setPop}: {point: TGraphPoint, setPop: (pop: ReactNode
     const {updateStats, reloadStats} = useStats()
     const date = new Date(point.date);
     const now = new Date()
+    console.log(point)
     date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
     let goalDays =  point.history;
     let {goal } = point;

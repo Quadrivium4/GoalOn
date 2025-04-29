@@ -85,7 +85,7 @@
     gap: 10px;
 }
 #friends .friend .days{
-    height: 200px;
+    max-height: 300px;
     display: flex;
     flex-direction: column;
     gap: 10px;

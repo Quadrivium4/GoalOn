@@ -1,0 +1,105 @@
+#landing-page {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+#landing-page section {
+    position: relative;
+    display: flex;
+    width: 100%;
+    max-width: 800px;
+    height: 70vh;
+    align-items: center;
+    padding: 10px;
+    /* border-left: 1px solid rgb(95, 95, 95);
+    border-right: 1px solid rgb(94, 94, 94); */
+}
+#landing-page section .text{
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    max-width: 240px;
+    gap: 10px;
+}
+
+#landing-page section .text .buttons{
+    display: flex;
+    gap: 10px;
+}
+#landing-page section img.app-screenshot1{
+    transform: rotate(-35deg);
+    z-index: -1;
+    right: 0;
+    top: -50px;
+    width: 400px;
+    position: absolute;
+    opacity: 0.7;
+}
+
+
+#landing-page section#track-progress{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    background-color: rgba(0,0,0,0.5);
+}
+#landing-page section#track-progress .text{
+    z-index: 1;
+    width: 50%;
+}
+#landing-page section#track-progress img{
+    width: 400px;
+    transform: rotate(25deg);
+    position: absolute;
+    opacity: 0.7;
+    left: -70px;
+}
+#landing-page section img.app-screenshot3 {
+    transform: rotate(-25deg);
+    z-index: -1;
+    right: 0;
+    top: -20px;
+    width: 400px;
+    position: absolute;
+    opacity: 0.7;
+    background-color: rebeccapurple;
+}
+@media(max-width: 800px) {
+    #landing-page section img.app-screenshot1 {
+        width: 350px;
+        right: -150px;
+        top: -80px;
+    }
+
+    #landing-page section#track-progress img {
+        width: 300px;
+        transform: rotate(25deg);
+        position: absolute;
+        left: -70px;
+    }
+
+    #landing-page section img.app-screenshot3 {
+        width: 300px;
+        right: -70px;
+    }
+
+}
+@media(max-width: 500px){
+    #landing-page section img.app-screenshot1 {
+            width: 300px;
+            right: -150px;
+            top: -80px;
+        }
+    #landing-page section#track-progress img {
+        width: 240px;
+        transform: rotate(25deg);
+        position: absolute;
+        left: -70px;
+    }
+    #landing-page section img.app-screenshot3 {
+        width: 240px;
+        right: -70px;
+    }
+
+}

@@ -6,13 +6,19 @@ import ResetPassword from './auth/ResetPassword';
 import VerifyResetPassword from './auth/VerifyResetPassword';
 import LandingPage from './auth/LandingPage';
 import DeleteAccount from './shared/DeleteAccount';
+import DownloadPage from './auth/DownloadPage';
 
 const authRouter = createBrowserRouter([{
 
     path: "/:reload?/*",
     element: <LandingPage />
 
-},{
+},
+{
+    path: "/download",
+    element: <DownloadPage />
+},
+{
     path: "/login",
     element: <Login />
 }, {

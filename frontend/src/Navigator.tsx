@@ -42,7 +42,7 @@ const Navigator = () =>{
                     <AppNavigator />
                 </StatsProvider>
             </DaysProvider>
-        : <AuthNavigator/>}
+        : loading ? null : <AuthNavigator/>}
 
         </>
 

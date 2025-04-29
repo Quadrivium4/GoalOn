@@ -3,7 +3,7 @@
   "name": "Goal",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "latest.png",
       "type": "image/png",
       "sizes": "512x512"
     }

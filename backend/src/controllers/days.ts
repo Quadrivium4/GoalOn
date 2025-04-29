@@ -27,6 +27,7 @@ export const aggregateDays = (date: number, userId: string | ObjectId):mongoose.
        */
       {
         userId: userId.toString(),
+        history: {$exists: true, $type: 'array', $ne: []},
         $or: [
           {
             $and: [
@@ -114,7 +115,7 @@ const getStats = async(req: ProtectedReq, res: Response) =>{
     const promises = [];
     user.goals.map(goal =>{
         let promise = async() => {
-          let days = await Day.find({userId: user.id, "goal._id": new ObjectId(goal._id)}).sort({date: 1})
+          let days = await Day.find({userId: user.id, "goal._id": new ObjectId(goal._id), history: {$exists: true, $type: 'array', $ne: []}}).sort({date: 1})
           return {...goal, days}
         }
         promises.push(promise());

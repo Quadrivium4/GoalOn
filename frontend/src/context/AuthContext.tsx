@@ -104,7 +104,7 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
         //console.log(aToken)
         if (!aToken) return dispatch({ type: "LOGGED_OUT" });
         try {
-           // await wait(2000)
+            await wait(2000)
              const res = await protectedApi.get(`/user`);
              let user = res.data;
         //console.log({user})

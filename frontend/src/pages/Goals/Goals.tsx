@@ -35,9 +35,13 @@ export function getTime(date: Date | number) {
     date = new Date(date);
     return `${date.getHours()}:${date.getMinutes().toString().padStart(2,"0")}`
 }
+export function getDate(date: Date | number) {
+    date = new Date(date);
+    return date.toLocaleDateString("eng", {month: "short",day: "numeric"});
+}
 export function formatDate(date: Date | number):string{
     date = new Date(date)
-    return `${date.toLocaleDateString("eng", {month: "short",day: "numeric"})} at ${getTime(date)}`
+    return `${getDate(date)} at ${getTime(date)}`
 }
 export function getAmountString(amount: number, type: TGoalAmountType):string{
   let string = type === "time"? getTimeAmount(amount) + " hours": type === "distance"?  amount/1000 + "km": amount + "";
@@ -124,21 +128,33 @@ export function sumDayProgress(day: TDay){
   }
   return sum;
 }
+export function getDayStrings(day: TDay, goal: TGoal, frequency?: TGoal["frequency"]){
+
+}
+export function formatTime(date: Date | number){
+  date = new Date(date);
+  return 
+}
 export function ProgressDays({history, setPop, onChange}:{history: TDay[], setPop: (content: ReactNode)=> void, onChange?: (day: TDay)=>void}){
   return (<div className='sub-progresses'>
           {history.length > 0? history.sort((a, b)=> a.date -b.date).map(day =>{
         
               return (
-                <div key={day._id}>
+                <div key={day._id} className='day'>
+                  <p style={{textAlign: "center"}}>{sameDay(day.date, new Date())? "Today" : isYesterday(day.date)? "Yesterday": getDate(day.date) }</p>
                   {
-                   day.history.sort((a, b)=> a.date -b.date).map(progress =>{
+                    
+                   day.history.sort((a, b)=> a.date -b.date).map((progress, index) =>{
+                      //const strings = getDayStrings()
                       let date = new Date(progress.date);
                       return (
                         <div className='sub-progress' key={progress.date}>
                           <div className='header'>
-                            <p>{sameDay(date, new Date())? "Today" : isYesterday(date)? "Yesterday": formatDate(date) }</p>
+                            {/* <p>{sameDay(date, new Date())? "Today" : isYesterday(date)? "Yesterday": formatDate(date) }</p> */}
+                             <p>at {getTime(date)}</p>
+                             {/* {index ==0?<p >{sameDay(day.date, new Date())? "Today" : isYesterday(day.date)? "Yesterday": getDate(day.date) }</p>: null} */}
                             <p style={{color: colors.primary}}>+{getAmountString(progress.progress, day.goal.type)}</p>
-
+                           
                           </div>
                         <div className='main' style={{display: "flex"}}>
                           <p>{progress.notes}</p>

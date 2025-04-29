@@ -42,7 +42,7 @@ function Login() {
         <button type='submit' onClick={handleLogin}>Submit</button>
         <p>- or - </p>
         <GoogleButton onSuccess={onGoogleLogin} onError={message.error}>Sign in with google</GoogleButton>
-        <p>Don't have an account yet? <Link to={"/"}>Register</Link></p>
+        <p>Don't have an account yet? <Link to={"/register"}>Register</Link></p>
         <p>forgot password? <Link to={"/reset-password"} state={{email}} >Reset</Link></p>
         
         {/* <GoogleLogin onSuccess={handleGoogleLogin} onError={()=> console.log("Error google login")}/> */}
