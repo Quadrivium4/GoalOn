@@ -1,12 +1,15 @@
 @import "../../root.css";
-
+#goals{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 #goals .goals {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-width: 500px;
 }
-#goals .goals  .goal{
+#goals .goals .goal{
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -59,7 +62,6 @@
     gap: 5px;
     border-bottom: 1px solid var(--background-light);
     color: var(--foreground-dark);
-
 }
 #goals .goals .goal  .sub-progresses .sub-progress .header {
     display: flex;
@@ -83,6 +85,12 @@
 #goals .goals .goal>.footer .edit-icon{
     cursor: pointer;
 }
+#goals .goal .likes {
+
+}
+#goals .goal .likes .like {}
+
+
 
 .goal-skeleton{
     background-color: rgba(255, 255, 255, 0.034);

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const UnverifiedUserSchema = new mongoose.Schema({
+var UnverifiedUserSchema = new mongoose.Schema({
     name: {
         type: String,
         trim: true,
@@ -20,6 +20,5 @@ const UnverifiedUserSchema = new mongoose.Schema({
         required: true
     }
 });
-const UnverifiedUser = mongoose.model("UnverifiedUser", UnverifiedUserSchema);
+var UnverifiedUser = mongoose.model("UnverifiedUser", UnverifiedUserSchema);
 export default UnverifiedUser;
-//# sourceMappingURL=unverifiedUser.js.map

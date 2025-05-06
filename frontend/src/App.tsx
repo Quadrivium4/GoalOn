@@ -7,6 +7,8 @@ import { AuthProvider } from './context/AuthContext';
 import { MessageProvider } from './context/MessageContext';
 import Message from './components/Message';
 import { ErrorBoundary } from 'react-error-boundary';
+import Pop from './components/Pop/Pop';
+import { PopProvider } from './context/PopContext';
 
 // function App() {
 //   return (
@@ -25,16 +27,17 @@ import { ErrorBoundary } from 'react-error-boundary';
 //     {// </ErrorBoundary>}
 //   );
 // }
+
 function App() {
   return (
-
-     <MessageProvider>
-    <AuthProvider>
-        <Message />
-        <Navigator></Navigator>
-
-    </AuthProvider>
-    </MessageProvider>
+    <PopProvider >
+      <MessageProvider>
+        <AuthProvider>
+            <Message />
+            <Navigator></Navigator>
+        </AuthProvider>
+      </MessageProvider>
+    </PopProvider>
   );
 }
 export default App;

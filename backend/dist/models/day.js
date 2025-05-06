@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const DaySchema = new mongoose.Schema({
+var DaySchema = new mongoose.Schema({
     userId: {
         type: String,
         required: true
@@ -25,8 +25,10 @@ const DaySchema = new mongoose.Schema({
     },
     status: {
         type: String
+    },
+    utcDate: {
+        type: Date
     }
 });
-const Day = mongoose.model("Day", DaySchema);
+var Day = mongoose.model("Day", DaySchema);
 export default Day;
-//# sourceMappingURL=day.js.map

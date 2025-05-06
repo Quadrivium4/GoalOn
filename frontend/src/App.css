@@ -3,6 +3,10 @@
     padding: 20px;
     padding-bottom: 60px;
 }
+.page > .header{
+    border-bottom: 1px solid;
+    margin-bottom: 10px;
+}
 .form {
     display: flex;
     width: 100%;
@@ -68,6 +72,7 @@ button.google-button svg{
 @media(max-width: 500px){
     .page{
         padding: 10px;
+        padding-bottom: 60px;
     }
     #header .logo {
         font-size: 26px;
@@ -83,12 +88,21 @@ button.google-button svg{
         height: 20px;
     }
 }
+@media(min-width: 700px){
+    #root{
+        align-items: center;
+    }
+    .page{
+            width: 600px;
 
+    }
+}
 #auth-page{
     display: flex;
     flex-direction: column;
     align-items: center;
     /* padding: 10px; */
+    width: 100%;
     height: 100%;
     overflow: hidden;
 }

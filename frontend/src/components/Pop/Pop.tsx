@@ -1,7 +1,9 @@
 import { ReactNode, useEffect } from "react";
 import "./Pop.css"
+import { usePop } from "../../context/PopContext";
 
-const Pop = ({children, toggle}: {children: ReactNode, toggle: () => void}) =>{
+const Pop = ({children, toggle}: {children?: ReactNode, toggle?: () => void}) =>{
+    const {content, closePop, title} = usePop()
     useEffect(()=>{
         document.body.style.overflow = "hidden";
         // document.documentElement.style.overflow = 'hidden'
@@ -12,18 +14,24 @@ const Pop = ({children, toggle}: {children: ReactNode, toggle: () => void}) =>{
     },[])
     const handleClick = () =>{
 
-        toggle();
+        if(toggle) toggle();
+        else closePop()
     }
+    if(!children && !content) return null
     return (
         <div id="pop-layer">
             <div id="pop-up">
-                <div id="close-pop" onClick={handleClick}>
-                    <span className="n1"></span>
-                    <span className="n2"></span>
+                <div className="header">
+                    <h2 className="title">{title}</h2>
+                    <div id="close-pop" onClick={handleClick}>
+                        <span className="n1"></span>
+                        <span className="n2"></span>
+                    </div>
                 </div>
+                
                 <div id="pop-body">
                     {/* <p>{document.body.style.overflow}</p> */}
-                    {children}
+                    {children || content}
                 </div>
             </div>
         </div>)

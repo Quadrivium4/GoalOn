@@ -1,0 +1,16 @@
+.likes {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.likes > p {
+    margin-left: 10px;
+}
+.likesList{
+
+}
+.likesList .like{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}

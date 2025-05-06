@@ -22,7 +22,6 @@
 //         type: String,
 //         trim: true,
 //     },
-export {};
 //     description: {
 //         type: String
 //     },
@@ -32,4 +31,3 @@ export {};
 // });
 // const Goal = mongoose.model<TGoal>("Goal", GoalSchema);
 // export default Goal
-//# sourceMappingURL=goal.js.map

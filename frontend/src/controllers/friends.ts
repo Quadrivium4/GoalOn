@@ -6,6 +6,7 @@ import { protectedApi } from "../utils"
 import { TDay, TProgress } from "./days"
 import { TGoal } from "./goals"
 import { TMyGoal } from "../context/DaysContext"
+import { TNotification } from "../pages/Settings/Settings"
 export type TFriendsResponse = {
     friends: TUser[],
     incomingFriendRequests: TUser[],
@@ -65,17 +66,31 @@ const cancelFriendRequest = async(id: string): Promise<TUser> =>{
     let res = await protectedApi.delete("/cancel-friend-request/" + id);
     return res.data;
 }
+const ignoreFriendRequest = async(id: string): Promise<TUser> =>{
+    let res = await protectedApi.delete("/ignore-friend-request/" + id);
+    return res.data;
+}
 const deleteFriend = async(id: string): Promise<TUser> =>{
     let res = await protectedApi.delete("/delete-friend/" + id);
     return res.data;
 }
-
+const getNotifications = async(): Promise<TNotification[]> =>{
+    let res = await protectedApi.get("/notifications",{params: {timestamp: Date.now()}});
+    return res.data;
+}
+const readNotifications = async(ids: string[]): Promise<TNotification[]> =>{
+    let res = await protectedApi.post("/notifications",{ids});
+    return res.data;
+}
 export  {
     getUsers,
     getFriends,
+    getNotifications,
+    readNotifications,
     getLazyFriends,
     sendFriendRequest,
     acceptFriendRequest,
     cancelFriendRequest,
-    deleteFriend
+    ignoreFriendRequest,
+    deleteFriend,
 }

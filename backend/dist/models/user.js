@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const UserSchema = new mongoose.Schema({
+var UserSchema = new mongoose.Schema({
     name: {
         type: String,
         trim: true,
@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        trim: true,
+        trim: true
     },
     googleLogin: {
         type: Boolean
@@ -31,8 +31,8 @@ const UserSchema = new mongoose.Schema({
     },
     deletionToken: {
         type: String
-    }
+    },
+    notifications: []
 });
-const User = mongoose.model("User", UserSchema);
+var User = mongoose.model("User", UserSchema);
 export default User;
-//# sourceMappingURL=user.js.map

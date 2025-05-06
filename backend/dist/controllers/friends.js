@@ -1,248 +1,647 @@
+function _array_like_to_array(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+    for(var i = 0, arr2 = new Array(len); i < len; i++)arr2[i] = arr[i];
+    return arr2;
+}
+function _array_with_holes(arr) {
+    if (Array.isArray(arr)) return arr;
+}
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+        var info = gen[key](arg);
+        var value = info.value;
+    } catch (error) {
+        reject(error);
+        return;
+    }
+    if (info.done) {
+        resolve(value);
+    } else {
+        Promise.resolve(value).then(_next, _throw);
+    }
+}
+function _async_to_generator(fn) {
+    return function() {
+        var self = this, args = arguments;
+        return new Promise(function(resolve, reject) {
+            var gen = fn.apply(self, args);
+            function _next(value) {
+                asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+            }
+            function _throw(err) {
+                asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+            }
+            _next(undefined);
+        });
+    };
+}
+function _iterable_to_array_limit(arr, i) {
+    var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
+    if (_i == null) return;
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _s, _e;
+    try {
+        for(_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true){
+            _arr.push(_s.value);
+            if (i && _arr.length === i) break;
+        }
+    } catch (err) {
+        _d = true;
+        _e = err;
+    } finally{
+        try {
+            if (!_n && _i["return"] != null) _i["return"]();
+        } finally{
+            if (_d) throw _e;
+        }
+    }
+    return _arr;
+}
+function _non_iterable_rest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+function _sliced_to_array(arr, i) {
+    return _array_with_holes(arr) || _iterable_to_array_limit(arr, i) || _unsupported_iterable_to_array(arr, i) || _non_iterable_rest();
+}
+function _unsupported_iterable_to_array(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _array_like_to_array(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(n);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _array_like_to_array(o, minLen);
+}
+function _ts_generator(thisArg, body) {
+    var f, y, t, _ = {
+        label: 0,
+        sent: function() {
+            if (t[0] & 1) throw t[1];
+            return t[1];
+        },
+        trys: [],
+        ops: []
+    }, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() {
+        return this;
+    }), g;
+    function verb(n) {
+        return function(v) {
+            return step([
+                n,
+                v
+            ]);
+        };
+    }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while(g && (g = 0, op[0] && (_ = 0)), _)try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [
+                op[0] & 2,
+                t.value
+            ];
+            switch(op[0]){
+                case 0:
+                case 1:
+                    t = op;
+                    break;
+                case 4:
+                    _.label++;
+                    return {
+                        value: op[1],
+                        done: false
+                    };
+                case 5:
+                    _.label++;
+                    y = op[1];
+                    op = [
+                        0
+                    ];
+                    continue;
+                case 7:
+                    op = _.ops.pop();
+                    _.trys.pop();
+                    continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                        _ = 0;
+                        continue;
+                    }
+                    if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+                        _.label = op[1];
+                        break;
+                    }
+                    if (op[0] === 6 && _.label < t[1]) {
+                        _.label = t[1];
+                        t = op;
+                        break;
+                    }
+                    if (t && _.label < t[2]) {
+                        _.label = t[2];
+                        _.ops.push(op);
+                        break;
+                    }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop();
+                    continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) {
+            op = [
+                6,
+                e
+            ];
+            y = 0;
+        } finally{
+            f = t = 0;
+        }
+        if (op[0] & 5) throw op[1];
+        return {
+            value: op[0] ? op[1] : void 0,
+            done: true
+        };
+    }
+}
 import { ObjectId } from "mongodb";
 import Day from "../models/day.js";
 import User from "../models/user.js";
 import AppError from "../utils/appError.js";
+import { addNotification, removeRequestAndNotification } from "../functions/friends.js";
 import { dayInMilliseconds } from "../utils.js";
 import { getLastMonday } from "./days.js";
-const week = 7 * dayInMilliseconds;
-const aggregateFriendDays = (userId, date, skip, limit) => [
-    {
-        $match: {
-            _id: new ObjectId(userId),
+var week = 7 * dayInMilliseconds;
+var aggregateFriendDays = function(userId, date, skip, limit) {
+    return [
+        {
+            $match: {
+                _id: new ObjectId(userId)
+            }
         },
-    },
-    {
-        $unwind: "$friends",
-    },
-    {
-        $lookup: {
-            from: "days",
-            localField: "friends",
-            foreignField: "userId",
-            as: "goals",
-            pipeline: [
-                {
-                    $match: {
-                        $or: [
-                            {
-                                date: {
-                                    $gte: date,
+        {
+            $unwind: "$friends"
+        },
+        {
+            $lookup: {
+                from: "days",
+                localField: "friends",
+                foreignField: "userId",
+                as: "goals",
+                pipeline: [
+                    {
+                        $match: {
+                            $or: [
+                                {
+                                    date: {
+                                        $gte: date
+                                    }
                                 },
-                            },
-                            {
-                                $and: [
-                                    {
-                                        "goal.frequency": {
-                                            $eq: "weekly",
+                                {
+                                    $and: [
+                                        {
+                                            "goal.frequency": {
+                                                $eq: "weekly"
+                                            }
                                         },
-                                    },
-                                    {
-                                        date: {
-                                            $gte: getLastMonday(date).getTime(),
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
+                                        {
+                                            date: {
+                                                $gte: getLastMonday(date).getTime()
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
                     },
-                },
-                { $group: {
-                        "_id": "$goal._id",
-                        "title": { $first: "$goal.title" },
-                        "type": { $first: "$goal.type" },
-                        "amount": { $first: "$goal.amount" },
-                        "date": { $first: "$date" },
-                        "history": { $push: "$$ROOT" },
-                        "userId": { $first: "$userId" }
+                    {
+                        $group: {
+                            "_id": "$goal._id",
+                            "title": {
+                                $first: "$goal.title"
+                            },
+                            "type": {
+                                $first: "$goal.type"
+                            },
+                            "amount": {
+                                $first: "$goal.amount"
+                            },
+                            "date": {
+                                $first: "$date"
+                            },
+                            "history": {
+                                $push: "$$ROOT"
+                            },
+                            "userId": {
+                                $first: "$userId"
+                            }
+                        }
                     }
+                ]
+            }
+        },
+        {
+            $project: {
+                _id: {
+                    $toObjectId: "$friends"
                 },
-            ],
+                goals: 1
+            }
         },
-    },
-    {
-        $project: {
-            _id: {
-                $toObjectId: "$friends",
-            },
-            goals: 1,
+        {
+            $lookup: {
+                from: "users",
+                localField: "_id",
+                foreignField: "_id",
+                as: "user"
+            }
         },
-    },
-    {
-        $lookup: {
-            from: "users",
-            localField: "_id",
-            foreignField: "_id",
-            as: "user",
+        {
+            $unwind: "$user"
         },
-    },
-    {
-        $unwind: "$user",
-    },
-    {
-        $project: {
-            _id: 1,
-            name: "$user.name",
-            goals: 1,
-            profileImg: "$user.profileImg",
-            goalsInfo: "$user.goals"
-        },
-    },
-];
-const aggregateDayFriends = [
+        {
+            $project: {
+                _id: 1,
+                name: "$user.name",
+                goals: 1,
+                profileImg: "$user.profileImg",
+                goalsInfo: "$user.goals"
+            }
+        }
+    ];
+};
+var aggregateDayFriends = [
     {
         $addFields: {
             userObjectId: {
-                $toObjectId: "$userId",
-            },
-        },
+                $toObjectId: "$userId"
+            }
+        }
     },
     {
         $lookup: {
             from: "users",
             localField: "userObjectId",
             foreignField: "_id",
-            as: "user",
-        },
+            as: "user"
+        }
     },
     {
-        $unwind: "$user",
-    },
+        $unwind: "$user"
+    }
 ];
-const getLazyFriends = async (req, res) => {
-    const offset = 20;
-    const { index, timestamp } = req.query;
-    const date = new Date(parseInt(timestamp, 10));
-    date.setHours(0, 0, 0, 0);
-    console.log({ offset, index, date });
-    //const friends = await getUserFriends(req.user);
-    const response = await User.aggregate(aggregateFriendDays(req.user.id, date.getTime(), index * offset, offset));
-    console.log("hey", response);
-    res.send(response);
-};
-const getFriends = async (req, res) => {
-    const { id } = req.params;
-    if (id) {
-        console.log("getting friend", { id });
-        let isFriend = req.user.friends.find(friend => friend.id == id);
-        if (!isFriend)
-            throw new AppError(1, 400, "is not your friend");
-        const friend = await User.findById(id);
-        return res.send({
-            id: friend.id,
-            name: friend.name,
-            profileImg: friend.profileImg,
-            goals: friend.goals
+var getLazyFriends = function(req, res) {
+    return _async_to_generator(function() {
+        var offset, _req_query, index, timestamp, date, response;
+        return _ts_generator(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    offset = 20;
+                    _req_query = req.query, index = _req_query.index, timestamp = _req_query.timestamp;
+                    date = new Date(parseInt(timestamp, 10));
+                    date.setHours(0, 0, 0, 0);
+                    console.log({
+                        offset: offset,
+                        index: index,
+                        date: date
+                    });
+                    return [
+                        4,
+                        User.aggregate(aggregateFriendDays(req.user.id, date.getTime(), index * offset, offset))
+                    ];
+                case 1:
+                    response = _state.sent();
+                    console.log("hey", response);
+                    res.send(response);
+                    return [
+                        2
+                    ];
+            }
         });
-    }
-    else {
-        console.log("getFriends...");
-        let promises = [
-            User.find({ _id: { $in: req.user.friends } }),
-            User.find({ _id: { $in: req.user.incomingFriendRequests } }),
-            User.find({ _id: { $in: req.user.outgoingFriendRequests } }),
-            Day.find({ userId: { $in: req.user.friends } }).sort({ date: -1 }).limit(20)
-        ];
-        // let friendsPromises = req.user.friends.map(friend =>{
-        //     return User.findById(friend);
-        // })
-        // promises.push(fr)
-        // let incomingFriendsPromises = req.user.incomingFriendRequests.map(friend =>{
-        //     return User.findById(friend);
-        // })
-        // let outgoingFriendsPromises = req.user.outgoingFriendRequests.map(friend =>{
-        //     return User.findById(friend);
-        // })
-        // let friendGoalsPromises = req.user.friends.map(friend =>{
-        // })
-        // let [friends, incomingFriendRequests, outgoingFriendRequests] = await Promise.all([Promise.all(friendsPromises),Promise.all(incomingFriendsPromises), Promise.all(outgoingFriendsPromises)]);
-        let [friends, incomingFriendRequests, outgoingFriendRequests, friendDays] = await Promise.all(promises);
-        //console.log({friends, incomingFriendRequests, outgoingFriendRequests, friendDays})
-        return res.send({ friends, incomingFriendRequests, outgoingFriendRequests, friendDays });
-    }
+    })();
 };
-const sendFriendRequest = async (req, res) => {
-    const { id } = req.params;
-    const friend = await User.findById(id);
-    if (friend.friends.find(id => id == req.user.id))
-        throw new AppError(1, 400, `You and ${friend.name} are already friend`);
-    if (friend.incomingFriendRequests.includes(req.user.id))
-        throw new AppError(1, 400, `You already sent a friend request to ${friend.name}`);
-    const result = await User.findByIdAndUpdate(id, {
-        $push: {
-            incomingFriendRequests: req.user.id
-        }
-    }, { new: true });
-    const user = await User.findByIdAndUpdate(req.user.id, {
-        $push: {
-            outgoingFriendRequests: id
-        }
-    }, { new: true });
-    console.log("send friend request", {
-        user, friend
-    });
-    res.send(user);
+var getFriends = function(req, res) {
+    return _async_to_generator(function() {
+        var id, isFriend, friend, promises, _ref, friends, incomingFriendRequests, outgoingFriendRequests, friendDays;
+        return _ts_generator(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    id = req.params.id;
+                    if (!id) return [
+                        3,
+                        2
+                    ];
+                    console.log("getting friend", {
+                        id: id
+                    });
+                    isFriend = req.user.friends.find(function(friend) {
+                        return friend.id == id;
+                    });
+                    if (!isFriend) throw new AppError(1, 400, "is not your friend");
+                    return [
+                        4,
+                        User.findById(id)
+                    ];
+                case 1:
+                    friend = _state.sent();
+                    return [
+                        2,
+                        res.send({
+                            id: friend.id,
+                            name: friend.name,
+                            profileImg: friend.profileImg,
+                            goals: friend.goals
+                        })
+                    ];
+                case 2:
+                    console.log("getFriends...");
+                    promises = [
+                        User.find({
+                            _id: {
+                                $in: req.user.friends
+                            }
+                        }),
+                        User.find({
+                            _id: {
+                                $in: req.user.incomingFriendRequests
+                            }
+                        }),
+                        User.find({
+                            _id: {
+                                $in: req.user.outgoingFriendRequests
+                            }
+                        }),
+                        Day.find({
+                            userId: {
+                                $in: req.user.friends
+                            }
+                        }).sort({
+                            date: -1
+                        }).limit(20)
+                    ];
+                    return [
+                        4,
+                        Promise.all(promises)
+                    ];
+                case 3:
+                    _ref = _sliced_to_array.apply(void 0, [
+                        _state.sent(),
+                        4
+                    ]), friends = _ref[0], incomingFriendRequests = _ref[1], outgoingFriendRequests = _ref[2], friendDays = _ref[3];
+                    //console.log({friends, incomingFriendRequests, outgoingFriendRequests, friendDays})
+                    return [
+                        2,
+                        res.send({
+                            friends: friends,
+                            incomingFriendRequests: incomingFriendRequests,
+                            outgoingFriendRequests: outgoingFriendRequests,
+                            friendDays: friendDays
+                        })
+                    ];
+                case 4:
+                    return [
+                        2
+                    ];
+            }
+        });
+    })();
 };
-const acceptFriendRequest = async (req, res) => {
-    const { id } = req.params;
-    if (!req.user.incomingFriendRequests.includes(id))
-        throw new AppError(1, 400, "This person didn't send you any friend request!");
-    const friend = await User.findByIdAndUpdate(id, {
-        $push: {
-            friends: req.user.id
+var sendFriendRequest = function(req, res) {
+    return _async_to_generator(function() {
+        var id, friend, result, user;
+        return _ts_generator(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    id = req.params.id;
+                    return [
+                        4,
+                        User.findById(id)
+                    ];
+                case 1:
+                    friend = _state.sent();
+                    if (friend.friends.find(function(id) {
+                        return id == req.user.id;
+                    })) throw new AppError(1, 400, "You and ".concat(friend.name, " are already friend"));
+                    if (friend.incomingFriendRequests.includes(req.user.id)) throw new AppError(1, 400, "You already sent a friend request to ".concat(friend.name));
+                    return [
+                        4,
+                        addNotification(friend.id, {
+                            date: Date.now(),
+                            content: "new friend request",
+                            from: {
+                                userId: req.user.id,
+                                name: req.user.name
+                            },
+                            type: "incoming request",
+                            status: "unread"
+                        })
+                    ];
+                case 2:
+                    _state.sent();
+                    return [
+                        4,
+                        User.findByIdAndUpdate(id, {
+                            $push: {
+                                incomingFriendRequests: req.user.id
+                            }
+                        }, {
+                            new: true
+                        })
+                    ];
+                case 3:
+                    result = _state.sent();
+                    return [
+                        4,
+                        User.findByIdAndUpdate(req.user.id, {
+                            $push: {
+                                outgoingFriendRequests: id
+                            }
+                        }, {
+                            new: true
+                        })
+                    ];
+                case 4:
+                    user = _state.sent();
+                    console.log("send friend request", {
+                        user: user,
+                        friend: friend
+                    });
+                    res.send(user);
+                    return [
+                        2
+                    ];
+            }
+        });
+    })();
+};
+var acceptedFriendNotification = function(name, id) {
+    return {
+        type: "accepted request",
+        date: Date.now(),
+        _id: new ObjectId().toHexString(),
+        content: "and you are now friends!",
+        from: {
+            userId: id,
+            name: name
         },
-        $pull: {
-            outgoingFriendRequests: req.user.id
-        }
-    }, { new: true });
-    const user = await User.findByIdAndUpdate(req.user.id, {
-        $push: {
-            friends: friend.id,
-        },
-        $pull: {
-            incomingFriendRequests: id
-        }
-    }, { new: true });
-    console.log("accept friend request", {
-        user, friend
-    });
-    res.send(user);
+        status: "unread"
+    };
 };
-const cancelFriendRequest = async (req, res) => {
-    const { id } = req.params;
-    console.log("canceling friend request", { id });
-    if (!req.user.outgoingFriendRequests.includes(id))
-        throw new AppError(1, 400, `You didn't send any friend request to him!`);
-    const friend = await User.findByIdAndUpdate(id, {
-        $pull: {
-            incomingFriendRequests: req.user.id
-        }
-    }, { new: true });
-    const user = await User.findByIdAndUpdate(req.user.id, {
-        $pull: {
-            outgoingFriendRequests: id
-        }
-    }, { new: true });
-    console.log("cancel friend request", {
-        user, friend
-    });
-    res.send(user);
+var acceptFriendRequest = function(req, res) {
+    return _async_to_generator(function() {
+        var id, friend, user;
+        return _ts_generator(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    id = req.params.id;
+                    if (!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, "This person didn't send you any friend request!");
+                    return [
+                        4,
+                        User.findByIdAndUpdate(id, {
+                            $push: {
+                                friends: req.user.id,
+                                notifications: acceptedFriendNotification(req.user.name, req.user.id)
+                            },
+                            $pull: {
+                                outgoingFriendRequests: req.user.id
+                            }
+                        }, {
+                            new: true
+                        })
+                    ];
+                case 1:
+                    friend = _state.sent();
+                    return [
+                        4,
+                        User.findByIdAndUpdate(req.user.id, {
+                            $push: {
+                                friends: friend.id
+                            },
+                            $pull: {
+                                incomingFriendRequests: id
+                            }
+                        }, {
+                            new: true
+                        })
+                    ];
+                case 2:
+                    user = _state.sent();
+                    console.log("accept friend request", {
+                        user: user,
+                        friend: friend
+                    });
+                    res.send(user);
+                    return [
+                        2
+                    ];
+            }
+        });
+    })();
 };
-const deleteFriend = async (req, res) => {
-    const { id } = req.params;
-    const friend = await User.findByIdAndUpdate(id, {
-        $pull: {
-            friends: req.user.id
-        },
-    }, { new: true });
-    const user = await User.findByIdAndUpdate(req.user.id, {
-        $pull: {
-            friends: id
-        },
-    }, { new: true });
-    console.log("friend deleted", {
-        user, friend
-    });
-    res.send(user);
+var ignoreFriendRequest = function(req, res) {
+    return _async_to_generator(function() {
+        var id, user;
+        return _ts_generator(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    id = req.params.id;
+                    console.log("ignoring friend request", {
+                        id: id
+                    });
+                    if (!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, "No friend request found from him");
+                    return [
+                        4,
+                        removeRequestAndNotification(id, req.user.id)
+                    ];
+                case 1:
+                    user = _state.sent();
+                    // console.log("cancel friend request", {
+                    //     user,
+                    // })
+                    res.send(user);
+                    return [
+                        2
+                    ];
+            }
+        });
+    })();
 };
-export { getFriends, getLazyFriends, acceptFriendRequest, sendFriendRequest, cancelFriendRequest, deleteFriend, };
-//# sourceMappingURL=friends.js.map
+var cancelFriendRequest = function(req, res) {
+    return _async_to_generator(function() {
+        var id, friend, user;
+        return _ts_generator(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    id = req.params.id;
+                    console.log("canceling friend request", {
+                        id: id
+                    });
+                    if (!req.user.outgoingFriendRequests.includes(id)) throw new AppError(1, 400, "You didn't send any friend request to him!");
+                    return [
+                        4,
+                        User.findById(id)
+                    ];
+                case 1:
+                    friend = _state.sent();
+                    return [
+                        4,
+                        removeRequestAndNotification(req.user.id, id)
+                    ];
+                case 2:
+                    user = _state.sent();
+                    console.log("cancel friend request", {
+                        user: user,
+                        friend: friend
+                    });
+                    res.send(user);
+                    return [
+                        2
+                    ];
+            }
+        });
+    })();
+};
+var deleteFriend = function(req, res) {
+    return _async_to_generator(function() {
+        var id, friend, user;
+        return _ts_generator(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    id = req.params.id;
+                    return [
+                        4,
+                        User.findByIdAndUpdate(id, {
+                            $pull: {
+                                friends: req.user.id
+                            }
+                        }, {
+                            new: true
+                        })
+                    ];
+                case 1:
+                    friend = _state.sent();
+                    return [
+                        4,
+                        User.findByIdAndUpdate(req.user.id, {
+                            $pull: {
+                                friends: id
+                            }
+                        }, {
+                            new: true
+                        })
+                    ];
+                case 2:
+                    user = _state.sent();
+                    console.log("friend deleted", {
+                        user: user,
+                        friend: friend
+                    });
+                    res.send(user);
+                    return [
+                        2
+                    ];
+            }
+        });
+    })();
+};
+export { getFriends, getLazyFriends, acceptFriendRequest, sendFriendRequest, cancelFriendRequest, ignoreFriendRequest, deleteFriend,  };

@@ -16,7 +16,7 @@ export const getLastSunday = (date: number | Date) =>{
 export const getLastMonday = (date: number | Date) =>{
   date = new Date(date);
   date.setHours(0,0,0,0);
-  date.setDate(date.getDate() - date.getDay() + 1);
+  date.setDate(date.getDate() - (date.getDay() + 6) % 7);
   return date;
 }
 export const aggregateDays = (date: number, userId: string | ObjectId):mongoose.PipelineStage[] =>[
@@ -32,14 +32,15 @@ export const aggregateDays = (date: number, userId: string | ObjectId):mongoose.
           {
             $and: [
               {
+                "goal.frequency": {
+                  $eq: "daily",
+                },
+              },
+              {
                 date: {
                   $gte: date
                 }
-              },{
-                date: {
-                  $lte: date+dayInMilliseconds
-                }
-          }]
+              }]
           },
           {
             $and: [
@@ -89,13 +90,13 @@ export const aggregateDays = (date: number, userId: string | ObjectId):mongoose.
 const getDays = async(req: ProtectedReq, res) =>{
     let timestamp: number;
     if(typeof req.query.timestamp == 'string' ) timestamp = parseInt(req.query.timestamp, 10);
-    console.log({timestamp}, req.query)
+    //console.log({timestamp}, req.query)
     const date = new Date(timestamp);
     date.setHours(0,0,0,0);
     
     //const days = await Day.find({userId: req.user.id, $or: [{date: {$gte: date.getTime()}}, {$and: [{"goal.frequency":{$eq: "weekly"} }, {date: {$gte: date.getTime() - week}}]}]});
     const days = await Day.aggregate(aggregateDays(date.getTime(), req.user.id));
-    console.log("found days: ", days.length, {days}, {goals: req.user.goals})
+    console.log("found days: ", days.length, {days}, {goals: req.user.goals}, date, getLastMonday(date), date.getDay())
 
     if(days.length <req.user.goals.length){
       req.user.goals.map(goal =>{

@@ -37,8 +37,8 @@
 }
 h1,h2,h3,h4,h5,h6{
     color: var(--foreground-light);
-    font-family: sans-serif;
-    font-weight: 100;
+    font-family: Gummy;
+    font-weight: 200;
 }
 h1{
     font-size: 30px;
@@ -87,9 +87,19 @@ select:focus-visible{
 
 input{
     all: unset;
+    display: flex;
+    width: 100%;
     padding: 10px 10px;
+    box-sizing: border-box;
     border-radius: 5px;
     background-color: var(--background-light);
+}
+ textarea {
+    all: unset;
+    color: var(--foreground);
+    background-color: var(--background-medium);
+    padding: 10px;
+    display: flex;
 }
 input.error {
     box-shadow: inset 0px 0px 10px 1px rgb(223, 61, 61);

@@ -4,7 +4,7 @@ import { TGoal } from "./goals"
 
 export type TLike = {
     userId: string,
-    name: string,
+    username: string,
     profileImg: string
 }
 export type TProgress = {
@@ -29,7 +29,8 @@ export type TDayForm = {
     goal: TGoal
 }
 export type TDay = TDayForm & {
-    _id: string
+    _id: string,
+    utcDate: Date,
 }
 export type TStats = {
     _id: string,

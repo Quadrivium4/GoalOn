@@ -23,7 +23,7 @@ import { formatDate, getAmountString, getTime, isYesterday, sameDay, sumDayProgr
 import { getPercentage, normalizePercentage, getProgressColor} from '../Stats/Graph';
 import { GenericAbortSignal } from 'axios';
 import { postLike } from '../../controllers/likes';
-import ProfileIcon from '../../components/ProfileIcon';
+import ProfileIcon from '../../components/ProfileIcon/ProfileIcon';
 import { Link } from 'react-router-dom';
 const offset = 20;
 const useUsers = () =>{
@@ -165,7 +165,7 @@ function SearchUser({setPop}: {setPop: (body: any)=>void}){
     const user = useUser()
     return (
     <> 
-        <input type='text' onChange={(e) => search(e.target.value)} placeholder='search'></input>
+        <input type='text' onChange={(e) => search(e.target.value)} placeholder='search' style={{marginTop: 15}}></input>
         <div className='people' onScroll={(e) =>{
             const target = e.target as HTMLDivElement;
             const bottom = Math.abs(target.scrollHeight - target.clientHeight - target.scrollTop) < 1
@@ -236,39 +236,39 @@ export function sumDoubleDayProgress(goal: TMyGoal){
     }
     return amount;
 }
-export function deleteLike(likes: TLike[], userId: string){
-    let newLikes = [];
-    for (let i = 0; i < likes.length; i++) {
-        if(likes[i].userId !=userId ){
-            newLikes.push(likes[i])
-        }
+// export function deleteLike(likes: TLike[], userId: string){
+//     let newLikes = [];
+//     for (let i = 0; i < likes.length; i++) {
+//         if(likes[i].userId !=userId ){
+//             newLikes.push(likes[i])
+//         }
         
-    }
-    return newLikes
-}
+//     }
+//     return newLikes
+// }
 export function Day({day}: {day: TDay}){
     const user = useUser();
     const {unlikeProgress, likeProgress} = useDays();
     const toggleLikeProgress = async(progress: TProgress, isLiked: boolean) =>{
         if(isLiked){
-            unlikeProgress({id: day._id, ...progress}).then(res =>{
-                console.log("unliked")
+            // unlikeProgress({id: day._id, ...progress}).then(res =>{
+            //     console.log("unliked")
                 
-                day.history= day.history.map(pgr =>{
-                    if(pgr.date == progress.date){
-                        let likes: TLike[] = deleteLike(pgr.likes, user._id)
-                        return {...pgr, likes}
-                    }
-                    return pgr
+            //     day.history= day.history.map(pgr =>{
+            //         if(pgr.date == progress.date){
+            //             let likes: TLike[] = deleteLike(pgr.likes, user._id)
+            //             return {...pgr, likes}
+            //         }
+            //         return pgr
                         
-                })
-            })
+            //     })
+            // })
         }else{
             likeProgress({id: day._id, ...progress}).then(res =>{
                 console.log("liked");
                  day.history= day.history.map(pgr =>{
                     if(pgr.date == progress.date){
-                        let likes: TLike[] = [...pgr.likes, {userId: user._id, name: user.name, profileImg: user.profileImg}];
+                        let likes: TLike[] = [...pgr.likes, {userId: user._id, username: user.name, profileImg: user.profileImg}];
                         return {...pgr, likes}
                     }
                     return pgr

@@ -8,10 +8,12 @@ import Header from './components/Header';
 import Friends from './pages/Friends/Friends';
 import User from './pages/User/User';
 import DeleteAccount from './shared/DeleteAccount';
+import Pop from './components/Pop/Pop';
 
 const Layout = () =>(
     <>
          {window.screen.width >= 500?<Header></Header> : null}
+         <Pop />
          <Outlet />
          {window.screen.width <= 500?<Footer></Footer> : null}
     </>
@@ -46,6 +48,7 @@ const AppNavigator = () =>{
         <div>{window.screen.width + " " + window.innerWidth}</div> */}
        
         <RouterProvider router={appRouter}></RouterProvider>
+                    
         {/* <BrowserRouter >
          {window.screen.width >= 500?<Header></Header> : null}
         <Routes>

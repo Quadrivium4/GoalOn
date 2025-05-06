@@ -6,57 +6,11 @@
     display: flex;
     flex-direction: column;
 }
-/* #stats .days {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    
-    gap: 8px
-}
-#stats .day {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--background-light);
-    padding: 20px;
-    border-radius: 5px;
-}
 
-#stats .day .header {
-    border-bottom: 1px solid var(--background-light);
-    margin-bottom: 5px;
-    color: var(--foreground-dark);
-}
-#stats .day .day-goals {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-} */
 #stats .goal {
     position: relative;
 }
-/* #stats .pop .progress-bar {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    height: 5px;
-    border-radius: 5px;
-    overflow: hidden;
-}
-#stats .progress-bar p {
-    position: absolute;
-    padding: 5px;
-}
-#stats .progress-bar .amount-container {
-    position: relative;
-    border-radius: 5px;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: var(--background-dark);
-}
-#stats .progress-bar .amount {
-    height: 100%;
-} */
+
 #stats .graph::-webkit-scrollbar{
     background-color: var(--background-dark);
     border-radius: 50px;
@@ -92,7 +46,8 @@
 }
 #stats svg {
     /* transform: rotateZ(180deg); */
-    background-color: var(--background-medium)
+    background-color: var(--background-medium);
+    min-width: 100%;
 }
 #stats text {
     fill: var(--foreground);
@@ -118,106 +73,6 @@
 }
 
 
-#stats .day {
-    /* border-bottom: 1px solid var(--foreground-dark); */
-    position: relative;
-    border-radius: 0px 0px 0px 0px;
-    border-bottom: 1px solid var(--background-light);
-}
-
-#stats .day>.header {
-    position: relative;
-    overflow: hidden;
-    border-radius: 0px 0px 0px 0px;
-}
-
-#stats .day>.header .title-box {
-    text-align: center;
-    position: relative;
-
-}
-
-#stats .day>.header .title-box .title {
-    font-weight: bold;
-    font-size: large;
-    text-transform: uppercase;
-}
-
-#stats .day .subtitle {
-    text-align: center;
-}
-
-#stats .day>.header .progress-bar {
-    position: absolute;
-    height: 100%;
-}
-
-#stats .day .date {
-    /* text-decoration: underline; */
-}
-
-#stats .single-day .progress-added {
-    /* text-decoration: underline; */
-    color: var(--primary);
-}
-
-#stats .single-day .progress .header {
-    display: flex;
-    justify-content: space-between;
-}
-#stats .single-day .progress .footer{
-    display: none;
-}
-
-#stats .point-pop{
-    position: relative;
-}
-#stats .point-pop>.header {
-    height: 10px;
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-#stats .point-pop .header .progress {
-    /* border-top-left-radius: 10px;
-    border-top-right-radius: 10px; */
-    transition: 1s;
-    height: 100%;
-    background-color: var(--primary);
-}
-
-#stats  .sub-progresses {
-    display: flex;
-    flex-direction: column;
-    background-color: rgba(0, 0, 0, 0.2);
-    padding: 12px;
-    gap: 20px;
-}
-
-#stats  .sub-progresses .sub-progress {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    border-bottom: 1px solid var(--background-light);
-    color: var(--foreground-dark);
-
-}
-
-#stats  .sub-progresses .sub-progress .header {
-    display: flex;
-    justify-content: space-between;
-    color: var(--foreground);
-}
-
-#stats  .sub-progresses .sub-progress .main p {
-    width: 100%;
-}
-
-#stats  .sub-progresses .sub-progress .main .sidebar {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
 @media(width <= 600px){
     #stats .days {
         display: flex;

@@ -2,12 +2,15 @@ import { createContext, useContext, Reducer, useReducer, useEffect, ReactNode} f
 import { baseUrl, protectedUrl } from "../constants";
 import { api, protectedApi } from "../utils";
 import { useMessage } from "./MessageContext";
-import { TGoal } from "../controllers/goals";
+import controller, { TGoal } from "../controllers/goals";
+import userController from "../controllers/user";
 import { redirect } from "react-router-dom";
 import { wait } from "../controllers/days";
 import { CredentialResponse } from "@react-oauth/google";
 import { CanceledError } from "axios";
 import { stat } from "fs";
+import { putUser, TUserForm } from "../controllers/user";
+import { TNotification } from "../pages/Settings/Settings";
 const authState: TAuthStateProps = {
     logged: false,
     loading: true,
@@ -24,7 +27,7 @@ export type TUser = {
     bio: string,
     outgoingFriendRequests: string[],
     incomingFriendRequests: string[]
-
+    notifications: TNotification[]
 }
 type TAuthStateProps = {
     logged: boolean,
@@ -32,7 +35,7 @@ type TAuthStateProps = {
     aToken: string | null,
     user: TUser | null // to do: togliere null
 }
-type TLoginForm = {
+export type TLoginForm = {
     email: string, 
     password: string
 }
@@ -52,6 +55,7 @@ export type TUserAuthResponse = {
 type ContextProps = TAuthStateProps & {
     login: (form: TLoginForm) =>Promise<void>, 
    // googleLogin: (credentials: CredentialResponse) =>Promise<void>,
+    changeEmail: (form: TLoginForm) => Promise<void>,
     googleLogin: (token: string) =>Promise<void>,
     register: (form: TRegisterForm) => Promise<void>,
     logout: () => Promise<void>, 
@@ -60,6 +64,7 @@ type ContextProps = TAuthStateProps & {
     deleteAccount: () =>{}, 
     updateUserProfileImage: (id: string) => void,
     updateUser: (user: TUser) => void,
+    editUser: (user: TUserForm) => Promise<void>,
     setLoading: (state: boolean) =>void,
     deleteAccountRequest: () =>void
 } | null;
@@ -104,7 +109,7 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
         //console.log(aToken)
         if (!aToken) return dispatch({ type: "LOGGED_OUT" });
         try {
-            await wait(2000)
+            //await wait(2000)
              const res = await protectedApi.get(`/user`);
              let user = res.data;
         //console.log({user})
@@ -212,18 +217,27 @@ const AuthProvider = ({children } : {children: ReactNode}) =>{
         localStorage.removeItem("aToken");
         dispatch({type: "LOGGED_OUT"});
     }
+    const changeEmail = async(form: TLoginForm) =>{
+        console.log("changing email...")
+        const updatedUser = await userController.changeEmail(form)
+        dispatch({type: "SET_USER", payload: updatedUser})
+    }
     const updateUserProfileImage = (id: string) =>{
         dispatch({type: "SET_PROFILE_IMAGE", payload: id})
     }
-    const updateUser = (newUser: TUser) =>{
+    const updateUser = async(newUser: TUser) =>{
         dispatch({type: "SET_USER", payload: newUser});
+    }
+    const editUser = async(form: TUserForm) =>{
+        const updatedUser = await putUser(form);
+        dispatch({type: "SET_USER", payload: updatedUser});
     }
     const setLoading = (state: boolean) =>{
         dispatch({type: "SET_LOADING", payload: state})
     }
 
     return (
-        <AuthContext.Provider value={{...state, login,googleLogin, register, logout, verify, verifyPassword, deleteAccount,  updateUserProfileImage, updateUser, setLoading, deleteAccountRequest}}>
+        <AuthContext.Provider value={{...state, login,googleLogin, register, logout, changeEmail, verify, verifyPassword, deleteAccount,  updateUserProfileImage, updateUser, editUser, setLoading, deleteAccountRequest}}>
                 {children}
         </AuthContext.Provider>
     )

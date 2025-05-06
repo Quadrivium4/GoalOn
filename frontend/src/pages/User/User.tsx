@@ -22,7 +22,10 @@ function User() {
     },[])
     return (
         <div id='user' className='page'>
-        <h1>{user?.name}</h1>
+            <div className="header">
+            <h1>{user?.name}</h1>
+      </div>
+       
         <p>{user?.bio}</p>
         {user && 
         <StatsProvider user={user}>

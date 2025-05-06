@@ -1,5 +1,81 @@
 @import "../../root.css";
+#settings{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#settings .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#settings .header .notifications{
+    position: relative;
+}
+#settings .header .notifications .point{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background-color: var(--primary);
+    color: white;
+    width: 11px;
+    height: 11px;
+    font-size: 14px;
+    border-radius: 20px;
+}
+#settings .info {
+    display: flex;
+    gap: 10px;
+}
+#settings .info .text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+#settings .info .edit-user {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    position: relative;
+}
+#settings .info .edit input {
 
+}
+#settings .info .edit-user svg {
+    position: absolute;
+    right: 0;
+    top: 5px;
+}
+#settings  .edit-bio{
+    position: relative;
+    display: flex;
+    width: 100%;
+}
+#settings .edit-bio div{
+    display: flex;
+}
+#settings .edit-bio button{
+    margin-top: auto;
+}
+#settings .info .edit {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+#settings .info .edit svg {
+    cursor: pointer;
+}
+#settings  .edit-bio textarea{
+    width: 100%;
+}
+#settings .edit-bio button {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
 #settings .profile-img {
     width: 100px;
 }
@@ -21,4 +97,20 @@
     justify-content: center;
     border-radius: 50px;
     object-fit: cover;
+}
+#settings .buttons{
+    display: flex;
+    gap: 10px;
+}
+#settings .notifications {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+#settings .notifications .date{
+    
+}
+#settings .notifications .notification {
+    border-bottom: 1px solid var(--background-light);
+    padding: 5px;
 }

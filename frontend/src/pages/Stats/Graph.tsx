@@ -8,19 +8,22 @@ import {  TDay, TDayGoal, TProgress, TStats } from '../../controllers/days';
 import { TUser, useUser } from '../../context/AuthContext';
 import Pop from '../../components/Pop/Pop';
 import { editGoalAmount, TGoal, TGoalForm } from '../../controllers/goals';
-import { formatDate, getAmountString, getGoalAmountString, ProgressDays, SingleGoal, sumDayProgress, sumDaysProgress } from '../Goals/Goals';
+import { formatDate, getAmountString, getGoalAmountString,  SingleGoal, sumDayProgress, sumDaysProgress } from '../Goals/Goals';
 import { Day, Goal } from '../Friends/Friends';
 import AddProgress from '../../components/AddProgress';
 import EditProgress from '../../components/EditProgress';
 import { useStats } from '../../context/StatsContext';
 import EditGoal from '../../components/EditGoal';
 import Input from '../../components/Input/Input';
+import { usePop } from '../../context/PopContext';
+import ProgressDays from '../Goals/ProgressDays';
+import PointPop from './PointPop/PointPop';
 type TPoint = {
     x: number,
     y: number
 }
 
-type TGraphPoint = {
+export type TGraphPoint = {
     id: string,
     amountHeight: number,
     progress: number,
@@ -223,26 +226,10 @@ export function createGraphArray(stats: TDay[], goal: TGoal):TGraphPoint[] {
 
     return graphsArray
 }
-function EditGoalAmount({goal, closePop, date}: {goal: TGoal, closePop: ()=>void, date: number}){
+export function EditGoalAmount({goal, closePop, date}: {goal: TGoal, closePop: ()=>void, date: number}){
     const user = useUser();
     const {updateStats} = useStats();
     const [amount, setAmount] = useState<number>(goal.amount);
-        // const editGoalAmount =  async(goalForm: Omit<TGoal, "type">, date: number) =>{
-    //     setLoading(true)
-    //     if(goalForm.frequency === "daily"){
-    //         let newDay = await goalController.editGoalAmount<TDay>(goalForm, date);
-    //         let updatedGoals = getUpdatedGoals(goals, newDay, true)
-    //         setGoals(updatedGoals)
-    //     }else if(goalForm.frequency === "weekly"){
-    //         let newDays = await goalController.editGoalAmount<TDay[]>(goalForm, date);
-    //         let updatedGoals = getUpdatedGoalDays(goals, newDays, goalForm._id)
-    //         setGoals(updatedGoals)
-    //     }
-    
-       
-    //     setLoading(false)
-        
-    // }
     const createGoal = () =>{
         if(!amount) return;
        editGoalAmount({
@@ -270,38 +257,12 @@ function EditGoalAmount({goal, closePop, date}: {goal: TGoal, closePop: ()=>void
     </div>)
 }
 
-function PointPop ({point, setPop}: {point: TGraphPoint, setPop: (pop: ReactNode) =>void}){
-    const {updateStats, reloadStats} = useStats()
-    const date = new Date(point.date);
-    const now = new Date()
-    console.log(point)
-    date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
-    let goalDays =  point.history;
-    let {goal } = point;
-    let goalProgress = sumDaysProgress(goalDays);
-    let progressWidth = normalizePercentage(getPercentage(goal.amount, goalProgress));
-    let goalAmountString = getGoalAmountString(goal, goalProgress)
-    return (
-        <div className='point-pop'> 
-            <div className='info'>
-                <p>{goalAmountString} {goal.frequency}</p>
-            </div>
-            <div className='header'><div className='progress' style={{width: progressWidth + "%",backgroundColor: getProgressColor(progressWidth)}}></div></div>
-            
-            
-            <ProgressDays history={point.history} setPop={setPop} onChange={reloadStats}/>
-            <button className='outline' onClick={() => setPop(<AddProgress goal={point.goal}  closePop={()=>setPop(undefined)} date={date.getTime()} onRes={reloadStats}/>)}>add progress</button>
-            <button className='outline gray' onClick={() => setPop(<EditGoalAmount goal={point.goal}  date={point.date.getTime()} closePop={() => setPop(undefined)}/>)}>Edit goal</button>
-        </div>
-    )
-
-}
 
 function Svg ({graph}:{graph: TGraphPoint[]}) {
     const [pointsString, setPointsString] = useState("");
     const [monthNamePoints, setMonthNamePoints] = useState<TMonthPoint[]>([]);
     const [monthDayScroll, setMonthDayScroll] = useState(0);
-    const [pop, setPop] = useState<ReactNode>();
+    const {setPop} = usePop()
     const ref = useRef<HTMLDivElement>(null);
     const svgWidth = (graph.length -1) * gap + paddingHorizontal * 2 < minSvgWidth? minSvgWidth : (graph.length -1) * gap + paddingHorizontal * 2 ;
    // console.log({svgWidth, length: graph.length, gap})
@@ -323,14 +284,15 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
                 monthNamePoints.map((month, i) =>{
                     let nextMonthPosition = monthNamePoints[i+1]?  monthNamePoints[i+1].x : svgWidth//graph.length *gap+ padding;
                     let visible = monthDayScroll > month.x - (paddingHorizontal + 0.1);
-                    return <p key={month.id}className='month' style={{opacity: (nextMonthPosition - monthDayScroll - paddingHorizontal)/130, display: visible? "block" : "none", paddingLeft: paddingHorizontal}} >{month.name}</p>
+                    let opacity = svgWidth > 100?  (nextMonthPosition - monthDayScroll - paddingHorizontal)/130 : 1;
+                    return <p key={month.id}className='month' style={{opacity, display: visible? "block" : "none", paddingLeft: paddingHorizontal}} >{month.name}</p>
                 })
             }
         </div>
         <div className='graph' ref={ref} onScroll={(e)=>{
             let scroll = e.currentTarget.scrollLeft;
             if(Math.abs(scroll - monthDayScroll) >0) setMonthDayScroll(scroll)
-        }} style={{maxWidth: svgWidth}}>
+        }} style={{}}>
             <svg width={svgWidth} height={150 + paddingVertical}>
                 <polygon points={pointsString} fill='rgba(92, 200, 82, 0.25)'></polygon>
                 {graph.map((point, i) =>{
@@ -338,7 +300,7 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
                     //console.log({point})
                     return (
 
-                        <g onClick={() =>{ setPop(<PointPop point={point} setPop={setPop} />)}} key={point.id}>
+                        <g onClick={() =>{ setPop(<PointPop point={point}/>, point.goal.title)}} key={point.id}>
                         <rect x={point.x - gap/2} width={gap} height={150} fillOpacity={0}></rect>
 
                         <circle r={3} cx={point.x} cy={point.amountHeight}z={10} fill={"white"} ></circle>
@@ -369,7 +331,6 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
             </svg>
             
         </div>
-        {pop && <Pop toggle={() => setPop(undefined)}>{pop}</Pop>}
         </>
     )
 }

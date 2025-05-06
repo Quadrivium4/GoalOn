@@ -1,0 +1,31 @@
+.point-pop {
+    position: relative;
+}
+
+.point-pop h2 {
+    text-align: center;
+}
+
+.point-pop>.info {
+    margin-bottom: 5px;
+}
+
+ .point-pop>.header {
+    height: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+    background-color: var(--background-medium);
+}
+
+.point-pop .header .progress {
+    /* border-top-left-radius: 10px;
+    border-top-right-radius: 10px; */
+    transition: 1s;
+    height: 100%;
+    background-color: var(--primary);
+}
+
+.point-pop .buttons {
+    display: flex;
+    justify-content: space-between;
+}

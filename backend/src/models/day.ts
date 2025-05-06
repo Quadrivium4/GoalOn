@@ -41,6 +41,9 @@ const DaySchema = new mongoose.Schema({
     },
     status: {
         type: String
+    },
+    utcDate: {
+        type: Date
     }
 });
 

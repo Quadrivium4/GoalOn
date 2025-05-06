@@ -1,12 +1,13 @@
 import mongoose, { mongo } from "mongoose";
 import { ObjectId } from "mongodb";
 import Day from "../models/day.js";
-import User from "../models/user.js";
+import User, { TNotification } from "../models/user.js";
 import AppError from "../utils/appError.js";
 import express, { Express, Request, Response } from "express";
-import { getUserFriends } from "../functions/friends.js";
+import { addNotification, deleteRequestsNotification, getUserFriends, removeRequestAndNotification } from "../functions/friends.js";
 import { dayInMilliseconds } from "../utils.js";
 import { getLastMonday, getLastSunday } from "./days.js";
+import { ProtectedReq } from "../routes.js";
 const week = 7 * dayInMilliseconds
 const aggregateFriendDays = (userId: string, date: number,  skip: number, limit: number):mongoose.PipelineStage[] => [
   {
@@ -177,6 +178,16 @@ const sendFriendRequest = async(req, res) =>{
     const friend = await User.findById(id);
     if(friend.friends.find(id =>id == req.user.id)) throw new AppError(1, 400, `You and ${friend.name} are already friend`);
     if(friend.incomingFriendRequests.includes(req.user.id)) throw new AppError(1, 400, `You already sent a friend request to ${friend.name}`);
+    await addNotification(friend.id, {
+      date: Date.now(),
+      content: "new friend request",
+      from: {
+        userId: req.user.id,
+        name: req.user.name,
+      },
+      type: "incoming request",
+      status: "unread"
+    })
     const result = await User.findByIdAndUpdate(id, {
         $push: {
             incomingFriendRequests: req.user.id
@@ -193,25 +204,39 @@ const sendFriendRequest = async(req, res) =>{
     res.send(user)
 
 }
-const acceptFriendRequest = async(req, res) =>{
+const acceptedFriendNotification = (name: string, id: string) => ({
+  type: "accepted request",
+  date: Date.now(),
+  _id: new ObjectId().toHexString(),
+  content: "and you are now friends!",
+  from:{
+    userId: id,
+    name: name
+  },
+  status: "unread"
+})
+const acceptFriendRequest = async(req: ProtectedReq, res) =>{
     const { id } = req.params;
     if(!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, "This person didn't send you any friend request!")
     const friend = await User.findByIdAndUpdate(id, {
         $push: {
-            friends: req.user.id
+            friends: req.user.id,
+            notifications: acceptedFriendNotification(req.user.name, req.user.id)
         },
         $pull: {
             outgoingFriendRequests: req.user.id
         }
     }, {new: true})
+
     const user = await User.findByIdAndUpdate(req.user.id, {
         $push: {
             friends: friend.id,
-        },
+            
+            },
         $pull: {
             incomingFriendRequests: id
         }
-    }, {new: true})
+    }, {new: true});
 
     console.log("accept friend request", {
         user, friend
@@ -219,20 +244,24 @@ const acceptFriendRequest = async(req, res) =>{
     res.send(user)
 
 }
+const ignoreFriendRequest = async (req, res) => {
+    const { id } = req.params;
+    console.log("ignoring friend request", {id})
+    if (!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, `No friend request found from him`);
+    const user = await removeRequestAndNotification(id, req.user.id);
+    // console.log("cancel friend request", {
+    //     user,
+    // })
+    res.send(user)
+    
+}
 const cancelFriendRequest = async (req, res) => {
     const { id } = req.params;
     console.log("canceling friend request", {id})
-    if (!req.user.outgoingFriendRequests.includes(id)) throw new AppError(1, 400, `You didn't send any friend request to him!`)
-    const friend = await User.findByIdAndUpdate(id, {
-        $pull: {
-            incomingFriendRequests: req.user.id
-        }
-    }, { new: true })
-    const user = await User.findByIdAndUpdate(req.user.id, {
-        $pull: {
-            outgoingFriendRequests: id
-        }
-    }, { new: true })
+    if (!req.user.outgoingFriendRequests.includes(id)) throw new AppError(1, 400, `You didn't send any friend request to him!`);
+    const friend = await User.findById(id)
+    const user = await removeRequestAndNotification(req.user.id, id)
+
     console.log("cancel friend request", {
         user, friend
     })
@@ -259,11 +288,13 @@ const deleteFriend = async(req, res) =>{
     })
     res.send(user)
 }
+
 export  {
     getFriends,
     getLazyFriends,
     acceptFriendRequest,
     sendFriendRequest,
     cancelFriendRequest,
+    ignoreFriendRequest,
     deleteFriend,
 }

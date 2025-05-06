@@ -1,10 +1,10 @@
 import express, {Request, Response as ExpressResponse} from "express"
 import { tryCatch } from "./utils.js";
-import { changeEmail, deleteAccount, deleteAccountRequest, editUser, getUser, getUsers, googleLogin, login, logout, profileImgUpload, register, resetPassword, verify, verifyResetPassword } from "./controllers/user.js";
+import { changeEmail, deleteAccount, deleteAccountRequest, editUser, getNotifications, getUser, getUsers, googleLogin, login, logout, profileImgUpload, readNotifications, register, resetPassword, verify, verifyResetPassword } from "./controllers/user.js";
 import verifyToken from "./middlewares/verifyToken.js";
 import { deleteGoal, postGoal, putGoal, putGoalAmount } from "./controllers/goals.js";
 import { deleteProgress, getDays, getStats, postProgress, updateProgress } from "./controllers/days.js";
-import {acceptFriendRequest, cancelFriendRequest, deleteFriend, getFriends, getLazyFriends, sendFriendRequest } from "./controllers/friends.js"
+import {acceptFriendRequest, cancelFriendRequest, deleteFriend, getFriends, getLazyFriends, ignoreFriendRequest, sendFriendRequest } from "./controllers/friends.js"
 import { TUser } from "./models/user.js";
 import { deleteProgressLikes, updateProgressLikes } from "./controllers/likes.js";
 import { ParamsDictionary, Query, Request as CoreRequest } from "express-serve-static-core";
@@ -98,6 +98,8 @@ protectedRouter
     .post("/likes", tryCatch(updateProgressLikes))
     .delete("/likes", tryCatch(deleteProgressLikes))
 
+protectedRouter.get("/notifications", tryCatch(getNotifications));
+protectedRouter.post("/notifications", tryCatch(readNotifications));
 
 protectedRouter.get("/lazy-friends", tryCatch(getLazyFriends))
 protectedRouter.get("/friend/:id?", tryCatch(getFriends))
@@ -105,6 +107,7 @@ protectedRouter.post("/send-friend-request/:id", tryCatch(sendFriendRequest))
 protectedRouter.post("/accept-friend-request/:id", tryCatch(acceptFriendRequest))
 
 protectedRouter.delete("/cancel-friend-request/:id", tryCatch(cancelFriendRequest))
+protectedRouter.delete("/ignore-friend-request/:id", tryCatch(ignoreFriendRequest))
 protectedRouter.delete("/delete-friend/:id", tryCatch(deleteFriend))
 
 protectedRouter.route("/user/upload-profile-image")

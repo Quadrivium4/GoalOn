@@ -10,15 +10,19 @@ import { TMyGoal, useDays } from '../../context/DaysContext';
 import { MdOutlineModeEditOutline } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
 import EditGoal from '../../components/EditGoal';
-import { TDay, TGoalAmountType, TGoalDays } from '../../controllers/days';
+import { TDay, TGoalAmountType, TGoalDays, TLike } from '../../controllers/days';
 import { getTimeAmount } from '../../utils';
 import EditProgress from '../../components/EditProgress';
 import DeleteGoal from '../../components/DeleteGoal';
 import { TGoal } from '../../controllers/goals';
-import { colors } from '../../constants';
+import { assetsUrl, baseUrl, colors } from '../../constants';
 import GoalSkeleton from '../../components/GoalSkeleton';
 import Admin from '../Admin/Admin';
 import { getPercentage, getProgressColor } from '../Stats/Graph';
+import ProfileIcon from '../../components/ProfileIcon/ProfileIcon';
+import { usePop } from '../../context/PopContext';
+import { Likes } from '../../components/Likes/Likes';
+import ProgressDays from './ProgressDays';
 
 export function sameDay(date1: Date | number, date2: Date | number){
     date1 = new Date(date1);
@@ -135,43 +139,8 @@ export function formatTime(date: Date | number){
   date = new Date(date);
   return 
 }
-export function ProgressDays({history, setPop, onChange}:{history: TDay[], setPop: (content: ReactNode)=> void, onChange?: (day: TDay)=>void}){
-  return (<div className='sub-progresses'>
-          {history.length > 0? history.sort((a, b)=> a.date -b.date).map(day =>{
-        
-              return (
-                <div key={day._id} className='day'>
-                  <p style={{textAlign: "center"}}>{sameDay(day.date, new Date())? "Today" : isYesterday(day.date)? "Yesterday": getDate(day.date) }</p>
-                  {
-                    
-                   day.history.sort((a, b)=> a.date -b.date).map((progress, index) =>{
-                      //const strings = getDayStrings()
-                      let date = new Date(progress.date);
-                      return (
-                        <div className='sub-progress' key={progress.date}>
-                          <div className='header'>
-                            {/* <p>{sameDay(date, new Date())? "Today" : isYesterday(date)? "Yesterday": formatDate(date) }</p> */}
-                             <p>at {getTime(date)}</p>
-                             {/* {index ==0?<p >{sameDay(day.date, new Date())? "Today" : isYesterday(day.date)? "Yesterday": getDate(day.date) }</p>: null} */}
-                            <p style={{color: colors.primary}}>+{getAmountString(progress.progress, day.goal.type)}</p>
-                           
-                          </div>
-                        <div className='main' style={{display: "flex"}}>
-                          <p>{progress.notes}</p>
-                          <div className='sidebar'>
-                            <MdOutlineModeEditOutline size={24} onClick={() =>setPop(<EditProgress day={day} progress={progress} closePop={()=>setPop(undefined)} onChange={onChange} />)} className='button-icon' />
-                            {/* <MdDelete size={24} onClick={() =>setPop(<EditGoal goal={goal} closePop={() =>setPop(undefined)} />)} className='button-icon' />  */}
-                          </div>
-                        </div>
-                        </div>
-                      )
-                    })
-                  }
-                </div>
-              )
-            }): <p>no progress</p>}
-        </div>)
-}
+
+
 export function getGoalAmountString(goal: TGoal, goalProgress: number){
   return  goal.type === "time"? getTimeAmount(goalProgress) + "/" +getTimeAmount(goal.amount) + " hours": goal.type === "distance"? goalProgress/1000 + "/" + goal.amount/1000 + "km": goal.amount;
 }
@@ -220,7 +189,10 @@ function Goals() {
   return (
     <div className='page' id='goals'>
       {pop && <Pop toggle={() => setPop(undefined)}>{pop}</Pop>}
-      {/* <h1>Hello {user.name}</h1> */}
+      <div className="header">
+          <h1>Goals</h1>
+      </div>
+     
       <div className='goals'>
         {
           user.goals.length > 0 && daysLoading? <GoalSkeleton goals={user.goals} />:
@@ -234,7 +206,7 @@ function Goals() {
       </div>
       <button onClick={() =>{
         setPop(<AddGoal closePop={()=>setPop(undefined)} />)
-      }}>+</button>
+      }}> new Goal</button>
     {/* <button onClick={()=> window.open('tel:+393478619432', '_system')}>error</button> */}
     {/* <Admin /> */}
     </div>

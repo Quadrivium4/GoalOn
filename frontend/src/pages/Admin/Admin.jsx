@@ -8,7 +8,7 @@ function Admin() {
         api.post("/eval-db", {code})
     }
     return (
-        <div id="admin">
+        <div id="admin" className="page">
             <textarea onChange={(e)=> setcode(e.target.value)}></textarea>
             <button onClick={handleClick} className="outline">execute</button>
         </div>

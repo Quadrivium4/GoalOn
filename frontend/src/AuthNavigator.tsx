@@ -50,7 +50,7 @@ export const Header = () =>{
 }
 export const Footer = () =>{
     return (
-    <div id="auth-footer" style={{display: "flex", justifyContent: "center", gap: 20, backgroundColor: "rgb(30,30,30)", padding: 10, flexWrap: "wrap", marginTop: "auto"}}>
+    <div id="auth-footer" style={{display: "flex", width: "100%", justifyContent: "center", gap: 20, backgroundColor: "rgb(30,30,30)", padding: 10, flexWrap: "wrap", marginTop: "auto"}}>
         <p>@{new Date().getFullYear()} Goal</p>
         <p>All rights reserved</p>
         <a href={"https://www.termsfeed.com/live/36640761-198d-4cd0-bf16-e27ddf2872ba"} target='_blank'>Privacy Policy</a>

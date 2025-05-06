@@ -5,13 +5,24 @@ import { TUser } from "../models/user.js";
 import { ProtectedReq, Response } from "../routes.js";
 import mongoose from "mongoose";
 import { ObjectId } from "mongodb";
+import { addNotification } from "../functions/friends.js";
 
 const updateProgressLikes = async(req: ProtectedReq, res: Response) =>{
     console.log(req.body)
     const {date, id} = req.body;
     const day = await Day.findOneAndUpdate({_id: new ObjectId(id), "history.date": date}, {$push: {"history.$.likes": {userId: req.user.id, profileImg: req.user.profileImg, username: req.user.name}}},{new: true});
-    console.log(day)
-    res.send(day)
+    addNotification(day.userId, {
+        type: "like",
+        from: {
+            userId: req.user.id,
+            name: req.user.name
+        },
+        status: "unread",
+        date: Date.now(),
+        content: req.user.name + " liked your activity"
+    });
+    console.log(day);
+    res.send(day);
 }
 const deleteProgressLikes = async(req: ProtectedReq, res: Response) =>{
     console.log(req.query)

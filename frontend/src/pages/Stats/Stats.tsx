@@ -14,7 +14,10 @@ function Stats() {
   },[])
   return (
     <div id='stats' className='page'>
-      <h1>Stats</h1>
+     <div className="header">
+        <h1>Stats</h1>
+      
+      </div>
 
         <Graph />
     </div>

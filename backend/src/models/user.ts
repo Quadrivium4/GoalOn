@@ -7,6 +7,17 @@ export interface TGoal  {
     description: string,
     amount: number
 }
+export interface TNotification {
+    _id: string,
+    date: number,
+    content: string,
+    type: "like" | "incoming request" | "accepted request" | "comment", 
+    from: {
+        name: string,
+        userId: string,
+    }
+    status: "read" | "unread"
+}
 export interface TUser extends mongoose.Document  {
     name: string,
     email: string,
@@ -19,7 +30,8 @@ export interface TUser extends mongoose.Document  {
     googleLogin?: boolean,
     outgoingFriendRequests: string[],
     incomingFriendRequests: string[],
-    deletionToken?: string
+    deletionToken?: string,
+    notifications: TNotification[]
 }
 const UserSchema = new mongoose.Schema({
     name: {
@@ -53,7 +65,8 @@ const UserSchema = new mongoose.Schema({
     },
     deletionToken: {
         type: String
-    }
+    },
+    notifications: []
 });
 
 const User = mongoose.model<TUser>("User", UserSchema);

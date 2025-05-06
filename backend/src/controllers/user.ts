@@ -7,6 +7,8 @@ import { OAuth2Client } from "google-auth-library";
 import AppError from "../utils/appError.js";
 import crypto from "crypto";
 import { isValidObjectId } from "mongoose";
+import { deleteOldNotifications } from "../functions/friends.js";
+import { ProtectedReq } from "../routes.js";
 
 export const GOOGLE_LOGIN = "google-login"
 const client = new OAuth2Client();
@@ -137,7 +139,10 @@ const getUser = async(req, res) =>{
 }
 const changeEmail = async(req, res) =>{
     const {email, password} = req.body;
+    
     if(!validateEmail(email)) throw new AppError(1, 401, "Invalid Email");
+    const user = await User.findOne({email})
+    if(user) throw new AppError(1, 401, "User with that email already exists")
     if(req.user.googleLogin) throw new AppError(1, 401, "cannot change email of google account");
     const passwordsCheck =  await comparePassword(password, req.user.password);
     if(!passwordsCheck) throw new AppError(1003, 401, "Invalid Password");
@@ -166,6 +171,33 @@ const getUsers = async(req, res) =>{
     return res.send(users)
 }
 const updateUser = async(req, res) =>{
+
+}
+const getNotifications = async(req: ProtectedReq<{},{} ,{} , {timestamp: number}>, res) =>{
+    console.log(req.query)
+    let timestamp: number;
+    if(typeof req.query.timestamp == 'string' ) timestamp = parseInt(req.query.timestamp, 10);
+    //console.log({timestamp}, req.query)
+    const date = new Date(timestamp);
+    date.setHours(0,0,0,0);
+
+    
+    const user = await deleteOldNotifications(req.user.id, timestamp );
+    res.send(user.notifications)
+
+
+}
+const readNotifications = async(req: ProtectedReq, res) =>{
+    console.log(req.body)
+    const {ids} = req.body;
+    const newNotifications = req.user.notifications.map(not =>{
+        if(ids.includes(not._id)){
+            not.status = 'read'
+        }
+        return not
+    })
+    const user = await User.findByIdAndUpdate(req.user.id, {notifications: newNotifications }, {new: true});
+    res.send(user.notifications)
 
 }
 // const profileImgUpload = async(req, res) =>{
@@ -220,5 +252,7 @@ export {
     profileImgUpload,
     googleLogin,
     changeEmail,
-    editUser
+    editUser,
+    getNotifications,
+    readNotifications
 }
