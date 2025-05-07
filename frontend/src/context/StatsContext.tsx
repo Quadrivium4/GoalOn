@@ -6,13 +6,14 @@ import {
     useEffect
 } from "react";
 import { createGraphArray as createPointsArray, createGraphPoint, TGraph } from "../pages/Stats/Graph";
-import dayController, { TDay, TGoalDays, TStat } from '../controllers/days';
+import dayController, { TDay, TGoalDays, TStat, wait } from '../controllers/days';
 import { TUser, useUser } from "./AuthContext";
 import { nextWeekTime } from "../utils";
 import { sumDaysProgress } from "../pages/Goals/Goals";
 import axios, { Axios } from "axios";
 type TStatsStateProps = {
-    stats: TGraph[]
+    stats: TGraph[],
+    loading: boolean,
 }
 type TStatsContextProps = TStatsStateProps & {
     updateStats: (stats: TGoalDays[]) => void,
@@ -35,14 +36,14 @@ const createGraphArray = (data: TGoalDays[]) => data.map((stat)=>{
     
 
 const StatsProvider = ({ children, user}: {children: ReactNode, user: TUser}) => {
-    const [state, setState] = useState<TStatsStateProps>({stats: []});
+    const [state, setState] = useState<TStatsStateProps>({stats: [], loading: true});
     const {goals, _id} = user ;
     const {stats} = state;
     useEffect(()=>{
        // console.log("reloading stats")
         dayController.getStats(_id).then(data =>{
             let result: TGraph[] = createGraphArray(data)
-            setState({stats:result})
+            setState({stats:result, loading: false})
          }).catch(err =>{
             if(axios.isCancel(err)){
                 //console.log("cancel err")
@@ -54,13 +55,15 @@ const StatsProvider = ({ children, user}: {children: ReactNode, user: TUser}) =>
     //const delay = 5000;
     const updateStats = (stats: TGoalDays[]) =>{
             let result: TGraph[] = createGraphArray(stats)
-            setState({stats:result})
+            setState({...state, stats:result})
     }
-    const reloadStats = () =>{
+    const reloadStats =async() =>{
+        setState({...state, loading: true});
+        await wait(3000);
         dayController.getStats(_id).then(data =>{
             // Goal in stats is updated!!
             let result: TGraph[] = createGraphArray(data)
-            setState({stats:result})
+            setState({...state, loading: false, stats:result})
         });
         // Manually update stats, not recommended
         // console.log("updating stats")

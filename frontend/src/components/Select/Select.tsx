@@ -8,8 +8,11 @@ function Select<T extends string>({options, placeholder, onSelect, selected} : {
         onSelect(selectedOption);
     },[selectedOption])
     return (
-        <div className="custom-select">
+        <div className="custom-select" style={{borderRadius: !isActive? 5 : undefined}}>
             {selectedOption? <p onClick={()=> setIsActive(prev => !prev)}>{selectedOption}</p> : <p className="placeholder" onClick={()=> setIsActive(true)}>{placeholder}</p>}
+            <div className="options-wrapper">
+
+           
             <div className={["options", isActive? "active" : null].join(" ")}>
             {
                 options.map(option=>{
@@ -22,6 +25,7 @@ function Select<T extends string>({options, placeholder, onSelect, selected} : {
                     </div>)
                 })
             }
+            </div>
             </div>
         </div>)
 }

@@ -1,6 +1,8 @@
 @import "../../root.css";
-#stats {
-    
+#stats .header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 #stats .option {
     display: flex;
@@ -44,7 +46,7 @@
     stroke: rgb(168, 168, 168);
     stroke-width: 1;
 }
-#stats svg {
+#stats .graph-container svg {
     /* transform: rotateZ(180deg); */
     background-color: var(--background-medium);
     min-width: 100%;

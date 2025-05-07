@@ -9,7 +9,6 @@ import { TUser, useUser } from '../../context/AuthContext';
 import Pop from '../../components/Pop/Pop';
 import { editGoalAmount, TGoal, TGoalForm } from '../../controllers/goals';
 import { formatDate, getAmountString, getGoalAmountString,  SingleGoal, sumDayProgress, sumDaysProgress } from '../Goals/Goals';
-import { Day, Goal } from '../Friends/Friends';
 import AddProgress from '../../components/AddProgress';
 import EditProgress from '../../components/EditProgress';
 import { useStats } from '../../context/StatsContext';
@@ -18,6 +17,7 @@ import Input from '../../components/Input/Input';
 import { usePop } from '../../context/PopContext';
 import ProgressDays from '../Goals/ProgressDays';
 import PointPop from './PointPop/PointPop';
+import GraphSkeleton from './GraphSkeleton/GraphSkeleton';
 type TPoint = {
     x: number,
     y: number
@@ -284,7 +284,7 @@ function Svg ({graph}:{graph: TGraphPoint[]}) {
                 monthNamePoints.map((month, i) =>{
                     let nextMonthPosition = monthNamePoints[i+1]?  monthNamePoints[i+1].x : svgWidth//graph.length *gap+ padding;
                     let visible = monthDayScroll > month.x - (paddingHorizontal + 0.1);
-                    let opacity = svgWidth > 100?  (nextMonthPosition - monthDayScroll - paddingHorizontal)/130 : 1;
+                    let opacity = svgWidth > 140?  (nextMonthPosition - monthDayScroll - paddingHorizontal)/130 : 1;
                     return <p key={month.id}className='month' style={{opacity, display: visible? "block" : "none", paddingLeft: paddingHorizontal}} >{month.name}</p>
                 })
             }
@@ -340,17 +340,19 @@ export type TGraph = {
     points: TGraphPoint[]
 }
 function Graph() {
-    const {stats} = useStats()
+    const {stats, reloadStats, loading} = useStats()
     return (
         <div className='graphs'>
-            {stats.map((graph, i)=>{
+            
+            {loading? <GraphSkeleton graphs={stats}/>: stats.map((graph, i)=>{
                 //if(i == 0) console.log("RERENDER")
                 let {points, goal} = graph;
-                if(points.length < 1) return <p>no stats</p>
+                
                 return (
                     <div key={goal._id} className='graph-container'>
                         <h3>{goal.title}</h3>
-                        <Svg graph={points} />
+                        
+                        {points.length > 0? <Svg graph={points} />: <p>no stats</p>}
                     </div>
                 )
             })}

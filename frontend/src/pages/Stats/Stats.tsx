@@ -6,9 +6,11 @@ import Select from '../../components/Select/Select';
 import Calendar from './Calendar';
 import Graph from './Graph';
 import { useUser } from '../../context/AuthContext';
-import { StatsProvider } from '../../context/StatsContext';
+import { StatsProvider, useStats } from '../../context/StatsContext';
+import { IoMdRefresh } from "react-icons/io";
 function Stats() {
   const user = useUser()
+  const {reloadStats} = useStats()
   useEffect(()=>{
     //console.log("stats rerender")
   },[])
@@ -16,7 +18,7 @@ function Stats() {
     <div id='stats' className='page'>
      <div className="header">
         <h1>Stats</h1>
-      
+        <IoMdRefresh size={24} onClick={reloadStats}/>
       </div>
 
         <Graph />

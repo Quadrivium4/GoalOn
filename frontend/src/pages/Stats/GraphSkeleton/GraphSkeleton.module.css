@@ -1,0 +1,51 @@
+.skeletons {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.title-skeleton {
+    background-color: rgba(255, 255, 255, 0.034);
+    position: relative;
+    height: 20px;
+    width: 100px;
+}
+.title-skeleton .circle {
+    width: 0px;
+    height: 100%;
+    opacity: 0;
+    position: absolute;
+    background-color: transparent;
+    box-shadow: 0 0 100px 5px var(--background-light);
+    animation: skeletonSlide 0.7s infinite ease-in-out;
+}
+.graph-skeleton {
+    background-color: rgba(255, 255, 255, 0.034);
+    position: relative;
+    height: 160px;
+}
+
+.graph-skeleton .circle {
+    width: 0px;
+    height: 100%;
+    opacity: 0;
+    position: absolute;
+    background-color: transparent;
+    box-shadow: 0 0 100px 5px var(--background-light);
+    animation: skeletonSlide 0.7s infinite ease-in-out;
+}
+
+@keyframes skeletonSlide {
+    0% {
+        opacity: 0;
+        left: -100px;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    to {
+        left: 100%;
+        opacity: 0;
+    }
+}

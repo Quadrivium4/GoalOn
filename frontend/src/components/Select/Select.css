@@ -5,7 +5,8 @@
     flex-direction: column;
     background-color: var(--background-light);
     color: var(--foreground);
-    border-radius: 5px;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
     cursor: pointer;
 
 }
@@ -15,13 +16,19 @@
 .custom-select .placeholder {
     color: rgb(117,117,117);
 }
+.custom-select .options-wrapper{
+    position: relative;
+}
 .custom-select .options {
     display: none;
+    width: 100%;
 }
 .custom-select .active {
     display: flex;
     flex-direction: column;
-    border-top: 1px solid var(--foreground)
+    border-top: 1px solid var(--foreground);
+    position: absolute;
+    background-color: var(--background-light);
 }
 .custom-select .option {
     padding: 10px;

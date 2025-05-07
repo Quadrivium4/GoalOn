@@ -4,7 +4,7 @@ import { changeEmail, deleteAccount, deleteAccountRequest, editUser, getNotifica
 import verifyToken from "./middlewares/verifyToken.js";
 import { deleteGoal, postGoal, putGoal, putGoalAmount } from "./controllers/goals.js";
 import { deleteProgress, getDays, getStats, postProgress, updateProgress } from "./controllers/days.js";
-import {acceptFriendRequest, cancelFriendRequest, deleteFriend, getFriends, getLazyFriends, ignoreFriendRequest, sendFriendRequest } from "./controllers/friends.js"
+import {acceptFriendRequest, cancelFriendRequest, deleteFollower, unfollow, getFriends, getLazyFriends, ignoreFriendRequest, sendFriendRequest } from "./controllers/friends.js"
 import { TUser } from "./models/user.js";
 import { deleteProgressLikes, updateProgressLikes } from "./controllers/likes.js";
 import { ParamsDictionary, Query, Request as CoreRequest } from "express-serve-static-core";
@@ -108,7 +108,8 @@ protectedRouter.post("/accept-friend-request/:id", tryCatch(acceptFriendRequest)
 
 protectedRouter.delete("/cancel-friend-request/:id", tryCatch(cancelFriendRequest))
 protectedRouter.delete("/ignore-friend-request/:id", tryCatch(ignoreFriendRequest))
-protectedRouter.delete("/delete-friend/:id", tryCatch(deleteFriend))
+protectedRouter.delete("/delete-friend/:id", tryCatch(deleteFollower))
+protectedRouter.delete("/unfollow/:id", tryCatch(unfollow))
 
 protectedRouter.route("/user/upload-profile-image")
     .post(tryCatch(profileImgUpload))

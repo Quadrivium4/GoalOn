@@ -7,6 +7,8 @@ import { TDay, TProgress } from "./days"
 import { TGoal } from "./goals"
 import { TMyGoal } from "../context/DaysContext"
 import { TNotification } from "../pages/Settings/Settings"
+import { TFilter } from "../pages/Friends/SearchUser/SearchUser"
+
 export type TFriendsResponse = {
     friends: TUser[],
     incomingFriendRequests: TUser[],
@@ -28,11 +30,12 @@ export type TLazyFriendsResponse = {
         goals: TMyGoal[],
         goalsInfo: TGoal[]
     }[]
-const getUsers= async({index, offset, search, signal}: {index: number, search?: string, offset?: number, signal?: GenericAbortSignal}): Promise<TUser[]> =>{
+const getUsers= async({index, offset, search,filter, signal}: {index: number, search?: string, offset?: number,filter?: TFilter,  signal?: GenericAbortSignal}): Promise<TUser[]> =>{
     
     const res =  await protectedApi.get("/users", {params:{
         index, 
         offset,
+        filter,
         search
     },
     signal: signal 

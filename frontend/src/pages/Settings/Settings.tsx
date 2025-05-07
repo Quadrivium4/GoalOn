@@ -97,8 +97,8 @@ const isNewNotification = (notifications: TNotification[]) =>{
   }
   return isNew
 }
-const NotificationContext = createContext<TNotificationContextProps | null>(null)
-const NotificationProvider = ({children}: {children: React.ReactNode}) =>{
+export const NotificationContext = createContext<TNotificationContextProps | null>(null)
+export const NotificationProvider = ({children}: {children: React.ReactNode}) =>{
   const [notifications, setNotifications] = useState<TNotification[]>([])
   const [newNotification, setNewNotification] = useState(false);
   useEffect(()=>{
@@ -116,7 +116,7 @@ const NotificationProvider = ({children}: {children: React.ReactNode}) =>{
   return <NotificationContext.Provider value={{notifications, newNotification, setNotifications, setNewNotification}}>{children}</NotificationContext.Provider>
 }
 
-function Notifications(){
+export function Notifications(){
   const {notifications, setNotifications} = useNotifications();
   const {message} = useMessage()
   const handleIgnore = async(id: string) =>{
@@ -162,13 +162,13 @@ function Notifications(){
     </div>
   )
 }
-function useNotifications(){
+export function useNotifications(){
   const notificationContext = useContext(NotificationContext);
   if(!notificationContext) throw new Error("notification context must be used inside provider")
   return notificationContext
 }
 
-function NotificationBell({setPop}: {setPop: (content: React.ReactNode)=>void}){
+export function NotificationBell({setPop}: {setPop: (content: React.ReactNode)=>void}){
   const {notifications, setNewNotification, newNotification, setNotifications} = useNotifications();
   console.log({notifications})
   const openNotifications = () =>{
@@ -208,10 +208,8 @@ function Settings() {
       
       <div className="header">
         <h1>Account</h1>
-        <NotificationProvider>
            {pop && <Pop children={pop} toggle={() =>setPop(undefined)}/>}
           <NotificationBell setPop={setPop} />
-        </NotificationProvider>
       </div>
       
       <div className='info'>

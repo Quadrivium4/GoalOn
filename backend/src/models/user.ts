@@ -7,6 +7,7 @@ export interface TGoal  {
     description: string,
     amount: number
 }
+
 export interface TNotification {
     _id: string,
     date: number,
@@ -30,6 +31,8 @@ export interface TUser extends mongoose.Document  {
     googleLogin?: boolean,
     outgoingFriendRequests: string[],
     incomingFriendRequests: string[],
+    followers: string[],
+    following: string[],
     deletionToken?: string,
     notifications: TNotification[]
 }
@@ -66,7 +69,9 @@ const UserSchema = new mongoose.Schema({
     deletionToken: {
         type: String
     },
-    notifications: []
+    notifications: [],
+    followers: [],
+    following: []
 });
 
 const User = mongoose.model<TUser>("User", UserSchema);

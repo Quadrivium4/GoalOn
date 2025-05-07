@@ -1,0 +1,77 @@
+
+
+.days {
+    max-height: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    padding: 10px;
+    background-color: var(--background-medium);
+}
+
+.days .day {
+    /* border-bottom: 1px solid var(--foreground-dark); */
+    position: relative;
+    border-radius: 0px 0px 0px 0px;
+    border-bottom: 1px solid var(--background-light);
+
+}
+
+.days .day>.header {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0px 0px 0px 0px;
+}
+
+.days .day>.header .title-box {
+    text-align: center;
+    position: relative;
+
+}
+
+.days .day>.header .title-box .title {
+    font-weight: bold;
+    font-size: large;
+    text-transform: uppercase;
+}
+
+.days .day .subtitle {
+    text-align: center;
+}
+
+.days .day>.header .progress-bar {
+    position: absolute;
+    height: 100%;
+}
+
+.days .day .date {
+    /* text-decoration: underline; */
+}
+
+.days .day .progress-added {
+    /* text-decoration: underline; */
+    color: var(--primary);
+}
+
+.days .single-day {
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.days .single-day .progress .header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.days .single-day .progress .footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.days .day>.footer {
+    /* padding: 0px 10px; */
+}

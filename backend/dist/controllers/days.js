@@ -267,27 +267,40 @@ export var aggregateDays = function(date, userId) {
 };
 var getDays = function(req, res) {
     return _async_to_generator(function() {
-        var timestamp, date, days;
+        var user, timestamp, date, days;
         return _ts_generator(this, function(_state) {
             switch(_state.label){
                 case 0:
                     if (typeof req.query.timestamp == 'string') timestamp = parseInt(req.query.timestamp, 10);
+                    if (!req.query.id) return [
+                        3,
+                        2
+                    ];
+                    return [
+                        4,
+                        User.findById(req.query.id)
+                    ];
+                case 1:
+                    user = _state.sent();
+                    _state.label = 2;
+                case 2:
+                    if (!user) user = req.user;
                     //console.log({timestamp}, req.query)
                     date = new Date(timestamp);
                     date.setHours(0, 0, 0, 0);
                     return [
                         4,
-                        Day.aggregate(aggregateDays(date.getTime(), req.user.id))
+                        Day.aggregate(aggregateDays(date.getTime(), user.id))
                     ];
-                case 1:
+                case 3:
                     days = _state.sent();
                     console.log("found days: ", days.length, {
                         days: days
                     }, {
-                        goals: req.user.goals
+                        goals: user.goals
                     }, date, getLastMonday(date), date.getDay());
-                    if (days.length < req.user.goals.length) {
-                        req.user.goals.map(function(goal) {
+                    if (days.length < user.goals.length) {
+                        user.goals.map(function(goal) {
                             var alreadyExists = days.find(function(day) {
                                 return day._id.toString() === goal._id.toString();
                             });

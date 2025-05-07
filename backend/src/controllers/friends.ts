@@ -16,12 +16,12 @@ const aggregateFriendDays = (userId: string, date: number,  skip: number, limit:
     },
   },
   {
-    $unwind: "$friends",
+    $unwind: "$following",
   },
   {
     $lookup: {
       from: "days",
-      localField: "friends",
+      localField: "following",
       foreignField: "userId",
       as: "goals",
       pipeline: [
@@ -67,7 +67,7 @@ const aggregateFriendDays = (userId: string, date: number,  skip: number, limit:
     $project:
       {
         _id: {
-          $toObjectId: "$friends",
+          $toObjectId: "$following",
         },
         goals: 1,
       },
@@ -145,10 +145,10 @@ const getFriends = async (req, res) => {
     }else{
         console.log("getFriends...")
         let promises = [
-            User.find({_id: {$in: req.user.friends}}), 
+            User.find({_id: {$in: req.user.followers}}), 
             User.find({_id: {$in: req.user.incomingFriendRequests}}), 
             User.find({_id: {$in: req.user.outgoingFriendRequests}}), 
-            Day.find({userId: {$in: req.user.friends}}).sort({date: -1}).limit(20)
+            Day.find({userId: {$in: req.user.following}}).sort({date: -1}).limit(20)
         ];
         // let friendsPromises = req.user.friends.map(friend =>{
         //     return User.findById(friend);
@@ -165,11 +165,11 @@ const getFriends = async (req, res) => {
 
         // })
         // let [friends, incomingFriendRequests, outgoingFriendRequests] = await Promise.all([Promise.all(friendsPromises),Promise.all(incomingFriendsPromises), Promise.all(outgoingFriendsPromises)]);
-        let [friends, incomingFriendRequests, outgoingFriendRequests, friendDays] = await Promise.all(promises);
+        let [followers, incomingFriendRequests, outgoingFriendRequests, friendDays] = await Promise.all(promises);
         
         
         //console.log({friends, incomingFriendRequests, outgoingFriendRequests, friendDays})
-        return res.send({friends, incomingFriendRequests, outgoingFriendRequests, friendDays})
+        return res.send({followers, incomingFriendRequests, outgoingFriendRequests, friendDays})
     }
     
 }
@@ -180,7 +180,7 @@ const sendFriendRequest = async(req, res) =>{
     if(friend.incomingFriendRequests.includes(req.user.id)) throw new AppError(1, 400, `You already sent a friend request to ${friend.name}`);
     await addNotification(friend.id, {
       date: Date.now(),
-      content: "new friend request",
+      content: "new follower request",
       from: {
         userId: req.user.id,
         name: req.user.name,
@@ -220,7 +220,7 @@ const acceptFriendRequest = async(req: ProtectedReq, res) =>{
     if(!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, "This person didn't send you any friend request!")
     const friend = await User.findByIdAndUpdate(id, {
         $push: {
-            friends: req.user.id,
+            following: req.user.id,
             notifications: acceptedFriendNotification(req.user.name, req.user.id)
         },
         $pull: {
@@ -230,7 +230,7 @@ const acceptFriendRequest = async(req: ProtectedReq, res) =>{
 
     const user = await User.findByIdAndUpdate(req.user.id, {
         $push: {
-            friends: friend.id,
+            followers: friend.id,
             
             },
         $pull: {
@@ -269,26 +269,44 @@ const cancelFriendRequest = async (req, res) => {
     
 
 }
-const deleteFriend = async(req, res) =>{
+const deleteFollower = async(req, res) =>{
     const {id} = req.params;
     const friend = await User.findByIdAndUpdate(id, {
         $pull: {
-            friends: req.user.id
+            following: req.user.id
 
         },
 
     }, { new: true })
     const user = await User.findByIdAndUpdate(req.user.id, {
         $pull: {
-            friends: id
+            followers: id
         },
     }, { new: true })
-    console.log("friend deleted", {
+    console.log("follower deleted", {
         user, friend
     })
     res.send(user)
 }
+const unfollow = async(req: ProtectedReq, res) =>{
+   const {id} = req.params;
+    const friend = await User.findByIdAndUpdate(id, {
+        $pull: {
+            followers: req.user.id
 
+        },
+
+    }, { new: true })
+    const user = await User.findByIdAndUpdate(req.user.id, {
+        $pull: {
+            following: id
+        },
+    }, { new: true })
+    console.log("unfollowed", {
+        user, friend
+    })
+    res.send(user)
+}
 export  {
     getFriends,
     getLazyFriends,
@@ -296,5 +314,6 @@ export  {
     sendFriendRequest,
     cancelFriendRequest,
     ignoreFriendRequest,
-    deleteFriend,
+    deleteFollower,
+    unfollow
 }

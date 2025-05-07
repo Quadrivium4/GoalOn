@@ -9,6 +9,7 @@ import crypto from "crypto";
 import { isValidObjectId } from "mongoose";
 import { deleteOldNotifications } from "../functions/friends.js";
 import { ProtectedReq } from "../routes.js";
+import { ObjectId } from "mongodb";
 
 export const GOOGLE_LOGIN = "google-login"
 const client = new OAuth2Client();
@@ -155,18 +156,27 @@ const editUser = async(req, res) =>{
     const newUser = await User.findByIdAndUpdate(req.user.id, {name, bio}, {new: true})
     return res.send(newUser)
 }
+const arrayToOids =  (array: string[]) =>{
+    return array.map(str => new ObjectId(str))
+}
 const getUsers = async(req, res) =>{
-    let {search, index, offset} = req.query;
+    let {search, index, offset, filter: flt} = req.query;
     if(!index) index = 0;
     if(!offset) offset = 20;
-    console.log("get users query: ", req.query)
-    let filter = {};
-    if(search){
-        filter = {
-            name: { $regex: "(?i)^" + search }
-        }
-        console.log(filter)
+    console.log("get users query: ", req.query);
+    let filter: any = {};
+    if(flt === "followers"){
+        filter._id = {$in: arrayToOids(req.user.followers)}
+    }else if(flt === "following"){
+        filter._id = {$in: arrayToOids(req.user.following)}
     }
+
+    if(search){
+        filter.name =  { $regex: "(?i)^" + search }
+
+        
+    }
+    console.log(filter)
     const users = await User.find(filter).skip(index * offset).limit(offset);
     return res.send(users)
 }

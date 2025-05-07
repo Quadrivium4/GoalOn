@@ -47,9 +47,9 @@ export type TProgressForm = Omit<TProgress, "likes"> & {id: string}
 export function wait(duration: number){
     return new Promise((resolve, reject) => setTimeout(resolve, duration))
 }
-const getDays = async():Promise<TMyGoal[]> =>{
+const getDays = async(userId?: string):Promise<TMyGoal[]> =>{
     //await wait(2000)
-    let res = await protectedApi.get("/days", {params: {timestamp: Date.now()}});
+    let res = await protectedApi.get("/days", {params: {timestamp: Date.now(), id: userId}});
     return res.data;
 }
 const getStats = async(userId?: string):Promise<TGoalDays[]> =>{
@@ -77,10 +77,10 @@ let dayControllers = {
     deleteProgress
 }
 export default dayControllers
-// export {
-//     getDays,
-//     addProgress,
-//     getStats,
-//     updateProgress,
-//     deleteProgress
-// }
+export {
+    getDays,
+    addProgress,
+    getStats,
+    updateProgress,
+    deleteProgress
+}

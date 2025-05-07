@@ -152,6 +152,7 @@ import { OAuth2Client } from "google-auth-library";
 import AppError from "../utils/appError.js";
 import { isValidObjectId } from "mongoose";
 import { deleteOldNotifications } from "../functions/friends.js";
+import { ObjectId } from "mongodb";
 export var GOOGLE_LOGIN = "google-login";
 var client = new OAuth2Client();
 var register = function(req, res) {
@@ -590,25 +591,37 @@ var editUser = function(req, res) {
         });
     })();
 };
+var arrayToOids = function(array) {
+    return array.map(function(str) {
+        return new ObjectId(str);
+    });
+};
 var getUsers = function(req, res) {
     return _async_to_generator(function() {
-        var _req_query, search, index, offset, filter, users;
+        var _req_query, search, index, offset, flt, filter, users;
         return _ts_generator(this, function(_state) {
             switch(_state.label){
                 case 0:
-                    _req_query = req.query, search = _req_query.search, index = _req_query.index, offset = _req_query.offset;
+                    _req_query = req.query, search = _req_query.search, index = _req_query.index, offset = _req_query.offset, flt = _req_query.filter;
                     if (!index) index = 0;
                     if (!offset) offset = 20;
                     console.log("get users query: ", req.query);
                     filter = {};
-                    if (search) {
-                        filter = {
-                            name: {
-                                $regex: "(?i)^" + search
-                            }
+                    if (flt === "followers") {
+                        filter._id = {
+                            $in: arrayToOids(req.user.followers)
                         };
-                        console.log(filter);
+                    } else if (flt === "following") {
+                        filter._id = {
+                            $in: arrayToOids(req.user.following)
+                        };
                     }
+                    if (search) {
+                        filter.name = {
+                            $regex: "(?i)^" + search
+                        };
+                    }
+                    console.log(filter);
                     return [
                         4,
                         User.find(filter).skip(index * offset).limit(offset)

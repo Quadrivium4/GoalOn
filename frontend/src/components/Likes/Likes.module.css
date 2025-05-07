@@ -6,7 +6,8 @@
 .likes > p {
     margin-left: 10px;
 }
-.likesList{
+.likesList h2{
+    text-align: center;
 
 }
 .likesList .like{

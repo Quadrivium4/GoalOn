@@ -180,12 +180,12 @@ var aggregateFriendDays = function(userId, date, skip, limit) {
             }
         },
         {
-            $unwind: "$friends"
+            $unwind: "$following"
         },
         {
             $lookup: {
                 from: "days",
-                localField: "friends",
+                localField: "following",
                 foreignField: "userId",
                 as: "goals",
                 pipeline: [
@@ -243,7 +243,7 @@ var aggregateFriendDays = function(userId, date, skip, limit) {
         {
             $project: {
                 _id: {
-                    $toObjectId: "$friends"
+                    $toObjectId: "$following"
                 },
                 goals: 1
             }
@@ -322,7 +322,7 @@ var getLazyFriends = function(req, res) {
 };
 var getFriends = function(req, res) {
     return _async_to_generator(function() {
-        var id, isFriend, friend, promises, _ref, friends, incomingFriendRequests, outgoingFriendRequests, friendDays;
+        var id, isFriend, friend, promises, _ref, followers, incomingFriendRequests, outgoingFriendRequests, friendDays;
         return _ts_generator(this, function(_state) {
             switch(_state.label){
                 case 0:
@@ -358,7 +358,7 @@ var getFriends = function(req, res) {
                     promises = [
                         User.find({
                             _id: {
-                                $in: req.user.friends
+                                $in: req.user.followers
                             }
                         }),
                         User.find({
@@ -373,7 +373,7 @@ var getFriends = function(req, res) {
                         }),
                         Day.find({
                             userId: {
-                                $in: req.user.friends
+                                $in: req.user.following
                             }
                         }).sort({
                             date: -1
@@ -387,12 +387,12 @@ var getFriends = function(req, res) {
                     _ref = _sliced_to_array.apply(void 0, [
                         _state.sent(),
                         4
-                    ]), friends = _ref[0], incomingFriendRequests = _ref[1], outgoingFriendRequests = _ref[2], friendDays = _ref[3];
+                    ]), followers = _ref[0], incomingFriendRequests = _ref[1], outgoingFriendRequests = _ref[2], friendDays = _ref[3];
                     //console.log({friends, incomingFriendRequests, outgoingFriendRequests, friendDays})
                     return [
                         2,
                         res.send({
-                            friends: friends,
+                            followers: followers,
                             incomingFriendRequests: incomingFriendRequests,
                             outgoingFriendRequests: outgoingFriendRequests,
                             friendDays: friendDays
@@ -427,7 +427,7 @@ var sendFriendRequest = function(req, res) {
                         4,
                         addNotification(friend.id, {
                             date: Date.now(),
-                            content: "new friend request",
+                            content: "new follower request",
                             from: {
                                 userId: req.user.id,
                                 name: req.user.name
@@ -499,7 +499,7 @@ var acceptFriendRequest = function(req, res) {
                         4,
                         User.findByIdAndUpdate(id, {
                             $push: {
-                                friends: req.user.id,
+                                following: req.user.id,
                                 notifications: acceptedFriendNotification(req.user.name, req.user.id)
                             },
                             $pull: {
@@ -515,7 +515,7 @@ var acceptFriendRequest = function(req, res) {
                         4,
                         User.findByIdAndUpdate(req.user.id, {
                             $push: {
-                                friends: friend.id
+                                followers: friend.id
                             },
                             $pull: {
                                 incomingFriendRequests: id
@@ -601,7 +601,7 @@ var cancelFriendRequest = function(req, res) {
         });
     })();
 };
-var deleteFriend = function(req, res) {
+var deleteFollower = function(req, res) {
     return _async_to_generator(function() {
         var id, friend, user;
         return _ts_generator(this, function(_state) {
@@ -612,7 +612,7 @@ var deleteFriend = function(req, res) {
                         4,
                         User.findByIdAndUpdate(id, {
                             $pull: {
-                                friends: req.user.id
+                                following: req.user.id
                             }
                         }, {
                             new: true
@@ -624,7 +624,7 @@ var deleteFriend = function(req, res) {
                         4,
                         User.findByIdAndUpdate(req.user.id, {
                             $pull: {
-                                friends: id
+                                followers: id
                             }
                         }, {
                             new: true
@@ -632,7 +632,7 @@ var deleteFriend = function(req, res) {
                     ];
                 case 2:
                     user = _state.sent();
-                    console.log("friend deleted", {
+                    console.log("follower deleted", {
                         user: user,
                         friend: friend
                     });
@@ -644,4 +644,47 @@ var deleteFriend = function(req, res) {
         });
     })();
 };
-export { getFriends, getLazyFriends, acceptFriendRequest, sendFriendRequest, cancelFriendRequest, ignoreFriendRequest, deleteFriend,  };
+var unfollow = function(req, res) {
+    return _async_to_generator(function() {
+        var id, friend, user;
+        return _ts_generator(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    id = req.params.id;
+                    return [
+                        4,
+                        User.findByIdAndUpdate(id, {
+                            $pull: {
+                                followers: req.user.id
+                            }
+                        }, {
+                            new: true
+                        })
+                    ];
+                case 1:
+                    friend = _state.sent();
+                    return [
+                        4,
+                        User.findByIdAndUpdate(req.user.id, {
+                            $pull: {
+                                following: id
+                            }
+                        }, {
+                            new: true
+                        })
+                    ];
+                case 2:
+                    user = _state.sent();
+                    console.log("unfollowed", {
+                        user: user,
+                        friend: friend
+                    });
+                    res.send(user);
+                    return [
+                        2
+                    ];
+            }
+        });
+    })();
+};
+export { getFriends, getLazyFriends, acceptFriendRequest, sendFriendRequest, cancelFriendRequest, ignoreFriendRequest, deleteFollower, unfollow };

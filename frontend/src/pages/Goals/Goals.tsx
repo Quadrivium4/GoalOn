@@ -1,28 +1,20 @@
-import React,{ReactNode, useEffect, useState} from 'react';
-import { useAuth, useUser } from '../../context/AuthContext';
-import Pop from '../../components/Pop/Pop';
-import Select from '../../components/Select/Select';
-import Input from '../../components/Input/Input';
+import { ReactNode, useEffect } from 'react';
 import AddGoal from '../../components/AddGoal';
-import "./Goals.css"
 import AddProgress from '../../components/AddProgress';
-import { TMyGoal, useDays } from '../../context/DaysContext';
-import { MdOutlineModeEditOutline } from "react-icons/md";
-import { MdDelete } from "react-icons/md";
-import EditGoal from '../../components/EditGoal';
-import { TDay, TGoalAmountType, TGoalDays, TLike } from '../../controllers/days';
-import { getTimeAmount } from '../../utils';
-import EditProgress from '../../components/EditProgress';
 import DeleteGoal from '../../components/DeleteGoal';
-import { TGoal } from '../../controllers/goals';
-import { assetsUrl, baseUrl, colors } from '../../constants';
+import EditGoal from '../../components/EditGoal';
 import GoalSkeleton from '../../components/GoalSkeleton';
-import Admin from '../Admin/Admin';
-import { getPercentage, getProgressColor } from '../Stats/Graph';
-import ProfileIcon from '../../components/ProfileIcon/ProfileIcon';
+import Pop from '../../components/Pop/Pop';
+import { useAuth, useUser } from '../../context/AuthContext';
+import { TMyGoal, useDays } from '../../context/DaysContext';
 import { usePop } from '../../context/PopContext';
-import { Likes } from '../../components/Likes/Likes';
+import { TDay, TGoalAmountType } from '../../controllers/days';
+import { TGoal } from '../../controllers/goals';
+import { getTimeAmount } from '../../utils';
+import { getPercentage, getProgressColor } from '../Stats/Graph';
+import "./Goals.css";
 import ProgressDays from './ProgressDays';
+import { NotificationBell, NotificationProvider } from '../Settings/Settings';
 
 export function sameDay(date1: Date | number, date2: Date | number){
     date1 = new Date(date1);
@@ -173,24 +165,28 @@ export function SingleGoal({goal, setPop, closePop}: {goal: TMyGoal, setPop: (co
       </div>
     )
 }
+
 //* VERSION 2 */
 function Goals() {
     const user = useUser();
-    const {loading} = useAuth()
+    const {loading} = useAuth();
+
+    console.log("goals rendering")
     //const {goals } = user;
     const {goals, addProgress, daysLoading} = useDays();
-    const [pop, setPop] = useState<ReactNode>();
+    const {setPop} = usePop();
     useEffect(()=>{
-      
+      //console.log("remount")
       // console.log(user)
-      // console.log({goals})
+      //console.log({goals})
       //worker.postMessage("hello")
-    },[goals])
+    },[])
   return (
     <div className='page' id='goals'>
-      {pop && <Pop toggle={() => setPop(undefined)}>{pop}</Pop>}
+      
       <div className="header">
           <h1>Goals</h1>
+            <NotificationBell setPop={setPop} />
       </div>
      
       <div className='goals'>

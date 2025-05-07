@@ -32,7 +32,9 @@ var UserSchema = new mongoose.Schema({
     deletionToken: {
         type: String
     },
-    notifications: []
+    notifications: [],
+    followers: [],
+    following: []
 });
 var User = mongoose.model("User", UserSchema);
 export default User;

@@ -23,11 +23,15 @@ import ProfileIcon from '../../components/ProfileIcon/ProfileIcon';
 import { usePop } from '../../context/PopContext';
 import { Likes } from '../../components/Likes/Likes';
 import { getAmountString, getDate, getTime, isYesterday, sameDay } from './Goals';
-import styles from "./ProgressDays.module.css"
+import styles from "./ProgressDays.module.css";
+import { MdOutlineThumbUpOffAlt } from "react-icons/md";
+import { postLike } from '../../controllers/likes';
 
 export default function ProgressDays({history, setPop, onChange}:{history: TDay[], setPop: (content: ReactNode)=> void, onChange?: (day: TDay)=>void}){
+    const user = useUser();
+    
     return (<div className={styles["sub-progresses"]}>
-            {history.length > 0? history.sort((a, b)=> a.date -b.date).map(day =>{
+            {history.length > 0 && history[0].history.length > 0? history.sort((a, b)=> a.date -b.date).map(day =>{
             
                 return (
                     <div key={day._id} className={styles.day}>
@@ -38,6 +42,9 @@ export default function ProgressDays({history, setPop, onChange}:{history: TDay[
                     day.history.sort((a, b)=> a.date -b.date).map((progress, index) =>{
                         //const strings = getDayStrings()
                         let date = new Date(progress.date);
+
+                        // TODO LIKE PAST PROGRESS
+                        let youLiked = Boolean(progress.likes.find(like => like.userId ===day.goal.userId));
                         return (
                             <>
                             <div className={styles["sub-progress"]} key={progress.date}>
@@ -51,8 +58,10 @@ export default function ProgressDays({history, setPop, onChange}:{history: TDay[
                             <div className={styles.main} style={{display: "flex"}}>
                             <p>{progress.notes}</p>
                             <div className={styles["sidebar"]}>
-                                <MdOutlineModeEditOutline size={24} onClick={() =>setPop(<EditProgress day={day} progress={progress} closePop={()=>setPop(undefined)} onChange={onChange} />)} className='button-icon' />
-                                {/* <MdDelete size={24} onClick={() =>setPop(<EditGoal goal={goal} closePop={() =>setPop(undefined)} />)} className='button-icon' />  */}
+                                {day.goal.userId === user._id? 
+                                <MdOutlineModeEditOutline size={24} onClick={() =>setPop(<EditProgress day={day} progress={progress} closePop={()=>setPop(undefined)} onChange={onChange} />)} className='button-icon' />:null
+                                // <MdOutlineThumbUpOffAlt size={24} onClick={() =>postLike({id: day._id, ...progress})} color={youLiked? colors.primary : ""} /> }
+                                /* <MdDelete size={24} onClick={() =>setPop(<EditGoal goal={goal} closePop={() =>setPop(undefined)} />)} className='button-icon' />  */}
                             </div>
                             </div>
                             {progress.likes.length> 0?<div className='likes' style={{paddingBottom: 5}}>

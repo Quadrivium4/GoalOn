@@ -19,7 +19,7 @@ function LandingPage() {
     }
     useEffect(()=>{
        // console.log("landing mounting")
-        console.log("hello landing", location, params)
+        //console.log("hello landing", location, params)
         window.addEventListener("beforeinstallprompt",setEvent);
         return ()=>{
             window.removeEventListener("beforeinstallpropmpt", setEvent)

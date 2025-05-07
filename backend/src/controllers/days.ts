@@ -88,18 +88,21 @@ export const aggregateDays = (date: number, userId: string | ObjectId):mongoose.
   },
 ]
 const getDays = async(req: ProtectedReq, res) =>{
+    let user: TUser;
     let timestamp: number;
     if(typeof req.query.timestamp == 'string' ) timestamp = parseInt(req.query.timestamp, 10);
+    if(req.query.id) user = await User.findById(req.query.id);
+    if(!user) user = req.user;
     //console.log({timestamp}, req.query)
     const date = new Date(timestamp);
     date.setHours(0,0,0,0);
     
     //const days = await Day.find({userId: req.user.id, $or: [{date: {$gte: date.getTime()}}, {$and: [{"goal.frequency":{$eq: "weekly"} }, {date: {$gte: date.getTime() - week}}]}]});
-    const days = await Day.aggregate(aggregateDays(date.getTime(), req.user.id));
-    console.log("found days: ", days.length, {days}, {goals: req.user.goals}, date, getLastMonday(date), date.getDay())
+    const days = await Day.aggregate(aggregateDays(date.getTime(), user.id));
+    console.log("found days: ", days.length, {days}, {goals: user.goals}, date, getLastMonday(date), date.getDay())
 
-    if(days.length <req.user.goals.length){
-      req.user.goals.map(goal =>{
+    if(days.length <user.goals.length){
+      user.goals.map(goal =>{
         let alreadyExists = days.find(day => day._id.toString() === goal._id.toString());
         if(!alreadyExists) days.push({...goal, history: []})
       })

@@ -1,4 +1,5 @@
 import AddProgress from "../../../components/AddProgress";
+import { useUser } from "../../../context/AuthContext";
 import { usePop } from "../../../context/PopContext";
 import { useStats } from "../../../context/StatsContext";
 import { getGoalAmountString, sumDaysProgress } from "../../Goals/Goals";
@@ -19,6 +20,7 @@ export default function PointPop ({point}: {point: TGraphPoint}){
     const date = new Date(point.date);
     const now = new Date()
     const {setPop} = usePop();
+    const user = useUser();
     console.log(point)
     date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
     let goalDays =  point.history;
@@ -33,10 +35,10 @@ export default function PointPop ({point}: {point: TGraphPoint}){
             </div>
             <PointHeader progressWidth={progressWidth}/>
             <ProgressDays history={point.history} setPop={setPop} onChange={reloadStats}/>
-            <div className={styles.buttons}>
+            {user._id === goal.userId? <div className={styles.buttons}>
                 <button className='outline' onClick={() => setPop(<AddProgress goal={point.goal}  closePop={()=>setPop(undefined)} date={date.getTime()} onRes={reloadStats}/>)}>add progress</button>
                 <button className='outline gray' onClick={() => setPop(<EditGoalAmount goal={point.goal}  date={point.date.getTime()} closePop={() => setPop(undefined)}/>)}>Edit goal</button>
-            </div>
+            </div>: null}
         </div>
     )
 

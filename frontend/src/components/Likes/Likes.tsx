@@ -15,6 +15,7 @@ export function LikesList({likes}:{likes: TLike[]}){
         navigate("/user/" + id);
     }
   return <div className={styles.likesList}>
+    <h2>Likes</h2>
     {
       likes.map(like=>{
         return <div className={styles.like} key={like.userId} onClick={()=>handleClick(like.userId)}>
