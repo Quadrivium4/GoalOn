@@ -10,7 +10,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import Pop from './components/Pop/Pop';
 import { PopProvider } from './context/PopContext';
 import { GlobalProvider } from './GlobalState';
-import { NotificationProvider } from './pages/Settings/Settings';
+import { NotificationProvider } from './pages/Settings/Notifications/Notifications';
 
 // function App() {
 //   return (

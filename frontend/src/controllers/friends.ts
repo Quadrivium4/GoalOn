@@ -6,7 +6,7 @@ import { protectedApi } from "../utils"
 import { TDay, TProgress } from "./days"
 import { TGoal } from "./goals"
 import { TMyGoal } from "../context/DaysContext"
-import { TNotification } from "../pages/Settings/Settings"
+import { TNotification } from "../pages/Settings/Notifications/Notifications"
 import { TFilter } from "../pages/Friends/SearchUser/SearchUser"
 
 export type TFriendsResponse = {
@@ -83,6 +83,11 @@ const getNotifications = async(): Promise<TNotification[]> =>{
 }
 const readNotifications = async(ids: string[]): Promise<TNotification[]> =>{
     let res = await protectedApi.post("/notifications",{ids});
+    
+    return res.data;
+}
+const unfollow = async(id: string): Promise<TUser> =>{
+    let res = await protectedApi.delete("/unfollow/" + id);
     return res.data;
 }
 export  {
@@ -96,4 +101,5 @@ export  {
     cancelFriendRequest,
     ignoreFriendRequest,
     deleteFriend,
+    unfollow
 }

@@ -156,9 +156,11 @@ const DaysProvider = ({children, me}: {children: ReactNode, me?: TUser}) =>{
         })
     },[])
     const addProgress = async(goalId: string, progress: number, notes: string, date: number)=>{
+        setLoading(true)
         let updatedDay = await dayController.addProgress(goalId, progress, notes, date);
         let updatedGoals = getUpdatedGoals(goals, updatedDay);
         setGoals(updatedGoals)
+        setLoading(false);
         return updatedDay
     }
     const addGoal = async(goalForm: TGoalForm) =>{
@@ -214,6 +216,7 @@ const DaysProvider = ({children, me}: {children: ReactNode, me?: TUser}) =>{
         
     }
     const editProgress = async(progress: TProgressForm & {newDate: number})=>{
+        setLoading(true)
         let updatedDay = await dayController.updateProgress(progress);
         let updatedDays;
         let updatedGoals = goals.map(goal =>{
@@ -226,10 +229,12 @@ const DaysProvider = ({children, me}: {children: ReactNode, me?: TUser}) =>{
            
             return {...goal, history: updatedDays}
         })
-        setGoals(updatedGoals)
+        setGoals(updatedGoals);
+        setLoading(false)
         return updatedDay
     }
     const deleteProgress = async(progress: TProgressForm)=>{
+        setLoading(true)
         let updatedDay = await dayController.deleteProgress(progress)
         let updatedDays;
         let updatedGoals = goals.map(goal =>{
@@ -242,7 +247,8 @@ const DaysProvider = ({children, me}: {children: ReactNode, me?: TUser}) =>{
            
             return {...goal, history: updatedDays}
         })
-        setGoals(updatedGoals)
+        setGoals(updatedGoals);
+        setLoading(false)
         return updatedDay
     }
     const likeProgress = async(progress: TProgressForm) =>{

@@ -21,24 +21,39 @@ function User() {
     const {userId} = useParams();
     const [user, setUser] = useState<TUser>();
     const [friends, setFriends] = useState<TUser[]>();
-    const [goals, setGoals] = useState<TMyGoal[]>([])
+    const [goals, setGoals] = useState<TMyGoal[]>([]);
+    const [userLoading, setUserLoading] = useState(true);
+    const [goalsLoading, setGoalsLoading] = useState(true);
     console.log({userId})
     useEffect(() =>{
-        if(userId) getUser(userId).then(res => setUser(res)).catch(err =>{
+        setUserLoading(true)
+        setGoalsLoading(true)
+        if(userId) getUser(userId).then(res => {
+            setUserLoading(false)
+            setUser(res)
+        }).catch(err =>{
+            setUserLoading(false)
             console.log("cannot load user")
         })
         
-        getDays(userId).then(setGoals).catch(err => console.log(err))
+        getDays(userId).then((res) =>{
+            setGoals(res);
+            setGoalsLoading(false);
+        }
+        ).catch(err => {
+             setGoalsLoading(false)
+            console.log(err)
+        })
         return () =>{
         }
     },[])
-    if(!user) return <p>User not found</p>;
+    if(userLoading) return <p>loading...</p>
     return (
         <div id='user' className='page'>
             <div className="header">
             <h1>Profile</h1>
         </div>
-        <div className='info'>
+        {user? <div className='info'>
             <ProfileIcon  name={user.name} _id={user._id} profileImg={user.profileImg} />
             <div>
                 <h2>{user.name}</h2>
@@ -46,14 +61,14 @@ function User() {
                 <p>{user.bio}</p>
                 <FriendButton friend={user}/>
             </div> 
-       </div>
+       </div>: <p>user not found</p>}
        <div className='activities'>
         <h2>Goals</h2>
-        <UserDays days={goals} />
+        {goalsLoading? <p>loading</p>: <UserDays days={goals} />}
         <h2>Stats</h2>
-        <StatsProvider user={user}>
+        {user? <StatsProvider user={user}>
             <Graph/>
-        </StatsProvider>
+        </StatsProvider>: null}
        </div>
         
        

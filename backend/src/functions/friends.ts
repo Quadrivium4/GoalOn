@@ -26,6 +26,7 @@ const deleteRequestsNotification = (notifications: TNotification[], requestUserI
     return newNotifications
 }
 const removeRequestAndNotification = async(requestingId: string, receivingId: string) =>{
+    console.log({requestingId, receivingId})
     const friend = await User.findByIdAndUpdate(requestingId, {
         $pull: {
             outgoingFriendRequests: receivingId
@@ -38,19 +39,17 @@ const removeRequestAndNotification = async(requestingId: string, receivingId: st
             incomingFriendRequests: requestingId,
             notifications: {
                 type: "incoming request",
-                from: {
-                    userId: requestingId
-                }
+                "from.userId": requestingId
             }
         }
     }, { new: true });
-    console.log(user.notifications)
+    console.log("not length", user.notifications.length)
     return user;
 }
 const deleteOldNotifications = async(userId: string, date: number | Date) =>{
     date = new Date(date);
     date.setHours(0,0,0,0);
-    const user =  await User.findByIdAndUpdate(userId,{$pull: {notifications: { date: {$lte: date.getTime()}, status: "read", type: {$ne: ["incoming request"]}}}});
+    const user =  await User.findByIdAndUpdate(userId,{$pull: {notifications: { date: {$lte: date.getTime()}, status: "read", type: {$ne: "incoming request"}}}});
     return user;
 }
 export {

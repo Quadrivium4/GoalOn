@@ -1,0 +1,17 @@
+.notification-bell {
+    position: relative;
+}
+.notification-bell .point {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background-color: var(--primary);
+    color: white;
+    width: 11px;
+    height: 11px;
+    font-size: 14px;
+    border-radius: 20px;
+}

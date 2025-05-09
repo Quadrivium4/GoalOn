@@ -4,7 +4,7 @@ import Select from "../../../components/Select/Select";
 import { TUser, useAuth, useUser } from "../../../context/AuthContext";
 import { usePop } from "../../../context/PopContext";
 import { RiUserAddLine, RiUserFollowLine } from "react-icons/ri";
-import { acceptFriendRequest, cancelFriendRequest, deleteFriend, getFriends, getUsers, sendFriendRequest } from "../../../controllers/friends";
+import { acceptFriendRequest, cancelFriendRequest, deleteFriend, getFriends, getUsers, sendFriendRequest, unfollow } from "../../../controllers/friends";
 import { useEffect, useState } from "react";
 import { GenericAbortSignal } from "axios";
 import { colors } from "../../../constants";
@@ -109,7 +109,7 @@ const UnfollowPop = ({id, name, closePop}: {id:string, name: string, closePop:()
     return (
         <>
             <h2>Unfollow {name}?</h2>
-            <button className='outline error' onClick={()=> deleteFriend(id).then(res=> {
+            <button className='outline error' onClick={()=> unfollow(id).then(res=> {
                 updateUser(res);
                 closePop();
                 })}>unfollow</button>
@@ -123,8 +123,9 @@ type TFriendType = "follower" | "following" | "requested" | "requesting" | "othe
 function getFriendType(user: TUser, friend: TUser) {
     if(user.outgoingFriendRequests.includes(friend._id)) return "requested";
     if(user.incomingFriendRequests.includes(friend._id)) return "requesting";
-    if(user.followers.includes(friend._id)) return "follower";
     if(user.following.includes(friend._id)) return "following";
+    if(user.followers.includes(friend._id)) return "follower";
+  
     return "other"
 } 
 
@@ -134,6 +135,7 @@ export function FriendButton({friend}: {friend: TUser}){
     const {updateUser} = useAuth()
     const {message} = useMessage()
     const type:TFriendType = getFriendType(user, friend);
+    console.log("friend type", {type})
     const handleClick = () =>{
         if(type === "following"){
             setPop(<UnfollowPop id={friend._id} name={friend.name} closePop={()=>setPop(undefined)}/>)
@@ -195,8 +197,8 @@ export default function SearchUser(){
         {loading? <p>loading...</p> 
         :users.length > 0? users.map(randomUser =>{
             //console.log("hey user", user)
-            if(randomUser._id == user._id) return null
-            else return (
+            //if(randomUser._id == user._id) return null
+            return (
                 <div key={randomUser._id} onClick={() =>setPop} className={styles.user}>
                     
                     <ProfileIconLink profileImg={randomUser.profileImg} name={randomUser.name} _id={randomUser._id}/>

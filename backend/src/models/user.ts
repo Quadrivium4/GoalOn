@@ -19,6 +19,57 @@ export interface TNotification {
     }
     status: "read" | "unread"
 }
+const NotificationSchema = new mongoose.Schema({
+    date: {
+        type: Number
+    },
+    content: {
+        type: String
+    },
+    type: String, 
+    from: {
+        name: {
+            type: String
+        }, 
+        userId: {
+            type: String
+        },
+    },
+    status: {
+        type: String
+    }
+})
+// const NotificationSchema = new mongoose.Schema({
+//     userId: {
+//         type: String,
+//         required: true
+//     },
+//     date: {
+//         type: Number,
+//         trim: true,
+//         required: true
+//     },
+//     goal: {
+//         type: Object,
+//         trim: true,
+//         required: true
+//     },
+//     progress: {
+//         type: Number,
+//         trim: true,
+//         default: 0
+//     },
+//     history: {
+//         type: Array, 
+//         default: []
+//     },
+//     status: {
+//         type: String
+//     },
+//     utcDate: {
+//         type: Date
+//     }
+// });
 export interface TUser extends mongoose.Document  {
     name: string,
     email: string,
@@ -69,7 +120,7 @@ const UserSchema = new mongoose.Schema({
     deletionToken: {
         type: String
     },
-    notifications: [],
+    notifications: [NotificationSchema],
     followers: [],
     following: []
 });

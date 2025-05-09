@@ -322,7 +322,7 @@ var getLazyFriends = function(req, res) {
 };
 var getFriends = function(req, res) {
     return _async_to_generator(function() {
-        var id, isFriend, friend, promises, _ref, followers, incomingFriendRequests, outgoingFriendRequests, friendDays;
+        var id, friend, promises, _ref, followers, incomingFriendRequests, outgoingFriendRequests, friendDays;
         return _ts_generator(this, function(_state) {
             switch(_state.label){
                 case 0:
@@ -334,10 +334,6 @@ var getFriends = function(req, res) {
                     console.log("getting friend", {
                         id: id
                     });
-                    isFriend = req.user.friends.find(function(friend) {
-                        return friend.id == id;
-                    });
-                    if (!isFriend) throw new AppError(1, 400, "is not your friend");
                     return [
                         4,
                         User.findById(id)
@@ -419,9 +415,9 @@ var sendFriendRequest = function(req, res) {
                     ];
                 case 1:
                     friend = _state.sent();
-                    if (friend.friends.find(function(id) {
+                    if (friend.followers.find(function(id) {
                         return id == req.user.id;
-                    })) throw new AppError(1, 400, "You and ".concat(friend.name, " are already friend"));
+                    })) throw new AppError(1, 400, "You are already following ".concat(friend.name, " "));
                     if (friend.incomingFriendRequests.includes(req.user.id)) throw new AppError(1, 400, "You already sent a friend request to ".concat(friend.name));
                     return [
                         4,
@@ -494,7 +490,7 @@ var acceptFriendRequest = function(req, res) {
             switch(_state.label){
                 case 0:
                     id = req.params.id;
-                    if (!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, "This person didn't send you any friend request!");
+                    if (!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, "This person didn't send you any following request!");
                     return [
                         4,
                         User.findByIdAndUpdate(id, {
@@ -548,7 +544,6 @@ var ignoreFriendRequest = function(req, res) {
                     console.log("ignoring friend request", {
                         id: id
                     });
-                    if (!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, "No friend request found from him");
                     return [
                         4,
                         removeRequestAndNotification(id, req.user.id)
@@ -576,7 +571,6 @@ var cancelFriendRequest = function(req, res) {
                     console.log("canceling friend request", {
                         id: id
                     });
-                    if (!req.user.outgoingFriendRequests.includes(id)) throw new AppError(1, 400, "You didn't send any friend request to him!");
                     return [
                         4,
                         User.findById(id)
@@ -589,10 +583,9 @@ var cancelFriendRequest = function(req, res) {
                     ];
                 case 2:
                     user = _state.sent();
-                    console.log("cancel friend request", {
-                        user: user,
-                        friend: friend
-                    });
+                    // console.log("cancel friend request", {
+                    //     user, friend
+                    // })
                     res.send(user);
                     return [
                         2

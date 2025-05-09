@@ -164,7 +164,9 @@ const getUsers = async(req, res) =>{
     if(!index) index = 0;
     if(!offset) offset = 20;
     console.log("get users query: ", req.query);
-    let filter: any = {};
+    let filter: any = {
+        _id: {$ne: req.user._id}
+    };
     if(flt === "followers"){
         filter._id = {$in: arrayToOids(req.user.followers)}
     }else if(flt === "following"){

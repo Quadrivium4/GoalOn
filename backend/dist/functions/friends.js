@@ -264,6 +264,10 @@ var removeRequestAndNotification = function(requestingId, receivingId) {
         return _ts_generator(this, function(_state) {
             switch(_state.label){
                 case 0:
+                    console.log({
+                        requestingId: requestingId,
+                        receivingId: receivingId
+                    });
                     return [
                         4,
                         User.findByIdAndUpdate(requestingId, {
@@ -284,9 +288,7 @@ var removeRequestAndNotification = function(requestingId, receivingId) {
                                 incomingFriendRequests: requestingId,
                                 notifications: {
                                     type: "incoming request",
-                                    from: {
-                                        userId: requestingId
-                                    }
+                                    "from.userId": requestingId
                                 }
                             }
                         }, {
@@ -295,7 +297,7 @@ var removeRequestAndNotification = function(requestingId, receivingId) {
                     ];
                 case 2:
                     user = _state.sent();
-                    console.log(user.notifications);
+                    console.log("not length", user.notifications.length);
                     return [
                         2,
                         user
@@ -322,9 +324,7 @@ var deleteOldNotifications = function(userId, date) {
                                     },
                                     status: "read",
                                     type: {
-                                        $ne: [
-                                            "incoming request"
-                                        ]
+                                        $ne: "incoming request"
                                     }
                                 }
                             }

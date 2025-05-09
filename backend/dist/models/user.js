@@ -1,4 +1,24 @@
 import mongoose from "mongoose";
+var NotificationSchema = new mongoose.Schema({
+    date: {
+        type: Number
+    },
+    content: {
+        type: String
+    },
+    type: String,
+    from: {
+        name: {
+            type: String
+        },
+        userId: {
+            type: String
+        }
+    },
+    status: {
+        type: String
+    }
+});
 var UserSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -32,7 +52,9 @@ var UserSchema = new mongoose.Schema({
     deletionToken: {
         type: String
     },
-    notifications: [],
+    notifications: [
+        NotificationSchema
+    ],
     followers: [],
     following: []
 });

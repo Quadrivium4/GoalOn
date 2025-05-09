@@ -133,8 +133,8 @@ const getFriends = async (req, res) => {
     const {id} = req.params;
     if(id){
         console.log("getting friend", { id })
-        let isFriend = req.user.friends.find(friend => friend.id == id);
-        if(!isFriend) throw new AppError(1, 400, "is not your friend")
+        //let isFriend = req.user.friends.find(friend => friend.id == id);
+        //if(!isFriend) throw new AppError(1, 400, "is not your friend")
         const friend = await User.findById(id);
         return res.send({
             id: friend.id,
@@ -176,7 +176,7 @@ const getFriends = async (req, res) => {
 const sendFriendRequest = async(req, res) =>{
     const {id} = req.params;
     const friend = await User.findById(id);
-    if(friend.friends.find(id =>id == req.user.id)) throw new AppError(1, 400, `You and ${friend.name} are already friend`);
+    if(friend.followers.find(id =>id == req.user.id)) throw new AppError(1, 400, `You are already following ${friend.name} `);
     if(friend.incomingFriendRequests.includes(req.user.id)) throw new AppError(1, 400, `You already sent a friend request to ${friend.name}`);
     await addNotification(friend.id, {
       date: Date.now(),
@@ -217,7 +217,7 @@ const acceptedFriendNotification = (name: string, id: string) => ({
 })
 const acceptFriendRequest = async(req: ProtectedReq, res) =>{
     const { id } = req.params;
-    if(!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, "This person didn't send you any friend request!")
+    if(!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, "This person didn't send you any following request!")
     const friend = await User.findByIdAndUpdate(id, {
         $push: {
             following: req.user.id,
@@ -247,7 +247,7 @@ const acceptFriendRequest = async(req: ProtectedReq, res) =>{
 const ignoreFriendRequest = async (req, res) => {
     const { id } = req.params;
     console.log("ignoring friend request", {id})
-    if (!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, `No friend request found from him`);
+    //if (!req.user.incomingFriendRequests.includes(id)) throw new AppError(1, 400, `No friend request found from him`);
     const user = await removeRequestAndNotification(id, req.user.id);
     // console.log("cancel friend request", {
     //     user,
@@ -258,13 +258,13 @@ const ignoreFriendRequest = async (req, res) => {
 const cancelFriendRequest = async (req, res) => {
     const { id } = req.params;
     console.log("canceling friend request", {id})
-    if (!req.user.outgoingFriendRequests.includes(id)) throw new AppError(1, 400, `You didn't send any friend request to him!`);
+    //if (!req.user.outgoingFriendRequests.includes(id)) throw new AppError(1, 400, `You didn't send any friend request to him!`);
     const friend = await User.findById(id)
     const user = await removeRequestAndNotification(req.user.id, id)
 
-    console.log("cancel friend request", {
-        user, friend
-    })
+    // console.log("cancel friend request", {
+    //     user, friend
+    // })
     res.send(user)
     
 

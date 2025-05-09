@@ -10,7 +10,7 @@ import { CredentialResponse } from "@react-oauth/google";
 import { CanceledError } from "axios";
 import { stat } from "fs";
 import { putUser, TUserForm } from "../controllers/user";
-import { TNotification } from "../pages/Settings/Settings";
+import { TNotification } from "../pages/Settings/Notifications/Notifications";
 const authState: TAuthStateProps = {
     logged: false,
     loading: true,

@@ -14,7 +14,7 @@ import { getTimeAmount } from '../../utils';
 import { getPercentage, getProgressColor } from '../Stats/Graph';
 import "./Goals.css";
 import ProgressDays from './ProgressDays';
-import { NotificationBell, NotificationProvider } from '../Settings/Settings';
+import { NotificationBell } from '../Settings/Notifications/Notifications';
 
 export function sameDay(date1: Date | number, date2: Date | number){
     date1 = new Date(date1);
