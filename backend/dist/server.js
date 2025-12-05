@@ -129,7 +129,7 @@ import User from "./models/user.js";
 import fileUpload from "express-fileupload";
 import errorHandler from "./middlewares/errorHandler.js";
 var app = express();
-var port = 5000;
+var port = process.env.PORT;
 app.use(express.json());
 app.use(cors());
 app.use(fileUpload());

@@ -1,0 +1,26 @@
+.loader {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.circle {
+    box-sizing: border-box;
+    width: 60px;
+    height: 60px;
+    border: 10px solid rgb(20, 20, 20);
+    border-top: 10px solid rgb(85, 199, 82);
+    animation: spin 2s linear infinite;
+    border-radius: 100px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

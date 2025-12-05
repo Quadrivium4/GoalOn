@@ -8,6 +8,7 @@ import { TGoal } from "./goals"
 import { TMyGoal } from "../context/DaysContext"
 import { TNotification } from "../pages/Settings/Notifications/Notifications"
 import { TFilter } from "../pages/Friends/SearchUser/SearchUser"
+import { TFile } from "../components/ProfileIcon/ProfileIcon"
 
 export type TFriendsResponse = {
     friends: TUser[],
@@ -26,7 +27,7 @@ export type TFriendsResponse = {
 export type TLazyFriendsResponse = {
         _id: string,
         name: string,
-        profileImg: string | undefined,
+        profileImg: TFile | undefined,
         goals: TMyGoal[],
         goalsInfo: TGoal[]
     }[]

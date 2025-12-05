@@ -14,8 +14,10 @@ const updateProgressLikes = async(req: ProtectedReq, res: Response) =>{
     addNotification(day.userId, {
         type: "like",
         from: {
+            profileImg: req.user.profileImg,
             userId: req.user.id,
-            name: req.user.name
+            name: req.user.name,
+
         },
         status: "unread",
         date: Date.now(),

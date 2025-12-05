@@ -126,7 +126,6 @@ import { deleteGoal, postGoal, putGoal, putGoalAmount } from "./controllers/goal
 import { deleteProgress, getDays, getStats, postProgress, updateProgress } from "./controllers/days.js";
 import { acceptFriendRequest, cancelFriendRequest, deleteFollower, unfollow, getFriends, getLazyFriends, ignoreFriendRequest, sendFriendRequest } from "./controllers/friends.js";
 import { deleteProgressLikes, updateProgressLikes } from "./controllers/likes.js";
-import { downloadFile } from "./utils/files.js";
 import AppError from "./utils/appError.js";
 import fs from "fs";
 var publicRouter = express.Router();
@@ -199,5 +198,5 @@ protectedRouter.delete("/ignore-friend-request/:id", tryCatch(ignoreFriendReques
 protectedRouter.delete("/delete-friend/:id", tryCatch(deleteFollower));
 protectedRouter.delete("/unfollow/:id", tryCatch(unfollow));
 protectedRouter.route("/user/upload-profile-image").post(tryCatch(profileImgUpload));
-publicRouter.get("/file/:id", tryCatch(downloadFile));
+//publicRouter.get("/file/:id", tryCatch(downloadFile))
 export { publicRouter, protectedRouter };

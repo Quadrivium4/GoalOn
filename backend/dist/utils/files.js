@@ -118,110 +118,23 @@ function _ts_generator(thisArg, body) {
         };
     }
 }
-import dotenv from "dotenv";
-dotenv.config();
-import { DB } from "../db.js";
-import AppError from "./appError.js";
-import { Readable } from "stream";
-import { ObjectId } from "mongodb";
+import "dotenv";
+import { v2 as cloudinary } from "cloudinary";
+//const cloudinary = v2;
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 var saveFile = function(file) {
     return _async_to_generator(function() {
-        var stream, result;
-        return _ts_generator(this, function(_state) {
-            stream = Readable.from(file.data);
-            result = stream.pipe(DB.files.openUploadStream(file.name));
-            console.log(result.id);
-            return [
-                2,
-                result.id
-            ];
-        });
-    })();
-};
-var saveFiles = function(files) {
-    return _async_to_generator(function() {
-        var promises, fileIds;
+        var b64, dataURI, result, error;
         return _ts_generator(this, function(_state) {
             switch(_state.label){
                 case 0:
-                    promises = files.map(function(file) {
-                        return saveFile(file);
-                    });
-                    return [
-                        4,
-                        Promise.all(promises)
-                    ];
-                case 1:
-                    fileIds = _state.sent();
-                    return [
-                        2,
-                        fileIds
-                    ];
-            }
-        });
-    })();
-};
-var getFile = function(id) {
-    return _async_to_generator(function() {
-        var cursor, values;
-        return _ts_generator(this, function(_state) {
-            switch(_state.label){
-                case 0:
-                    if (id) cursor = DB.files.find({
-                        _id: new ObjectId(id)
-                    });
-                    else {
-                        cursor = DB.files.find({});
-                    }
-                    return [
-                        4,
-                        cursor.toArray()
-                    ];
-                case 1:
-                    values = _state.sent();
-                    return [
-                        2,
-                        values
-                    ];
-            }
-        });
-    })();
-};
-var downloadFile = function(req, res) {
-    return _async_to_generator(function() {
-        var id, stream;
-        return _ts_generator(this, function(_state) {
-            switch(_state.label){
-                case 0:
-                    id = req.params.id;
-                    if (!ObjectId.isValid(id)) throw new AppError(1, 400, "invalid id: " + id);
-                    return [
-                        4,
-                        DB.files.openDownloadStream(new ObjectId(id))
-                    ];
-                case 1:
-                    stream = _state.sent();
-                    stream.on("error", function(err) {
-                        return res.send({
-                            err: err.message
-                        });
-                    });
-                    return [
-                        2,
-                        stream.pipe(res)
-                    ];
-            }
-        });
-    })();
-};
-var deleteFile = function(id) {
-    return _async_to_generator(function() {
-        var stream, err;
-        return _ts_generator(this, function(_state) {
-            switch(_state.label){
-                case 0:
-                    if (!id) throw new AppError(1, 400, "invalid id");
-                    if (!ObjectId.isValid(id)) throw new AppError(1, 400, "invalid id");
+                    console.log("saving file.. " + file.name);
+                    b64 = Buffer.from(file.data).toString("base64");
+                    dataURI = "data:" + file.mimetype + ";base64," + b64;
                     _state.label = 1;
                 case 1:
                     _state.trys.push([
@@ -232,31 +145,91 @@ var deleteFile = function(id) {
                     ]);
                     return [
                         4,
-                        DB.files.delete(new ObjectId(id))
+                        cloudinary.uploader.upload(dataURI)
                     ];
                 case 2:
-                    stream = _state.sent();
+                    result = _state.sent();
+                    console.log(result);
                     return [
-                        3,
-                        4
+                        2,
+                        {
+                            url: result.url,
+                            name: file.name,
+                            public_id: result.public_id
+                        }
                     ];
                 case 3:
-                    err = _state.sent();
-                    console.log({
-                        err: err
-                    });
+                    error = _state.sent();
+                    console.log("cloudinary error", error);
                     return [
                         3,
                         4
                     ];
                 case 4:
-                    console.log(stream);
                     return [
-                        2,
-                        stream
+                        2
                     ];
             }
         });
     })();
 };
-export { saveFiles, getFile, downloadFile, deleteFile, saveFile };
+var deleteFile = function(file) {
+    return _async_to_generator(function() {
+        return _ts_generator(this, function(_state) {
+            switch(_state.label){
+                case 0:
+                    console.log("deleting file", file);
+                    if (!file.public_id) return [
+                        3,
+                        2
+                    ];
+                    return [
+                        4,
+                        cloudinary.uploader.destroy(file.public_id)
+                    ];
+                case 1:
+                    _state.sent();
+                    return [
+                        3,
+                        3
+                    ];
+                case 2:
+                    console.log("no public id in deleting file...");
+                    _state.label = 3;
+                case 3:
+                    return [
+                        2
+                    ];
+            }
+        });
+    })();
+};
+// const saveFiles = async(files)=>{
+//     console.log("saving multiple files", {files})
+//     const promises = [];
+//     for (const file of files) {
+//         promises.push(saveFile(file));
+//     }
+//     const results = await Promise.all(promises);
+//     console.log({results});
+//     return results;
+// }
+// const getFile = async(id)=>{
+//     let cursor; 
+//     if (id) cursor = bucket.actions.find({_id: new ObjectId(id)});
+//     else {
+//         cursor = bucket.actions.find({});
+//     }
+//     const values = await cursor.toArray();
+//     return values
+// }
+// const downloadFile = async(req, res) =>{
+//     console.log({params: req.params})
+//     let id = req.params.id;
+//     let stream = await bucket.actions.openDownloadStream(new ObjectId(id));
+//     stream.on("error",(err)=>{
+//         return res.send({err: err.message})
+//     })
+//     return stream.pipe(res);
+// }
+export { saveFile, deleteFile };

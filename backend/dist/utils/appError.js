@@ -116,22 +116,21 @@ function _is_native_reflect_construct() {
         return !!result;
     })();
 }
-import path from "path";
-Error.stackTraceLimit = 1;
-Error.prepareStackTrace = function(_, callSites) {
-    console.log(_);
-    var stack = [];
-    callSites.forEach(function(call) {
-        stack.push({
-            file: path.basename(call.getFileName()),
-            function: call.getFunctionName(),
-            line: call.getLineNumber(),
-            path: call.getFileName()
-        });
-        console.log(call.getFileName());
-    });
-    return stack;
-};
+// Error.stackTraceLimit = 1;
+// Error.prepareStackTrace = (_, callSites) => {
+//     console.log(_)
+//     let stack = []
+//     callSites.forEach(call => {
+//         stack.push({
+//             file: path.basename(call.getFileName()),
+//             function: call.getFunctionName(),
+//             line: call.getLineNumber(),
+//             path: call.getFileName(),
+//         })
+//         console.log(call.getFileName())
+//     })
+//     return stack
+// }
 var AppError = /*#__PURE__*/ function(Error1) {
     "use strict";
     _inherits(AppError, Error1);

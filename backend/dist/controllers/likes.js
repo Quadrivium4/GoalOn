@@ -151,6 +151,7 @@ var updateProgressLikes = function(req, res) {
                     addNotification(day.userId, {
                         type: "like",
                         from: {
+                            profileImg: req.user.profileImg,
                             userId: req.user.id,
                             name: req.user.name
                         },

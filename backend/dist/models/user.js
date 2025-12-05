@@ -47,7 +47,9 @@ var UserSchema = new mongoose.Schema({
     incomingFriendRequests: [],
     outgoingFriendRequests: [],
     profileImg: {
-        type: String
+        public_id: String,
+        url: String,
+        name: String
     },
     deletionToken: {
         type: String

@@ -1,3 +1,4 @@
+import { TFile } from "../components/ProfileIcon/ProfileIcon"
 import { TMyGoal } from "../context/DaysContext"
 import { protectedApi } from "../utils"
 import { TGoal } from "./goals"
@@ -5,7 +6,7 @@ import { TGoal } from "./goals"
 export type TLike = {
     userId: string,
     username: string,
-    profileImg: string
+    profileImg: TFile
 }
 export type TProgress = {
     date: number,

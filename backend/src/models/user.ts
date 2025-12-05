@@ -1,4 +1,5 @@
 import mongoose,  { Types }  from "mongoose";
+import { TFile } from "../utils/files.js";
 export interface TGoal  {
     _id: Types.ObjectId,
     title: string,
@@ -16,6 +17,7 @@ export interface TNotification {
     from: {
         name: string,
         userId: string,
+        profileImg?: TFile,
     }
     status: "read" | "unread"
 }
@@ -75,7 +77,7 @@ export interface TUser extends mongoose.Document  {
     email: string,
     password: string,
     tokens: string[],
-    profileImg: string,
+    profileImg: TFile,
     goals: TGoal[],
     friends: string[],
     bio: string,
@@ -115,7 +117,9 @@ const UserSchema = new mongoose.Schema({
     incomingFriendRequests: [],
     outgoingFriendRequests: [],
     profileImg: {
-        type: String
+        public_id: String,
+        url: String,
+        name: String
     },
     deletionToken: {
         type: String

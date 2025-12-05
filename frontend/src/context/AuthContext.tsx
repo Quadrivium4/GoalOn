@@ -11,6 +11,7 @@ import { CanceledError } from "axios";
 import { stat } from "fs";
 import { putUser, TUserForm } from "../controllers/user";
 import { TNotification } from "../pages/Settings/Notifications/Notifications";
+import { TFile } from "../components/ProfileIcon/ProfileIcon";
 const authState: TAuthStateProps = {
     logged: false,
     loading: true,
@@ -21,7 +22,7 @@ export type TUser = {
     _id: string
     name: string
     email: string
-    profileImg: string,
+    profileImg: TFile,
     goals: TGoal[],
     friends: string[],
     bio: string,

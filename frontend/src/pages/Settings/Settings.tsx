@@ -95,9 +95,11 @@ function Settings() {
       </div>
       
       <div className='info'>
-        <ImageUpload onUpload={(id) => updateUserProfileImage(id)}>
-          <ProfileIcon profileImg={user.profileImg} name={user.name} _id={user._id}></ProfileIcon>
-        </ImageUpload>
+        <div className='profile-img-uploader'>
+          <ImageUpload onUpload={(id) => updateUserProfileImage(id)}>
+            <ProfileIcon profileImg={user.profileImg} name={user.name} _id={user._id} size={60}></ProfileIcon>
+          </ImageUpload>
+        </div>
          <div className='text'>
           <div className='edit'>
              {isEditing !== "name"?  

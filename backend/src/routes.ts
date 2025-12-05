@@ -8,7 +8,6 @@ import {acceptFriendRequest, cancelFriendRequest, deleteFollower, unfollow, getF
 import { TUser } from "./models/user.js";
 import { deleteProgressLikes, updateProgressLikes } from "./controllers/likes.js";
 import { ParamsDictionary, Query, Request as CoreRequest } from "express-serve-static-core";
-import { downloadFile } from "./utils/files.js";
 import AppError from "./utils/appError.js";
 import fs from "fs";
 import { ObjectId } from "mongodb";
@@ -114,7 +113,7 @@ protectedRouter.delete("/unfollow/:id", tryCatch(unfollow))
 protectedRouter.route("/user/upload-profile-image")
     .post(tryCatch(profileImgUpload))
 
-publicRouter.get("/file/:id", tryCatch(downloadFile))
+//publicRouter.get("/file/:id", tryCatch(downloadFile))
 
 
 export {publicRouter, protectedRouter}
