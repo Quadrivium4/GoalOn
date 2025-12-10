@@ -135,25 +135,40 @@ export function FriendButton({friend}: {friend: TUser}){
     const {updateUser} = useAuth()
     const {message} = useMessage()
     const type:TFriendType = getFriendType(user, friend);
+    const [loading, setLoading] = useState(false);
     console.log("friend type", {type})
     const handleClick = () =>{
+        setLoading(true);
         if(type === "following"){
-            setPop(<UnfollowPop id={friend._id} name={friend.name} closePop={()=>setPop(undefined)}/>)
+            setPop(<UnfollowPop id={friend._id} name={friend.name} closePop={()=>{
+                setPop(undefined);
+                setLoading(false);
+            }
+                
+            }/>)
+
         }else if(type === "requested"){
             cancelFriendRequest(friend._id).then(res=>{
-                updateUser(res)
+                updateUser(res);
+                setLoading(false);
             }).catch(err=>{
                 message.error(err.message)
+            }).finally(()=>{
+                setLoading(false);
             })
         }else if(type === "requesting"){
             acceptFriendRequest(friend._id).catch(err=>{
                 message.error(err.message)
+            }).finally(()=>{
+                setLoading(false);
             })
         }else if(type === "follower"){
              sendFriendRequest(friend._id).then(res =>
                 updateUser(res)
             ).catch(err=>{
                 message.error(err.message)
+            }).finally(()=>{
+                setLoading(false);
             })
         }else
             {
@@ -161,12 +176,15 @@ export function FriendButton({friend}: {friend: TUser}){
                 updateUser(res)
             ).catch(err=>{
                 message.error(err.message)
+            }).finally(()=>{
+                setLoading(false);
             })
         }
     }
     return (
         <button className='outline gray' onClick={handleClick}>
         {
+            loading? <p>loading...</p> :
             type === "requested"? <><p>requested</p> <RxCross2 size={iconSize} color={colors.error} /></>:
             type === "requesting"? <><p>accept</p> <RiUserFollowLine size={iconSize} color={colors.primary}/> </>:
             type ==="follower"? <><p>follow back</p><RiUserAddLine  size={iconSize}  color={colors.primary} /></>: 

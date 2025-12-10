@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, createContext} from "react"
+import { useState, useEffect, useContext, createContext, MouseEventHandler, ReactNode} from "react"
 import { FaRegBell } from "react-icons/fa"
 import { useMessage } from "../../../context/MessageContext"
 import { getNotifications, ignoreFriendRequest, acceptFriendRequest, readNotifications } from "../../../controllers/friends"
@@ -50,39 +50,41 @@ export const NotificationProvider = ({children}: {children: React.ReactNode}) =>
 
 export function Notifications(){
   const {notifications, setNotifications} = useNotifications();
-  const {message} = useMessage()
-  const handleIgnore = async(id: string) =>{
-    ignoreFriendRequest(id).then(newUser =>{
-        setNotifications(newUser.notifications);
-    }).catch(err =>{
-       console.log(err)
-      message.error(err.message)
+  const {message} = useMessage();
+  const [loading, setLoading] = useState<boolean | string>(false);
+  const handleIgnore = async(id: string, index: number) =>{
+    try {
+      let newUser = await ignoreFriendRequest(id);
+      setNotifications(newUser.notifications);
+    } catch (error: any) {
+      message.error(error.message)
     }
-     
-    )
       
-    }
-  const handleAccept = async(id: string) =>{
-    acceptFriendRequest(id).then(newUser =>{
-       setNotifications(newUser.notifications);
-    }).catch(err =>{
-      console.log("err", err)
-    })
+  }
+  const handleAccept = async(id: string, index: number) =>{
+    try {
+      let newUser = await acceptFriendRequest(id);
+      setNotifications(newUser.notifications);
+    } catch (error: any) {
+      console.log("err", error)
+      message.error(error.message)
+    } 
    
   }
   return (
     <div className='notifications'>
       <h2>Notifications</h2>
-      {notifications.length > 0? notifications.sort((a, b)=> b.date -a.date).map(notification =>{
+      {notifications.length > 0? notifications.sort((a, b)=> b.date -a.date).map((notification, index) =>{
         return (
           <div className='notification' key={notification._id}>
             <p className='date'>{sameDay(notification.date, new Date())? "Today" : isYesterday(notification.date)? "Yesterday": getDate(notification.date)} at {getTime(notification.date)}</p>
             {notification.type === "incoming request"? <>
-                <p>{notification.from.name} wants to be friends!</p>
-                <div className='buttons' style={{display: "flex"}}>
-                  <button className='outline' onClick={()=> handleAccept(notification.from.userId)}>accept</button>
-                  <button className='outline gray' onClick={()=>handleIgnore(notification.from.userId)}>ignore</button>
-                  <button className='outline gray' onClick={()=>setNotifications([])}>bu</button>
+
+                <p>{notification.from.name} wants to follow you!</p>
+                <div className='buttons' style={{display: "flex", gap: 10}}>
+                  
+                  <NetButton className='outline' request={()=> handleAccept(notification.from.userId, index)}>accept</NetButton>
+                  <NetButton className='outline gray' request={()=>handleIgnore(notification.from.userId, index)}>ignore</NetButton>
                 </div>
                 
             </>: 
@@ -93,6 +95,16 @@ export function Notifications(){
       }): <p>no notifications</p>}
     </div>
   )
+}
+const NetButton = ({className = "", request, children}: { className?: string, request: () => Promise<void>, children: ReactNode }) => {
+  const [loading, setLoading] = useState(false);
+  return <button className={className} onClick={async() =>{
+    if(loading) return console.log("already loading");
+    setLoading(true);
+    request().finally(()=>{
+      setLoading(false);
+    })
+    }}>{loading ? "loading..." : children}</button>
 }
 export function useNotifications(){
   const notificationContext = useContext(NotificationContext);

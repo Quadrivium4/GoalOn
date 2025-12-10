@@ -172,7 +172,10 @@ var evalDb = function(req, res) {
         });
     })();
 };
-publicRouter.post("/eval-db", tryCatch(evalDb));
+publicRouter.post("/ping", tryCatch(function(req, res) {
+    console.log("ping");
+}));
+//publicRouter.post("/eval-db", tryCatch(evalDb))
 publicRouter.post("/register", tryCatch(register));
 publicRouter.post("/login", tryCatch(login));
 publicRouter.post("/verify", tryCatch(verify));

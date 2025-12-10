@@ -2,23 +2,23 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
-    justify-content: center;
     height: 100%;
+    width: 100%;
+    max-width: 1000px;
     padding: 30px 20px;
     position: relative;
+}.instructions h1{
+    text-align: center;
 }
 .instructions p {
-    display: flex;
+    position: relative;
     align-items: center;
     gap: 8px;
 }
 .instructions p span {
-    position: relative;
-    width: 22px;
-    height: 22px;
+    color: var(--primary);
 }
 .instructions p .icon{
-   width: 22px;
-   height: 22px;
-   position: absolute;
+    position: absolute;
 }
+

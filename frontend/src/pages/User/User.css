@@ -1,4 +1,15 @@
 @import "../../root.css";
+#user{
+    position: relative;
+}
+.scrollable {
+    height: 100%;
+    overflow: auto;
+}
+.scroll-view{
+    
+    height: calc(100% + 100px);
+}
 #user .activities h2 {
     margin-top: 10px;
 }

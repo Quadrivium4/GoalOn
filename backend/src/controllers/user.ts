@@ -203,11 +203,14 @@ const readNotifications = async(req: ProtectedReq, res) =>{
     console.log(req.body)
     const {ids} = req.body;
     const newNotifications = req.user.notifications.map(not =>{
-        if(ids.includes(not._id)){
-            not.status = 'read'
+        console.log({_id: not._id, ids})
+        if(ids.includes(not._id.toString())){
+            console.log("changing read status");
+            not.status = 'read';
         }
         return not
     })
+    console.log({newNotifications});
     const user = await User.findByIdAndUpdate(req.user.id, {notifications: newNotifications }, {new: true});
     res.send(user.notifications)
 

@@ -7,6 +7,7 @@ import { sameDay, getTime, isYesterday, formatDate, getAmountString } from "../.
 import { normalizePercentage, getPercentage, getProgressColor } from "../../Stats/Graph";
 import { sumDoubleDayProgress } from "../Friends";
 import styles from "./UserDays.module.css"
+import { TGoal } from "../../../controllers/goals";
 export function Day({day}: {day: TDay}){
     const user = useUser();
     const {unlikeProgress, likeProgress} = useDays();
@@ -71,11 +72,16 @@ export function Day({day}: {day: TDay}){
             </div>
     )
 }
-export default function UserDays({ days }: {days: TMyGoal[]}){
+export default function UserDays({ days, goals }: {days: TMyGoal[], goals: TGoal[]}){
     
     return (
         <div className={styles.days}>
-        {days.map(goal =>{
+        {goals.map(info =>{
+            let goal: TMyGoal | undefined = days.find(day => day._id == info._id);
+            if(!goal) goal = {
+                ...info,
+                history: []
+            }
             let dayProgress = sumDoubleDayProgress(goal)
             let normalizedPercentage = normalizePercentage(getPercentage(goal.amount, dayProgress));
             return (

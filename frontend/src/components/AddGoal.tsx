@@ -29,7 +29,7 @@ function AddGoal({closePop}: {closePop: () =>void}) {
     <div className='form'>
         <h2>New Goal</h2>
         <input placeholder='title' value={title} onChange={(e)=> setTitle(e.target.value)}></input>
-        <Select options={["daily", "weekly", "monthly"]}  placeholder="frequency" onSelect={setFrequency}/>
+        <Select options={["daily", "weekly"]}  placeholder="frequency" onSelect={setFrequency}/>
         <Select options={["distance", "time", "other"] } placeholder='type' onSelect={(option) => {
             setSelectedOption(option);
             setAmount(0);

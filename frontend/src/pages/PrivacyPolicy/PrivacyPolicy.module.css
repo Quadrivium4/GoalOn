@@ -1,0 +1,33 @@
+.page{
+    display: flex;
+    position: relative;
+    flex-grow: 1;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1000px;
+    padding: 30px 20px;
+    background-color: var(--medium);
+    overflow: auto;
+    
+}
+.page h1{
+    font-size: 28px;
+    text-align: center;
+}
+.title {
+    font-weight: 500;
+}
+.links {
+    display: flex;
+    gap: 10px;
+    font-weight: 300;
+    color: rgb(102, 190, 97);
+}
+.section{
+    padding:  10px 0px;
+    width: 100%;
+    max-width: 1000px;
+}
+.links a {
+    text-decoration: underline;
+}

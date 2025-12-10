@@ -683,10 +683,18 @@ var readNotifications = function(req, res) {
                     console.log(req.body);
                     ids = req.body.ids;
                     newNotifications = req.user.notifications.map(function(not) {
-                        if (ids.includes(not._id)) {
+                        console.log({
+                            _id: not._id,
+                            ids: ids
+                        });
+                        if (ids.includes(not._id.toString())) {
+                            console.log("changing read status");
                             not.status = 'read';
                         }
                         return not;
+                    });
+                    console.log({
+                        newNotifications: newNotifications
                     });
                     return [
                         4,

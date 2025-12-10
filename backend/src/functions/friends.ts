@@ -39,7 +39,7 @@ const removeRequestAndNotification = async(requestingId: string, receivingId: st
             incomingFriendRequests: requestingId,
             notifications: {
                 type: "incoming request",
-                "from.userId": requestingId
+                "from.userId": requestingId.toString()
             }
         }
     }, { new: true });
@@ -47,9 +47,14 @@ const removeRequestAndNotification = async(requestingId: string, receivingId: st
     return user;
 }
 const deleteOldNotifications = async(userId: string, date: number | Date) =>{
+    //console.log("deleting old notifications");
     date = new Date(date);
     date.setHours(0,0,0,0);
-    const user =  await User.findByIdAndUpdate(userId,{$pull: {notifications: { date: {$lte: date.getTime()}, status: "read", type: {$ne: "incoming request"}}}});
+    // const user = await User.find({"notifications.date": {$lte: date.getTime()}});
+    // console.log(user, date.getTime())
+    console.log(date.getTime(), "deleting notifications");
+    const user =  await User.findByIdAndUpdate(userId,{$pull: {notifications: { date: {$lte: date.getTime()}, status: "read", type: {$nin: ["incoming request", "outgoing request"]}}}},{new: true});
+
     return user;
 }
 export {

@@ -13,7 +13,7 @@ export interface TNotification {
     _id: string,
     date: number,
     content: string,
-    type: "like" | "incoming request" | "accepted request" | "comment", 
+    type: "like" | "incoming request" | "accepted request" | "comment" | "new follower", 
     from: {
         name: string,
         userId: string,

@@ -9,6 +9,7 @@ import { MdIosShare } from "react-icons/md";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { VscDesktopDownload } from "react-icons/vsc";
 import "./DownloadPage.css"
+import { colors } from '../constants';
 
 function DownloadPage() {
     const {userId, token} = useParams();
@@ -32,27 +33,27 @@ function DownloadPage() {
     return (
         <>
         <div className="instructions">
-        <Link to={"/"} style={{position: "absolute", top: 10, left: 10}}>{"<"} Back</Link>
+        <Link to={"/"}>{"<"} Back</Link>
         <h1>Download</h1>
         <section id='iphone'>
             <h2>iPhone</h2>
-            <p>In Safari browser, tap on the share button <span><MdIosShare  color='white' className='icon'></MdIosShare></span></p>
+            <p>In Safari browser, tap on the share button <span className="icon"><MdIosShare  color={colors.primary} style={{marginLeft: 5}} size={20} className='icon'></MdIosShare></span></p>
             {/* <img src={iphoneImg1} alt='goals screenshot' className='app-screenshot1' /> */}
-            <p>Then tap on 'Add to Home Screen' and then on 'Add'</p>
+            <p>Then tap on '<span>Add to Home Screen</span>' and then on '<span>Add</span>'</p>
             {/* <img src={iphoneImg2} alt='goals screenshot' className='app-screenshot1' /> */}
         </section>
         <section id='android'>
            <h2>Android</h2>
-            <p>In Chrome browser, tap on the 3 dots <span><BsThreeDotsVertical color='white' style={{top: 3}} className='icon'/></span></p>
+            <p>In Chrome browser, tap on the 3 dots <span className="icon"><BsThreeDotsVertical color={colors.primary} size={20} className='icon'/></span></p>
             {/* <img src={iphoneImg1} alt='goals screenshot' className='app-screenshot1' /> */}
-            <p>Then tap on 'Install'</p>
+            <p>Then tap on '<span>Install</span>'</p>
             {/* <img src={iphoneImg2} alt='goals screenshot' className='app-screenshot1' /> */}
         </section>
         <section id='desktop'>
            <h2>Desktop</h2>
-            <p>Inside the search bar, on the right click on the download icon <span><VscDesktopDownload  color='white' className='icon'/></span></p>
+            <p>Inside the search bar, on the right click on the download icon <span className="icon"><VscDesktopDownload  color={colors.primary} size={20}   style={{marginLeft: 5}} className='icon'/></span></p>
             {/* <img src={iphoneImg1} alt='goals screenshot' className='app-screenshot1' /> */}
-            <p>Then tap on 'Install'</p>
+            <p>Then tap on '<span>Install</span>'</p>
             {/* <img src={iphoneImg2} alt='goals screenshot' className='app-screenshot1' /> */}
         </section>
        

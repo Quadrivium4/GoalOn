@@ -475,7 +475,20 @@ var acceptedFriendNotification = function(name, id) {
         type: "accepted request",
         date: Date.now(),
         _id: new ObjectId().toHexString(),
-        content: "and you are now friends!",
+        content: "you are now following...",
+        from: {
+            userId: id,
+            name: name
+        },
+        status: "unread"
+    };
+};
+var newFollowerNotification = function(name, id) {
+    return {
+        type: "new follower",
+        date: Date.now(),
+        _id: new ObjectId().toHexString(),
+        content: "".concat(name, " is now following you!"),
         from: {
             userId: id,
             name: name
@@ -485,7 +498,7 @@ var acceptedFriendNotification = function(name, id) {
 };
 var acceptFriendRequest = function(req, res) {
     return _async_to_generator(function() {
-        var id, friend, user;
+        var id, friend, newUserNotifications, user;
         return _ts_generator(this, function(_state) {
             switch(_state.label){
                 case 0:
@@ -507,6 +520,11 @@ var acceptFriendRequest = function(req, res) {
                     ];
                 case 1:
                     friend = _state.sent();
+                    console.log(friend._id.toString());
+                    newUserNotifications = req.user.notifications.filter(function(not) {
+                        return !(not.type == "incoming request" && not.from.userId == friend.id.toString());
+                    });
+                    newUserNotifications.push(newFollowerNotification(friend.name, friend.id.toString()));
                     return [
                         4,
                         User.findByIdAndUpdate(req.user.id, {
@@ -515,6 +533,9 @@ var acceptFriendRequest = function(req, res) {
                             },
                             $pull: {
                                 incomingFriendRequests: id
+                            },
+                            $set: {
+                                notifications: newUserNotifications
                             }
                         }, {
                             new: true
@@ -522,10 +543,6 @@ var acceptFriendRequest = function(req, res) {
                     ];
                 case 2:
                     user = _state.sent();
-                    console.log("accept friend request", {
-                        user: user,
-                        friend: friend
-                    });
                     res.send(user);
                     return [
                         2

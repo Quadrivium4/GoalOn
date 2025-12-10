@@ -126,6 +126,7 @@ const getLazyFriends = async(req, res) =>{
     console.log({offset, index, date})
     //const friends = await getUserFriends(req.user);
     const response = await User.aggregate(aggregateFriendDays(req.user.id, date.getTime(), index * offset, offset));
+    
     console.log("hey", response)
     res.send(response)
 }
@@ -204,11 +205,22 @@ const sendFriendRequest = async(req, res) =>{
     res.send(user)
 
 }
-const acceptedFriendNotification = (name: string, id: string) => ({
+const acceptedFriendNotification = (name: string, id: string) : TNotification=> ({
   type: "accepted request",
   date: Date.now(),
   _id: new ObjectId().toHexString(),
-  content: "and you are now friends!",
+  content: "you are now following...",
+  from:{
+    userId: id,
+    name: name
+  },
+  status: "unread"
+})
+const newFollowerNotification = (name: string, id: string): TNotification => ({
+  type: "new follower",
+  date: Date.now(),
+  _id: new ObjectId().toHexString(),
+  content: `${name} is now following you!`,
   from:{
     userId: id,
     name: name
@@ -227,20 +239,25 @@ const acceptFriendRequest = async(req: ProtectedReq, res) =>{
             outgoingFriendRequests: req.user.id
         }
     }, {new: true})
+    console.log(friend._id.toString());
 
+    let newUserNotifications = req.user.notifications.filter(not =>{
+      return !(not.type == "incoming request" && not.from.userId == friend.id.toString())
+    })
+    newUserNotifications.push(newFollowerNotification(friend.name, friend.id.toString()));
     const user = await User.findByIdAndUpdate(req.user.id, {
         $push: {
             followers: friend.id,
-            
             },
         $pull: {
-            incomingFriendRequests: id
+            incomingFriendRequests: id,
+  
+        }, $set: {
+          notifications: newUserNotifications
         }
     }, {new: true});
 
-    console.log("accept friend request", {
-        user, friend
-    })
+    
     res.send(user)
 
 }

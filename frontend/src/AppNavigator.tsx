@@ -9,6 +9,7 @@ import Friends from './pages/Friends/Friends';
 import User from './pages/User/User';
 import DeleteAccount from './shared/DeleteAccount';
 import Pop from './components/Pop/Pop';
+import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
 
 const Layout = () =>(
     <>
@@ -38,7 +39,11 @@ const appRouter = createBrowserRouter([{
     },   {
         path: "/delete-account/:id/:token",
         element: <DeleteAccount />
-    }]}]);
+    },{
+        path: "/privacy-policy",
+        element: <PrivacyPolicy />
+    }
+]}]);
 
 const AppNavigator = () =>{
     return (

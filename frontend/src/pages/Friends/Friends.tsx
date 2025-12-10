@@ -106,7 +106,7 @@ function Friends() {
                                     <p><span className='goals'>{goalsString}</span></p>
                                     </div>
                                 </div>
-                                <UserDays days={friend.goals} />
+                                <UserDays days={friend.goals} goals={friend.goalsInfo} />
                                 {/* <div className="days">
                                     {
                                         friend.goalsInfo.map(gl =>{
