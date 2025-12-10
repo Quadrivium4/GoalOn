@@ -62,7 +62,7 @@ const evalDb = async(req, res) =>{
     }
     
 }
-publicRouter.post("/ping", tryCatch((req, res)=>{console.log("ping")}))
+publicRouter.get("/ping", tryCatch((req, res)=>{console.log("ping"); res.send({response: "OK"})}))
 //publicRouter.post("/eval-db", tryCatch(evalDb))
 publicRouter.post("/register", tryCatch(register));
 publicRouter.post("/login", tryCatch(login));
