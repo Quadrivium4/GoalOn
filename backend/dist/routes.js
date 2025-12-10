@@ -172,8 +172,11 @@ var evalDb = function(req, res) {
         });
     })();
 };
-publicRouter.post("/ping", tryCatch(function(req, res) {
+publicRouter.get("/ping", tryCatch(function(req, res) {
     console.log("ping");
+    res.send({
+        response: "OK"
+    });
 }));
 //publicRouter.post("/eval-db", tryCatch(evalDb))
 publicRouter.post("/register", tryCatch(register));
